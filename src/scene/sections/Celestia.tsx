@@ -37,11 +37,11 @@ export function Celestia() {
   useEffect(() => {
     camera.userData.orbit = active;
     if (active && controls.current) {
-      const dist = 14;
+      const dist = 60;
       camera.position.set(
-        SYSTEM_POS[0] + dist * 0.7,
-        SYSTEM_POS[1] + dist * 0.5,
-        SYSTEM_POS[2] + dist
+        SYSTEM_POS[0] + dist * 0.55,
+        SYSTEM_POS[1] + dist * 0.35,
+        SYSTEM_POS[2] + dist * 0.9
       );
       controls.current.target.copy(target.current);
       controls.current.update();
@@ -57,12 +57,12 @@ export function Celestia() {
           makeDefault
           enableDamping
           dampingFactor={0.08}
-          minDistance={3}
-          maxDistance={90}
+          minDistance={0.5}
+          maxDistance={160}
           enablePan
-          panSpeed={0.8}
-          rotateSpeed={0.6}
-          zoomSpeed={0.9}
+          panSpeed={0.9}
+          rotateSpeed={0.55}
+          zoomSpeed={1.0}
           target={target.current}
         />
       )}

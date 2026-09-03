@@ -38,7 +38,7 @@ export function Experience() {
     <Canvas
       dpr={settings.dpr}
       gl={{ antialias: false, powerPreference: "high-performance", alpha: false }}
-      camera={{ fov: 60, near: 0.1, far: 400, position: [0, 0, 14] }}
+      camera={{ fov: 60, near: 0.1, far: 500, position: [0, 0, 14] }}
       onCreated={({ gl }) => gl.setClearColor("#05060e", 1)}
       style={{ opacity: phase === "preloader" ? 0 : 1, transition: "opacity 1.2s ease" }}
     >

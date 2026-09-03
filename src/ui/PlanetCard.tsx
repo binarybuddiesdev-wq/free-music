@@ -47,15 +47,13 @@ export function PlanetCard() {
       </div>
       <div style={{ fontFamily: "var(--font-display)", fontSize: 34, marginBottom: 4 }}>{cfg.name}</div>
       <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--dim)", marginBottom: 12, letterSpacing: "0.05em" }}>
-        {cfg.moons?.length ?? 0} moon{(cfg.moons?.length ?? 0) === 1 ? "" : "s"} · orbit {cfg.dist.toFixed(1)} AU-rel
+        {cfg.moons?.length ?? 0} moon{(cfg.moons?.length ?? 0) === 1 ? "" : "s"} · {cfg.au} AU from Sol
       </div>
       <p style={{ fontFamily: "var(--font-body)", fontWeight: 300, fontSize: 13, lineHeight: 1.65, color: "rgba(238,241,255,0.8)" }}>
         {cfg.info}
       </p>
       <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
-        {cfg.colors.map((c) => (
-          <div key={c} style={{ width: 26, height: 6, borderRadius: 3, background: c }} />
-        ))}
+        <div style={{ width: 42, height: 6, borderRadius: 3, background: "linear-gradient(90deg, #58e6d9, #8b7bff)" }} />
       </div>
     </div>
   );
