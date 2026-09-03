@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { getPlanetTextures, getRingTexture } from "../textures";
@@ -165,12 +165,32 @@ export const PLANETS: PlanetCfg[] = [
 export const SYSTEM_POS: [number, number, number] = [-24, 30, 80];
 export const SUN_RADIUS = 4.8;
 
-function PlanetBody({ cfg, selected, onSelect }: { cfg: PlanetCfg; selected: boolean; onSelect: (name: string | null) => void }) {
+function PlanetBody({
+  cfg,
+  selected,
+  onSelect,
+  registerGetter,
+  unregisterGetter,
+}: {
+  cfg: PlanetCfg;
+  selected: boolean;
+  onSelect: (name: string | null) => void;
+  registerGetter: (name: string, fn: (out: THREE.Vector3) => void) => void;
+  unregisterGetter: (name: string) => void;
+}) {
   const pivot = useRef<THREE.Group>(null);
   const spin = useRef<THREE.Group>(null);
+  const holder = useRef<THREE.Group>(null);
   const moonRefs = useRef<(THREE.Mesh | null)[]>([]);
   const initialAngle = useMemo(() => Math.random() * Math.PI * 2, []);
   const texs = useMemo(() => getPlanetTextures(cfg.kind), [cfg.kind]);
+
+  useEffect(() => {
+    registerGetter(cfg.name, (out) => {
+      holder.current?.getWorldPosition(out);
+    });
+    return () => unregisterGetter(cfg.name);
+  }, [cfg.name, registerGetter, unregisterGetter]);
 
   useFrame((state, dt) => {
     if (pivot.current) pivot.current.rotation.y += cfg.speed * dt * 0.35;
@@ -186,7 +206,7 @@ function PlanetBody({ cfg, selected, onSelect }: { cfg: PlanetCfg; selected: boo
   return (
     <group rotation={[cfg.orbitTilt, 0, 0]}>
       <group ref={pivot} rotation={[0, initialAngle, 0]}>
-        <group position={[cfg.dist, 0, 0]}>
+        <group ref={holder} position={[cfg.dist, 0, 0]}>
           <group ref={spin} rotation={[cfg.tilt, 0, 0]}>
             <mesh
               onClick={(e) => { e.stopPropagation(); onSelect(selected ? null : cfg.name); }}
@@ -277,9 +297,25 @@ function OrbitLine({ radius, tilt, active }: { radius: number; tilt: number; act
   );
 }
 
-export function SolarSystem({ onInfo }: { onInfo: (cfg: PlanetCfg | null) => void }) {
+export function SolarSystem({
+  onInfo,
+  registerGetter,
+  unregisterGetter,
+}: {
+  onInfo: (cfg: PlanetCfg | null) => void;
+  registerGetter?: (name: string, fn: (out: THREE.Vector3) => void) => void;
+  unregisterGetter?: (name: string) => void;
+}) {
   const [selected, setSelected] = useState<string | null>(null);
   const belt = useRef<THREE.InstancedMesh>(null);
+
+  const noopRegRef = useRef({
+    reg: (_n: string, _f: (o: THREE.Vector3) => void) => {},
+    unreg: (_n: string) => {},
+  });
+
+  const reg = registerGetter ?? noopRegRef.current.reg;
+  const unreg = unregisterGetter ?? noopRegRef.current.unreg;
 
   const beltMatrices = useMemo(() => {
     const COUNT = 900;
@@ -313,6 +349,8 @@ export function SolarSystem({ onInfo }: { onInfo: (cfg: PlanetCfg | null) => voi
           key={p.name}
           cfg={p}
           selected={selected === p.name}
+          registerGetter={reg}
+          unregisterGetter={unreg}
           onSelect={(name) => {
             setSelected(name);
             onInfo(name ? PLANETS.find((x) => x.name === name) ?? null : null);

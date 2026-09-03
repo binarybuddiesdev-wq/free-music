@@ -1,26 +1,27 @@
 import { useEffect } from "react";
-import { scrollState } from "../hooks/useScrollTimeline";
 import { SECTIONS, useAether } from "../store";
 
 /** While the free-flight section (3) is active, scroll is captured by OrbitControls
- *  (wheel = zoom). A "resume journey" button skips to section 4. */
+ *  (wheel = zoom). "Resume journey" releases the lock and skips to section 4. */
 export function FreeFlightGate() {
   const section = useAether((s) => s.section);
+  const setFlightLock = useAether((s) => s.setFlightLock);
   const locked = section === 3;
 
   useEffect(() => {
-    if (!locked) return;
-    const freeze = (e: WheelEvent) => {
-      // Let OrbitControls consume wheel while in the solar system
-      e.preventDefault();
-    };
-    document.addEventListener("wheel", freeze, { passive: false });
-    return () => document.removeEventListener("wheel", freeze);
+    if (locked) useAether.setState({ flightLock: true });
+  }, [locked]);
+
+  useEffect(() => {
+    if (!locked && useAether.getState().flightLock) {
+      useAether.setState({ flightLock: false });
+    }
   }, [locked]);
 
   if (!locked) return null;
 
   const resume = () => {
+    useAether.setState({ flightLock: false });
     const total = document.documentElement.scrollHeight - window.innerHeight;
     const target = ((4 + 0.5) / SECTIONS.length) * total;
     window.scrollTo({ top: target, behavior: "smooth" });
@@ -48,7 +49,7 @@ export function FreeFlightGate() {
           pointerEvents: "none",
         }}
       >
-        FREE FLIGHT · drag to orbit · scroll to zoom · right-drag to pan
+        FREE FLIGHT · click a planet to focus · drag to orbit · scroll to zoom · right-drag to pan
       </div>
       <button
         onClick={resume}
@@ -78,5 +79,3 @@ export function FreeFlightGate() {
     </>
   );
 }
-
-void scrollState;

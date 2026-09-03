@@ -21,8 +21,10 @@ type AetherState = {
   section: number;
   tier: Tier;
   startedAt: number;
+  flightLock: boolean;
   setPhase: (p: Phase) => void;
   setSection: (i: number) => void;
+  setFlightLock: (v: boolean) => void;
 };
 
 export const useAether = create<AetherState>((set) => ({
@@ -30,8 +32,10 @@ export const useAether = create<AetherState>((set) => ({
   section: 0,
   tier: "high",
   startedAt: 0,
+  flightLock: false,
   setPhase: (phase) => set({ phase }),
   setSection: (section) => set({ section }),
+  setFlightLock: (flightLock) => set({ flightLock }),
 }));
 
 export function pickTier(): Tier {

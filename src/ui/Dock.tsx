@@ -4,6 +4,10 @@ export function Dock() {
   const section = useAether((s) => s.section);
 
   const jump = (i: number) => {
+    // Dock jumps release any free-flight lock first
+    if (useAether.getState().flightLock) {
+      useAether.setState({ flightLock: false });
+    }
     const total = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo({ top: ((i + 0.5) / SECTIONS.length) * total, behavior: "smooth" });
   };
@@ -15,7 +19,7 @@ export function Dock() {
         top: 22,
         left: "50%",
         transform: "translateX(-50%)",
-        zIndex: 50,
+        zIndex: 70,
         display: "flex",
         gap: 4,
         padding: "6px 8px",

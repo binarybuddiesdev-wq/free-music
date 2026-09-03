@@ -37,19 +37,19 @@ export function useScrollTimeline() {
 
       let idx = Math.min(SECTION_COUNT - 1, Math.floor(scrollState.damped * SECTION_COUNT + 0.0001));
 
-      // Free-flight lock: while in the solar system (section 3), clamp the
-      // journey progress to the section-3 band. Scroll wheel is captured by
-      // OrbitControls (zoom); leaving happens via the "Resume journey" button.
+      // Free-flight lock: while active, journey progress is pinned to the
+      // section-3 band. Releasing the flag (Resume button / dock jump)
+      // immediately restores normal scroll -> downstream sections work again.
       const store = useAether.getState();
-      if (store.section === 3 && lastSection.current === 3) {
+      if (store.flightLock) {
         const lo = 3 / SECTION_COUNT;
         const hi = 4.99 / SECTION_COUNT;
         if (scrollState.raw < lo) {
           scrollState.raw = lo;
-          scrollState.damped = Math.max(scrollState.damped, lo + 0.001);
+          if (scrollState.damped < lo + 0.001) scrollState.damped = lo + 0.001;
         } else if (scrollState.raw > hi) {
           scrollState.raw = hi;
-          scrollState.damped = Math.min(scrollState.damped, hi - 0.001);
+          if (scrollState.damped > hi - 0.001) scrollState.damped = hi - 0.001;
         }
         idx = 3;
       }
