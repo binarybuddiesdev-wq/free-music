@@ -3,6 +3,7 @@ import { scrollState } from "../hooks/useScrollTimeline";
 
 export function SectionCopy() {
   const section = useAether((s) => s.section);
+  if (section === 3) return null;
   const s = SECTIONS[section];
   const isLast = section === SECTIONS.length - 1;
   const isFirst = section === 0;

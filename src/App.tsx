@@ -7,6 +7,7 @@ import { Dock } from "./ui/Dock";
 import { ProgressRail } from "./ui/ProgressRail";
 import { SectionCopy } from "./ui/SectionCopy";
 import { PlanetCard } from "./ui/PlanetCard";
+import { FreeFlightGate } from "./ui/FreeFlightGate";
 
 export default function App() {
   const phase = useAether((s) => s.phase);
@@ -27,6 +28,7 @@ export default function App() {
           <ProgressRail />
           <SectionCopy />
           <PlanetCard />
+          <FreeFlightGate />
         </>
       )}
     </>

@@ -5,7 +5,7 @@ export function Dock() {
 
   const jump = (i: number) => {
     const total = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo({ top: (i / SECTIONS.length) * total + total / SECTIONS.length * 0.5, behavior: "smooth" });
+    window.scrollTo({ top: ((i + 0.5) / SECTIONS.length) * total, behavior: "smooth" });
   };
 
   return (

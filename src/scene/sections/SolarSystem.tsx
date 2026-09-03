@@ -19,6 +19,7 @@ uniform vec3 uColB;
 uniform vec3 uColC;
 uniform float uNoiseScale;
 uniform float uFlow;
+uniform float uBanding;
 uniform vec3 lightDir;
 varying vec3 vNormal;
 varying vec3 vPos;
@@ -42,7 +43,10 @@ void main(){
   float diff = clamp(dot(n, normalize(lightDir)), 0.0, 1.0);
   float terminator = smoothstep(0.0, 0.3, diff);
 
-  float b = fbm(vPos * uNoiseScale + vec3(0.0, uTime * uFlow, 0.0));
+  /* stretch noise along latitude for gas-giant banding when uBanding > 0 */
+  vec3 samplePos = vPos * uNoiseScale;
+  samplePos.y *= mix(1.0, 6.0, uBanding);
+  float b = fbm(samplePos + vec3(0.0, uTime * uFlow, 0.0));
   b = b * 0.5 + 0.5;
 
   vec3 col = mix(uColA, uColB, smoothstep(0.2, 0.8, b));
@@ -71,85 +75,6 @@ void main(){
   gl_FragColor = vec4(uColor * rim * 1.6, rim * 0.55);
 }
 `;
-
-export type MoonCfg = { radius: number; dist: number; speed: number; color: string };
-export type PlanetCfg = {
-  name: string;
-  radius: number;
-  dist: number;
-  speed: number;
-  tilt: number;
-  noiseScale: number;
-  flow: number;
-  colors: [string, string, string];
-  atmosphere?: string;
-  ring?: { inner: number; outer: number; color: string };
-  moons?: MoonCfg[];
-  info: string;
-};
-
-export const PLANETS: PlanetCfg[] = [
-  {
-    name: "Vulcan", radius: 0.55, dist: 5.2, speed: 0.50, tilt: 0.02, noiseScale: 5.0, flow: 0.10,
-    colors: ["#3a2a20", "#8a5a3a", "#e8a25c"], atmosphere: "#ff9a5c",
-    moons: [{ radius: 0.12, dist: 1.2, speed: 1.8, color: "#9a8a78" }],
-    info: "Scorched iron world hugging the star. One cratered moon.",
-  },
-  {
-    name: "Cerulea", radius: 0.85, dist: 7.8, speed: 0.36, tilt: 0.35, noiseScale: 3.4, flow: 0.16,
-    colors: ["#0a2a4a", "#2a7aaa", "#bfe8ff"], atmosphere: "#6ab8ff",
-    moons: [{ radius: 0.16, dist: 1.7, speed: 1.4, color: "#c8c8d0" }],
-    info: "Ocean world. Cyclone bands churn beneath a blue haze.",
-  },
-  {
-    name: "Verdant", radius: 0.95, dist: 11.0, speed: 0.27, tilt: 0.41, noiseScale: 2.8, flow: 0.05,
-    colors: ["#122a18", "#3a7a3a", "#d8e8b0"], atmosphere: "#7ade8a",
-    moons: [
-      { radius: 0.14, dist: 1.8, speed: 1.2, color: "#b0a898" },
-      { radius: 0.09, dist: 2.6, speed: 0.8, color: "#8a8880" },
-    ],
-    info: "Life-bearing. Two moons pull at its tides.",
-  },
-  {
-    name: "Rubra", radius: 0.75, dist: 14.4, speed: 0.21, tilt: 0.44, noiseScale: 4.2, flow: 0.28,
-    colors: ["#3a1010", "#a83a2a", "#ff9a6a"], atmosphere: "#ff6a4a",
-    info: "Rust-red desert. Global dust storms seasonally veil it.",
-  },
-  {
-    name: "Titanhold", radius: 2.0, dist: 21.5, speed: 0.13, tilt: 0.05, noiseScale: 2.0, flow: 0.22,
-    colors: ["#4a3018", "#c89858", "#f8e8c8"], atmosphere: "#e8b878",
-    ring: { inner: 2.7, outer: 4.4, color: "#d8c8a8" },
-    moons: [
-      { radius: 0.18, dist: 5.2, speed: 0.6, color: "#a8a098" },
-      { radius: 0.12, dist: 6.2, speed: 0.45, color: "#787880" },
-      { radius: 0.10, dist: 7.2, speed: 0.35, color: "#989088" },
-    ],
-    info: "Gas giant with banded storms. Grand ring, three shepherd moons.",
-  },
-  {
-    name: "Aurelia", radius: 1.7, dist: 27.5, speed: 0.09, tilt: 0.47, noiseScale: 2.2, flow: 0.18,
-    colors: ["#2a2a48", "#7a6aaa", "#e8dff8"], atmosphere: "#b8a8e8",
-    ring: { inner: 2.3, outer: 3.8, color: "#c8b8e8" },
-    moons: [{ radius: 0.15, dist: 4.6, speed: 0.5, color: "#c0c0c8" }],
-    info: "Ammonia-cloud giant tilted on its side. Delicate violet rings.",
-  },
-  {
-    name: "Glacius", radius: 1.05, dist: 33.5, speed: 0.06, tilt: 0.49, noiseScale: 3.0, flow: 0.03,
-    colors: ["#16324a", "#5aa8c8", "#e8f8ff"], atmosphere: "#9ae8ff",
-    moons: [
-      { radius: 0.13, dist: 2.2, speed: 0.9, color: "#d0d8e0" },
-      { radius: 0.11, dist: 3.0, speed: 0.7, color: "#a8b0c0" },
-      { radius: 0.08, dist: 3.8, speed: 0.55, color: "#c0c8d8" },
-    ],
-    info: "Ice giant. Methane winds exceed the speed of sound.",
-  },
-  {
-    name: "Nyx", radius: 0.5, dist: 39.5, speed: 0.04, tilt: 0.30, noiseScale: 5.5, flow: 0.0,
-    colors: ["#1a1424", "#3a3050", "#8a8aa8"], atmosphere: "#6a6a9a",
-    moons: [{ radius: 0.17, dist: 1.1, speed: 1.0, color: "#505058" }],
-    info: "The far dark one. A single oversize moon, mutually locked.",
-  },
-];
 
 const SUN_FRAG = `
 uniform float uTime;
@@ -185,6 +110,106 @@ void main(){
 }
 `;
 
+export type MoonCfg = { name: string; radius: number; dist: number; speed: number; color: string };
+
+export type PlanetCfg = {
+  name: string;
+  radius: number;
+  dist: number;
+  au: number;
+  speed: number;
+  tilt: number;
+  orbitTilt: number;
+  noiseScale: number;
+  flow: number;
+  banding: number;
+  colors: [string, string, string];
+  atmosphere?: string;
+  atmoStrength?: number;
+  ring?: { inner: number; outer: number; color: string; opacity: number };
+  moons?: MoonCfg[];
+  info: string;
+};
+
+/** Real Sol system — colors sampled from NASA imagery, distances/radii artistically compressed. */
+export const PLANETS: PlanetCfg[] = [
+  {
+    name: "Mercury", radius: 0.25, dist: 3.6, au: 0.39, speed: 0.30, tilt: 0.001, orbitTilt: 0.02,
+    noiseScale: 6.5, flow: 0.0, banding: 0,
+    colors: ["#3a3a40", "#8c8c94", "#c8c8cc"],
+    info: "Closest to the Sun. A cratered, airless world that roasts by day and freezes by night. Orbital period: 88 days.",
+  },
+  {
+    name: "Venus", radius: 0.45, dist: 4.9, au: 0.72, speed: 0.22, tilt: 3.09, orbitTilt: 0.03,
+    noiseScale: 3.2, flow: 0.25, banding: 0.4,
+    colors: ["#8a5a2a", "#d9a86a", "#f5e6c8"], atmosphere: "#e8cd9a", atmoStrength: 1.2,
+    info: "Wrapped in sulfuric acid clouds. Runaway greenhouse makes it the hottest planet — 465°C, day and night.",
+  },
+  {
+    name: "Earth", radius: 0.48, dist: 6.3, au: 1.0, speed: 0.19, tilt: 0.41, orbitTilt: 0,
+    noiseScale: 3.0, flow: 0.06, banding: 0,
+    colors: ["#0b2e59", "#1565c0", "#dceeff"], atmosphere: "#6ab8ff", atmoStrength: 1.0,
+    moons: [{ name: "Luna", radius: 0.13, dist: 1.15, speed: 1.1, color: "#c8c8cc" }],
+    info: "The only known living world. 71% ocean, one large moon stabilizing its tilt — and everyone you've ever met.",
+  },
+  {
+    name: "Mars", radius: 0.30, dist: 8.0, au: 1.52, speed: 0.15, tilt: 0.44, orbitTilt: 0.03,
+    noiseScale: 4.5, flow: 0.20, banding: 0,
+    colors: ["#4a1e0e", "#b5522a", "#e8a878"], atmosphere: "#ff9a6a", atmoStrength: 0.45,
+    moons: [
+      { name: "Phobos", radius: 0.035, dist: 0.65, speed: 2.6, color: "#8a7a6a" },
+      { name: "Deimos", radius: 0.02, dist: 0.95, speed: 1.6, color: "#9a8a7a" },
+    ],
+    info: "The rust-red desert world. Home of Olympus Mons — a volcano three times the height of Everest.",
+  },
+  {
+    name: "Jupiter", radius: 1.5, dist: 12.5, au: 5.2, speed: 0.08, tilt: 0.05, orbitTilt: 0.01,
+    noiseScale: 1.8, flow: 0.35, banding: 0.85,
+    colors: ["#8a6a4a", "#d9b98a", "#f5e8d0"], atmosphere: "#e8b878", atmoStrength: 0.5,
+    moons: [
+      { name: "Io", radius: 0.09, dist: 2.1, speed: 1.3, color: "#e8d878" },
+      { name: "Europa", radius: 0.08, dist: 2.7, speed: 1.0, color: "#e8e4dc" },
+      { name: "Ganymede", radius: 0.12, dist: 3.4, speed: 0.8, color: "#a89a88" },
+      { name: "Callisto", radius: 0.11, dist: 4.2, speed: 0.6, color: "#6a6058" },
+    ],
+    info: "King of planets — 2.5× the mass of all others combined. The Great Red Spot is a storm older than photography.",
+  },
+  {
+    name: "Saturn", radius: 1.3, dist: 16.5, au: 9.6, speed: 0.06, tilt: 0.47, orbitTilt: 0.02,
+    noiseScale: 1.9, flow: 0.30, banding: 0.9,
+    colors: ["#a88a4a", "#e8d0a0", "#f8f0dc"], atmosphere: "#e8d0a0", atmoStrength: 0.4,
+    ring: { inner: 1.7, outer: 2.7, color: "#d8c8a8", opacity: 0.55 },
+    moons: [
+      { name: "Titan", radius: 0.11, dist: 3.6, speed: 0.7, color: "#d9a04a" },
+      { name: "Rhea", radius: 0.05, dist: 4.4, speed: 0.5, color: "#c8c4bc" },
+    ],
+    info: "Less dense than water. Its rings are 280,000 km wide but sometimes just 10 meters thick. 146 known moons.",
+  },
+  {
+    name: "Uranus", radius: 0.75, dist: 21, au: 19.2, speed: 0.042, tilt: 1.71, orbitTilt: 0.05,
+    noiseScale: 2.4, flow: 0.12, banding: 0.6,
+    colors: ["#4a8a8a", "#8ac8c8", "#d8f0f0"], atmosphere: "#a8e8e8", atmoStrength: 0.6,
+    ring: { inner: 1.05, outer: 1.35, color: "#9ad8d8", opacity: 0.22 },
+    info: "Knocked on its side — 98° axial tilt. Each pole gets 42 years of sunlight, then 42 years of dark.",
+  },
+  {
+    name: "Neptune", radius: 0.72, dist: 25, au: 30.1, speed: 0.033, tilt: 0.49, orbitTilt: 0.03,
+    noiseScale: 2.6, flow: 0.15, banding: 0.55,
+    colors: ["#1a2a6a", "#2a5ac8", "#8ab8f8"], atmosphere: "#6a8aff", atmoStrength: 0.7,
+    moons: [{ name: "Triton", radius: 0.08, dist: 1.6, speed: 0.9, color: "#d8c0c8" }],
+    info: "The windiest world — supersonic gales at 2,100 km/h. Discovered by mathematics before telescopes found it.",
+  },
+  {
+    name: "Pluto", radius: 0.14, dist: 28.5, au: 39.5, speed: 0.027, tilt: 0.3, orbitTilt: 0.16,
+    noiseScale: 6.0, flow: 0.0, banding: 0,
+    colors: ["#6a5a4a", "#b0a08a", "#e0d8c8"],
+    moons: [{ name: "Charon", radius: 0.07, dist: 0.5, speed: 0.8, color: "#9a9288" }],
+    info: "Dwarf planet with a heart-shaped nitrogen glacier. Charon is so large they orbit a point between them.",
+  },
+];
+
+export const SYSTEM_POS: [number, number, number] = [-24, 0.5, 68];
+
 function Planet({
   cfg,
   selected,
@@ -198,8 +223,8 @@ function Planet({
 
   useFrame((state, dt) => {
     if (mat.current) mat.current.uniforms.uTime.value += dt;
-    if (pivot.current) pivot.current.rotation.y += cfg.speed * dt * 0.3;
-    if (spin.current) spin.current.rotation.y += dt * 0.15;
+    if (pivot.current) pivot.current.rotation.y += cfg.speed * dt * 0.35;
+    if (spin.current) spin.current.rotation.y += dt * 0.18;
     cfg.moons?.forEach((m, i) => {
       const mesh = moonRefs.current[i];
       if (!mesh) return;
@@ -208,70 +233,79 @@ function Planet({
     });
   });
 
-  const lightDir = useMemo(() => new THREE.Vector3(1, 0.35, 0.4).normalize(), []);
+  const lightDir = useMemo(() => new THREE.Vector3(0, 0.35, 0.4).normalize(), []);
 
   return (
-    <group ref={pivot} rotation={[0, initialAngle, 0]}>
-      <group position={[cfg.dist, 0, 0]}>
-        <group ref={spin} rotation={[cfg.tilt, 0, 0]}>
-          <mesh
-            onClick={(e) => { e.stopPropagation(); onSelect(selected ? null : cfg.name); }}
-            onPointerOver={() => (document.body.style.cursor = "pointer")}
-            onPointerOut={() => (document.body.style.cursor = "")}
-          >
-            <sphereGeometry args={[cfg.radius, 72, 72]} />
-            <shaderMaterial
-              ref={mat}
-              vertexShader={PLANET_VERT}
-              fragmentShader={PLANET_FRAG}
-              uniforms={{
-                uTime: { value: cfg.dist },
-                uNoiseScale: { value: cfg.noiseScale },
-                uFlow: { value: cfg.flow },
-                uColA: { value: new THREE.Color(cfg.colors[0]) },
-                uColB: { value: new THREE.Color(cfg.colors[1]) },
-                uColC: { value: new THREE.Color(cfg.colors[2]) },
-                lightDir: { value: lightDir },
-              }}
-            />
-          </mesh>
-          {cfg.atmosphere && (
-            <mesh scale={1.07}>
-              <sphereGeometry args={[cfg.radius, 48, 48]} />
+    <group rotation={[cfg.orbitTilt, 0, 0]}>
+      <group ref={pivot} rotation={[0, initialAngle, 0]}>
+        <group position={[cfg.dist, 0, 0]}>
+          <group ref={spin} rotation={[cfg.tilt, 0, 0]}>
+            <mesh
+              onClick={(e) => { e.stopPropagation(); onSelect(selected ? null : cfg.name); }}
+              onPointerOver={() => (document.body.style.cursor = "pointer")}
+              onPointerOut={() => (document.body.style.cursor = "")}
+            >
+              <sphereGeometry args={[cfg.radius, 72, 72]} />
               <shaderMaterial
-                vertexShader={ATMO_VERT}
-                fragmentShader={ATMO_FRAG}
-                transparent
-                blending={THREE.AdditiveBlending}
-                side={THREE.BackSide}
-                depthWrite={false}
-                uniforms={{ uColor: { value: new THREE.Color(cfg.atmosphere) } }}
+                ref={mat}
+                vertexShader={PLANET_VERT}
+                fragmentShader={PLANET_FRAG}
+                uniforms={{
+                  uTime: { value: cfg.dist },
+                  uNoiseScale: { value: cfg.noiseScale },
+                  uFlow: { value: cfg.flow },
+                  uBanding: { value: cfg.banding },
+                  uColA: { value: new THREE.Color(cfg.colors[0]) },
+                  uColB: { value: new THREE.Color(cfg.colors[1]) },
+                  uColC: { value: new THREE.Color(cfg.colors[2]) },
+                  lightDir: { value: lightDir },
+                }}
               />
             </mesh>
-          )}
-          {cfg.ring && (
-            <mesh rotation={[Math.PI / 2 + cfg.tilt * 0.6, 0, 0]}>
-              <ringGeometry args={[cfg.ring.inner, cfg.ring.outer, 96, 1]} />
-              <meshBasicMaterial color={cfg.ring.color} transparent opacity={0.42} side={THREE.DoubleSide} depthWrite={false} />
-            </mesh>
-          )}
-          {cfg.moons?.map((m, i) => (
-            <mesh
-              key={i}
-              ref={(r) => { moonRefs.current[i] = r; }}
-              onClick={(e) => { e.stopPropagation(); onSelect(selected ? null : cfg.name); }}
-            >
-              <icosahedronGeometry args={[m.radius, 2]} />
-              <meshStandardMaterial color={m.color} roughness={0.95} flatShading />
-            </mesh>
-          ))}
+            {cfg.atmosphere && (
+              <mesh scale={1 + 0.07 * (cfg.atmoStrength ?? 1)}>
+                <sphereGeometry args={[cfg.radius, 48, 48]} />
+                <shaderMaterial
+                  vertexShader={ATMO_VERT}
+                  fragmentShader={ATMO_FRAG}
+                  transparent
+                  blending={THREE.AdditiveBlending}
+                  side={THREE.BackSide}
+                  depthWrite={false}
+                  uniforms={{ uColor: { value: new THREE.Color(cfg.atmosphere) } }}
+                />
+              </mesh>
+            )}
+            {cfg.ring && (
+              <mesh rotation={[Math.PI / 2 + cfg.tilt * 0.3, 0, 0]}>
+                <ringGeometry args={[cfg.ring.inner, cfg.ring.outer, 96, 1]} />
+                <meshBasicMaterial
+                  color={cfg.ring.color}
+                  transparent
+                  opacity={cfg.ring.opacity}
+                  side={THREE.DoubleSide}
+                  depthWrite={false}
+                />
+              </mesh>
+            )}
+            {cfg.moons?.map((m, i) => (
+              <mesh
+                key={m.name}
+                ref={(r) => { moonRefs.current[i] = r; }}
+                onClick={(e) => { e.stopPropagation(); onSelect(selected ? null : cfg.name); }}
+              >
+                <icosahedronGeometry args={[m.radius, 2]} />
+                <meshStandardMaterial color={m.color} roughness={0.95} flatShading />
+              </mesh>
+            ))}
+          </group>
         </group>
       </group>
     </group>
   );
 }
 
-function OrbitLine({ radius, active }: { radius: number; active: boolean }) {
+function OrbitLine({ radius, tilt, active }: { radius: number; tilt: number; active: boolean }) {
   const geo = useMemo(() => {
     const pts: number[] = [];
     for (let i = 0; i <= 128; i++) {
@@ -282,29 +316,30 @@ function OrbitLine({ radius, active }: { radius: number; active: boolean }) {
   }, [radius]);
 
   return (
-    <line>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[geo, 3]} />
-      </bufferGeometry>
-      <lineBasicMaterial color={active ? "#8b7bff" : "#2a2a3f"} transparent opacity={active ? 0.8 : 0.35} depthWrite={false} />
-    </line>
+    <group rotation={[tilt, 0, 0]}>
+      <line>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[geo, 3]} />
+        </bufferGeometry>
+        <lineBasicMaterial color={active ? "#8b7bff" : "#2a2a3f"} transparent opacity={active ? 0.8 : 0.35} depthWrite={false} />
+      </line>
+    </group>
   );
 }
 
 export function SolarSystem({ onInfo }: { onInfo: (cfg: PlanetCfg | null) => void }) {
   const [selected, setSelected] = useState<string | null>(null);
-  const system = useRef<THREE.Group>(null);
   const belt = useRef<THREE.InstancedMesh>(null);
 
   const beltMatrices = useMemo(() => {
-    const COUNT = 500;
+    const COUNT = 700;
     const mats: THREE.Matrix4[] = [];
     const dummy = new THREE.Object3D();
     for (let i = 0; i < COUNT; i++) {
       const a = Math.random() * Math.PI * 2;
-      const r = 17.5 + Math.random() * 3.5;
-      dummy.position.set(Math.cos(a) * r, (Math.random() - 0.5) * 0.5, Math.sin(a) * r);
-      const s = 0.03 + Math.random() * 0.09;
+      const r = 9.2 + Math.random() * 1.4;
+      dummy.position.set(Math.cos(a) * r, (Math.random() - 0.5) * 0.4, Math.sin(a) * r);
+      const s = 0.015 + Math.random() * 0.05;
       dummy.scale.set(s, s, s);
       dummy.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
       dummy.updateMatrix();
@@ -314,19 +349,14 @@ export function SolarSystem({ onInfo }: { onInfo: (cfg: PlanetCfg | null) => voi
   }, []);
 
   useFrame((_, dt) => {
-    if (system.current) system.current.rotation.y += dt * 0.006;
-    if (belt.current) belt.current.rotation.y += dt * 0.02;
-    if (system.current) {
-      system.current.scale.setScalar(THREE.MathUtils.lerp(system.current.scale.x, selected ? 0.72 : 1, 0.04));
-    }
+    if (belt.current) belt.current.rotation.y += dt * 0.03;
   });
 
   return (
-    <group ref={system} position={[-24, 0, 68]}>
-      {/* sun */}
+    <group position={SYSTEM_POS}>
       <Sun />
       {PLANETS.map((p) => (
-        <OrbitLine key={p.name} radius={p.dist} active={selected === p.name} />
+        <OrbitLine key={p.name} radius={p.dist} tilt={p.orbitTilt} active={selected === p.name} />
       ))}
       {PLANETS.map((p) => (
         <Planet
@@ -335,8 +365,7 @@ export function SolarSystem({ onInfo }: { onInfo: (cfg: PlanetCfg | null) => voi
           selected={selected === p.name}
           onSelect={(name) => {
             setSelected(name);
-            const cfg = name ? PLANETS.find((x) => x.name === name) ?? null : null;
-            onInfo(cfg);
+            onInfo(name ? PLANETS.find((x) => x.name === name) ?? null : null);
           }}
         />
       ))}
@@ -370,7 +399,7 @@ function Sun() {
   return (
     <group>
       <mesh>
-        <sphereGeometry args={[2.6, 64, 64]} />
+        <sphereGeometry args={[2.0, 64, 64]} />
         <shaderMaterial
           ref={mat}
           vertexShader={PLANET_VERT}
@@ -378,8 +407,8 @@ function Sun() {
           uniforms={{ uTime: { value: 0 } }}
         />
       </mesh>
-      <mesh scale={1.35}>
-        <sphereGeometry args={[2.6, 48, 48]} />
+      <mesh scale={1.4}>
+        <sphereGeometry args={[2.0, 48, 48]} />
         <shaderMaterial
           ref={corona}
           vertexShader={ATMO_VERT}
@@ -391,7 +420,7 @@ function Sun() {
           uniforms={{ uTime: { value: 0 } }}
         />
       </mesh>
-      <pointLight position={[0, 0, 0]} intensity={140} distance={140} decay={2} color="#ffd9a0" />
+      <pointLight position={[0, 0, 0]} intensity={160} distance={160} decay={2} color="#ffd9a0" />
     </group>
   );
 }
