@@ -81,7 +81,7 @@ export function ConstellationOutro({ count }: { count: number }) {
   });
 
   return (
-    <group position={[-60, -3, 126]}>
+    <group position={[0, 0, 140]}>
       <points frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />

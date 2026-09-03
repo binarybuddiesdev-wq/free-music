@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
@@ -51,6 +51,9 @@ void main() {
 }
 `;
 
+/** Singularity lives at z≈112 — deepest section, far from everything. */
+export const SINGULARITY_POS: [number, number, number] = [0, 0, 112];
+
 export function Singularity() {
   const diskMat = useRef<THREE.ShaderMaterial>(null!);
   const group = useRef<THREE.Group>(null!);
@@ -58,27 +61,19 @@ export function Singularity() {
   useFrame(({ pointer }, dt) => {
     if (diskMat.current) diskMat.current.uniforms.uTime.value += dt;
     if (group.current) {
-      group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, pointer.x * 0.08, 0.05);
+      group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, pointer.x * 0.06, 0.05);
     }
   });
 
   return (
-    <group ref={group} position={[-40, 0, 86]}>
-      {/* event horizon */}
+    <group ref={group} position={SINGULARITY_POS}>
       <mesh>
-        <sphereGeometry args={[2.4, 64, 64]} />
+        <sphereGeometry args={[2.0, 64, 64]} />
         <meshBasicMaterial color="#000000" />
       </mesh>
 
-      {/* photon ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.62, 0.045, 16, 128]} />
-        <meshBasicMaterial color="#fff5e0" toneMapped={false} />
-      </mesh>
-
-      {/* accretion disk, front and back halves rendered via two rings offset for parallax */}
       <mesh rotation={[Math.PI / 2.08, 0.25, 0]}>
-        <ringGeometry args={[2.9, 7.4, 256, 1]} />
+        <ringGeometry args={[2.4, 6.4, 256, 1]} />
         <shaderMaterial
           ref={diskMat}
           vertexShader={DISK_VERT}
@@ -91,9 +86,13 @@ export function Singularity() {
         />
       </mesh>
 
-      {/* lensing halo */}
-      <mesh scale={1.02}>
-        <sphereGeometry args={[2.4, 64, 64]} />
+      <mesh rotation={[Math.PI / 2.08, 0.25, 0]}>
+        <torusGeometry args={[2.15, 0.035, 16, 128]} />
+        <meshBasicMaterial color="#fff5e0" toneMapped={false} />
+      </mesh>
+
+      <mesh scale={1.03}>
+        <sphereGeometry args={[2.0, 64, 64]} />
         <shaderMaterial
           vertexShader={/* glsl */ `
 varying vec3 vNormal;
@@ -115,34 +114,6 @@ void main() {
           depthWrite={false}
         />
       </mesh>
-
-      <StarDome />
     </group>
-  );
-}
-
-function StarDome() {
-  const COUNT = 3000;
-  const positions = useRef<Float32Array>(new Float32Array(0));
-  if (positions.current.length === 0) {
-    const arr = new Float32Array(COUNT * 3);
-    for (let i = 0; i < COUNT; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const R = 55;
-      arr[i * 3] = R * Math.sin(phi) * Math.cos(theta);
-      arr[i * 3 + 1] = R * Math.sin(phi) * Math.sin(theta);
-      arr[i * 3 + 2] = R * Math.cos(phi);
-    }
-    positions.current = arr;
-  }
-
-  return (
-    <points frustumCulled={false}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions.current, 3]} />
-      </bufferGeometry>
-      <pointsMaterial size={0.22} color="#cdd6ff" sizeAttenuation transparent opacity={0.85} depthWrite={false} />
-    </points>
   );
 }

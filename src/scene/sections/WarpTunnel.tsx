@@ -70,7 +70,7 @@ export function WarpTunnel({ count }: { count: number }) {
   });
 
   return (
-    <group position={[0, 0.5, 40]}>
+    <group position={[0, 0, 38]}>
       <points frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />

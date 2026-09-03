@@ -6,7 +6,7 @@ const NOISE_GLSL = /* glsl */ `
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 vec4 permute289(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
-vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+vec4 taylorInvSqrt(vec4 r) { return 1.792814 - 0.853734 * r; }
 
 float snoise(vec3 v) {
   const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
@@ -102,16 +102,18 @@ void main() {
 }
 `;
 
+/** Nebula lives around z≈50, far from Sol (z≈80) — no overlap. */
+export const NEBULA_POS: [number, number, number] = [0, 1, 50];
+
 export function NebulaField({ layers }: { layers: number }) {
-  const group = useRef<THREE.Group>(null!);
   const mats = useRef<THREE.ShaderMaterial[]>([]);
 
   const layerCfg = useMemo(
     () =>
       [
-        { pos: [0, 0, 62] as const, scale: 60, uScale: 2.2, seed: 0.0 },
-        { pos: [-8, 2, 68] as const, scale: 70, uScale: 3.1, seed: 4.7 },
-        { pos: [4, -3, 74] as const, scale: 80, uScale: 2.6, seed: 9.2 },
+        { pos: [0, 1, 52] as [number, number, number], scale: 42, uScale: 2.2, seed: 0.0 },
+        { pos: [3, 0, 56] as [number, number, number], scale: 50, uScale: 3.1, seed: 4.7 },
+        { pos: [-4, 2, 59] as [number, number, number], scale: 55, uScale: 2.6, seed: 9.2 },
       ].slice(0, layers),
     [layers]
   );
@@ -121,9 +123,9 @@ export function NebulaField({ layers }: { layers: number }) {
   });
 
   return (
-    <group ref={group}>
+    <group>
       {layerCfg.map((cfg, i) => (
-        <mesh key={i} position={cfg.pos as unknown as THREE.Vector3Tuple} frustumCulled={false}>
+        <mesh key={i} position={cfg.pos} frustumCulled={false}>
           <planeGeometry args={[cfg.scale, cfg.scale * 0.7]} />
           <shaderMaterial
             ref={(m) => {
@@ -145,68 +147,6 @@ export function NebulaField({ layers }: { layers: number }) {
           />
         </mesh>
       ))}
-      <Embers />
     </group>
-  );
-}
-
-function Embers() {
-  const mat = useRef<THREE.ShaderMaterial>(null!);
-  const COUNT = 900;
-
-  const { positions, rands } = useMemo(() => {
-    const positions = new Float32Array(COUNT * 3);
-    const rands = new Float32Array(COUNT);
-    for (let i = 0; i < COUNT; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 50;
-      positions[i * 3 + 1] = Math.random() * 30 - 15 + 2;
-      positions[i * 3 + 2] = 60 + Math.random() * 20;
-      rands[i] = Math.random();
-    }
-    return { positions, rands };
-  }, []);
-
-  useFrame((_, dt) => {
-    if (mat.current) mat.current.uniforms.uTime.value += dt;
-  });
-
-  return (
-    <points frustumCulled={false}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-aRand" args={[rands, 1]} />
-      </bufferGeometry>
-      <shaderMaterial
-        ref={mat}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-        uniforms={{ uTime: { value: 0 }, uSize: { value: 30 } }}
-        vertexShader={/* glsl */ `
-attribute float aRand;
-uniform float uTime;
-uniform float uSize;
-varying float vA;
-void main() {
-  vec3 p = position;
-  p.y += mod(uTime * (0.3 + aRand * 0.5) + aRand * 40.0, 30.0) - 15.0;
-  p.x += sin(uTime * 0.5 + aRand * 30.0) * 0.8;
-  vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  gl_PointSize = uSize * aRand * (14.0 / -mv.z);
-  vA = 0.5 + aRand * 0.5;
-  gl_Position = projectionMatrix * mv;
-}
-`}
-        fragmentShader={/* glsl */ `
-varying float vA;
-void main() {
-  vec2 c = gl_PointCoord - 0.5;
-  float d = length(c);
-  if (d > 0.5) discard;
-  gl_FragColor = vec4(vec3(1.0, 0.62, 0.36), smoothstep(0.5, 0.0, d) * vA * 0.8);
-}
-`}
-      />
-    </points>
   );
 }

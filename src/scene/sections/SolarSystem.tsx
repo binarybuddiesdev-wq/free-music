@@ -94,73 +94,75 @@ export type PlanetCfg = {
   info: string;
 };
 
-/** Real Sol system. Sizes: real ratio (Earth = 0.35 units). Distances compressed. */
+/** Real Sol system. True size ratios (Jupiter = 10.97 Earths), absolute scale
+ *  compressed to fit the scene; distances heavily compressed but ordered. */
 export const PLANETS: PlanetCfg[] = [
   {
-    name: "Mercury", kind: "mercury", radius: 0.122, dist: 4.2, au: 0.39, speed: 0.161, tilt: 0.001, orbitTilt: 0.02, rotSpeed: 0.02,
+    name: "Mercury", kind: "mercury", radius: 0.024, dist: 7.5, au: 0.39, speed: 0.161, tilt: 0.001, orbitTilt: 0.02, rotSpeed: 0.02,
     info: "Closest to the Sun. A cratered, airless world of extremes — 430°C by day, −180°C by night. Orbital period: 88 days.",
   },
   {
-    name: "Venus", kind: "venus", radius: 0.302, dist: 5.4, au: 0.72, speed: 0.117, tilt: 3.09, orbitTilt: 0.03, rotSpeed: -0.008,
+    name: "Venus", kind: "venus", radius: 0.060, dist: 9.2, au: 0.72, speed: 0.117, tilt: 3.09, orbitTilt: 0.03, rotSpeed: -0.008,
     atmosphere: "#e8cd9a", atmoStrength: 1.15,
     info: "Wrapped in sulfuric acid clouds that spin faster than the planet. Runaway greenhouse: 465°C, day and night.",
   },
   {
-    name: "Earth", kind: "earth", radius: 0.318, dist: 6.8, au: 1.0, speed: 0.10, tilt: 0.41, orbitTilt: 0, rotSpeed: 0.35,
+    name: "Earth", kind: "earth", radius: 0.063, dist: 11.0, au: 1.0, speed: 0.10, tilt: 0.41, orbitTilt: 0, rotSpeed: 0.35,
     atmosphere: "#7db4ff", atmoStrength: 1.0,
-    moons: [{ name: "Luna", radius: 0.086, dist: 0.95, speed: 0.35, texture: "moon" }],
+    moons: [{ name: "Luna", radius: 0.017, dist: 0.22, speed: 0.35, texture: "moon" }],
     info: "The only known living world. 71% ocean, one large moon that steadies its tilt — and everyone you've ever met.",
   },
   {
-    name: "Mars", kind: "mars", radius: 0.170, dist: 8.6, au: 1.52, speed: 0.081, tilt: 0.44, orbitTilt: 0.03, rotSpeed: 0.34,
+    name: "Mars", kind: "mars", radius: 0.034, dist: 13.0, au: 1.52, speed: 0.081, tilt: 0.44, orbitTilt: 0.03, rotSpeed: 0.34,
     atmosphere: "#d8a284", atmoStrength: 0.35,
     moons: [
-      { name: "Phobos", radius: 0.012, dist: 0.35, speed: 1.4, color: "#8a7a6a" },
-      { name: "Deimos", radius: 0.008, dist: 0.55, speed: 0.9, color: "#9a8a7a" },
+      { name: "Phobos", radius: 0.0035, dist: 0.09, speed: 1.4, color: "#8a7a6a" },
+      { name: "Deimos", radius: 0.0024, dist: 0.14, speed: 0.9, color: "#9a8a7a" },
     ],
     info: "The rust-red desert world. Home of Olympus Mons — a volcano three times the height of Everest.",
   },
   {
-    name: "Jupiter", kind: "jupiter", radius: 3.54, dist: 20, au: 5.2, speed: 0.044, tilt: 0.05, orbitTilt: 0.01, rotSpeed: 0.9,
+    name: "Jupiter", kind: "jupiter", radius: 0.70, dist: 26, au: 5.2, speed: 0.044, tilt: 0.05, orbitTilt: 0.01, rotSpeed: 0.9,
     atmosphere: "#e8c89a", atmoStrength: 0.35,
     moons: [
-      { name: "Io", radius: 0.092, dist: 5.2, speed: 1.15, texture: "io" },
-      { name: "Europa", radius: 0.082, dist: 6.5, speed: 0.85, texture: "europa" },
-      { name: "Ganymede", radius: 0.13, dist: 8.0, speed: 0.55, texture: "ganymede" },
-      { name: "Callisto", radius: 0.12, dist: 9.6, speed: 0.38, texture: "callisto" },
+      { name: "Io", radius: 0.018, dist: 1.05, speed: 1.15, texture: "io" },
+      { name: "Europa", radius: 0.016, dist: 1.32, speed: 0.85, texture: "europa" },
+      { name: "Ganymede", radius: 0.026, dist: 1.60, speed: 0.55, texture: "ganymede" },
+      { name: "Callisto", radius: 0.024, dist: 1.92, speed: 0.38, texture: "callisto" },
     ],
     info: "King of planets — 2.5× the mass of all others combined. The Great Red Spot is a storm older than photography.",
   },
   {
-    name: "Saturn", kind: "saturn", radius: 3.0, dist: 28, au: 9.6, speed: 0.032, tilt: 0.47, orbitTilt: 0.02, rotSpeed: 0.8,
+    name: "Saturn", kind: "saturn", radius: 0.60, dist: 34, au: 9.6, speed: 0.032, tilt: 0.47, orbitTilt: 0.02, rotSpeed: 0.8,
     atmosphere: "#e8d0a0", atmoStrength: 0.3,
     ring: "saturn", ringInner: 1.24, ringOuter: 2.27,
     moons: [
-      { name: "Titan", radius: 0.125, dist: 7.5, speed: 0.42, texture: "titan" },
-      { name: "Rhea", radius: 0.052, dist: 9.2, speed: 0.3, color: "#c8c4bc" },
+      { name: "Titan", radius: 0.025, dist: 1.55, speed: 0.42, texture: "titan" },
+      { name: "Rhea", radius: 0.010, dist: 1.90, speed: 0.3, color: "#c8c4bc" },
     ],
     info: "Less dense than water. Its rings span 280,000 km but are often just 10 meters thick. 146 known moons.",
   },
   {
-    name: "Uranus", kind: "uranus", radius: 1.36, dist: 36, au: 19.2, speed: 0.023, tilt: 1.71, orbitTilt: 0.05, rotSpeed: -0.5,
+    name: "Uranus", kind: "uranus", radius: 0.27, dist: 42, au: 19.2, speed: 0.023, tilt: 1.71, orbitTilt: 0.05, rotSpeed: -0.5,
     atmosphere: "#a8e0e8", atmoStrength: 0.5,
     ring: "uranus", ringInner: 1.6, ringOuter: 2.0,
-    info: "Knocked on its side — 98° axial tilt. Each pole gets 42 years of sunlight, then 42 years of dark.",
+    info: "Knocked on its side — 98° axial tilt. each pole gets 42 years of sunlight, then 42 years of dark.",
   },
   {
-    name: "Neptune", kind: "neptune", radius: 1.31, dist: 43, au: 30.1, speed: 0.018, tilt: 0.49, orbitTilt: 0.03, rotSpeed: 0.55,
+    name: "Neptune", kind: "neptune", radius: 0.26, dist: 48, au: 30.1, speed: 0.018, tilt: 0.49, orbitTilt: 0.03, rotSpeed: 0.55,
     atmosphere: "#5a7dff", atmoStrength: 0.6,
-    moons: [{ name: "Triton", radius: 0.092, dist: 3.2, speed: 0.35, texture: "triton" }],
+    moons: [{ name: "Triton", radius: 0.018, dist: 0.65, speed: 0.35, texture: "triton" }],
     info: "The windiest world — supersonic gales at 2,100 km/h. Found by mathematics before telescopes saw it.",
   },
   {
-    name: "Pluto", kind: "pluto", radius: 0.061, dist: 49, au: 39.5, speed: 0.014, tilt: 0.3, orbitTilt: 0.16, rotSpeed: 0.08,
-    moons: [{ name: "Charon", radius: 0.031, dist: 0.28, speed: 0.25, color: "#9a9288" }],
+    name: "Pluto", kind: "pluto", radius: 0.012, dist: 54, au: 39.5, speed: 0.014, tilt: 0.3, orbitTilt: 0.16, rotSpeed: 0.08,
+    moons: [{ name: "Charon", radius: 0.006, dist: 0.06, speed: 0.25, color: "#9a9288" }],
     info: "Dwarf planet with a heart-shaped nitrogen glacier. Charon is so large they orbit a point between them.",
   },
 ];
 
-export const SYSTEM_POS: [number, number, number] = [-24, 0.5, 68];
+/** Sol System sits high above the flight path (y+30) — physically apart from nebula (z50) and journey. */
+export const SYSTEM_POS: [number, number, number] = [-24, 30, 80];
 export const SUN_RADIUS = 4.8;
 
 function PlanetBody({ cfg, selected, onSelect }: { cfg: PlanetCfg; selected: boolean; onSelect: (name: string | null) => void }) {
@@ -285,7 +287,7 @@ export function SolarSystem({ onInfo }: { onInfo: (cfg: PlanetCfg | null) => voi
     const dummy = new THREE.Object3D();
     for (let i = 0; i < COUNT; i++) {
       const a = Math.random() * Math.PI * 2;
-      const r = 10.5 + Math.random() * 1.8;
+      const r = 15.5 + Math.random() * 2.5;
       dummy.position.set(Math.cos(a) * r, (Math.random() - 0.5) * 0.25, Math.sin(a) * r);
       const s = 0.008 + Math.random() * 0.03;
       dummy.scale.set(s, s, s);

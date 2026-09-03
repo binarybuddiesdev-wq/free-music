@@ -3,27 +3,40 @@ import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { scrollState } from "../hooks/useScrollTimeline";
 import { useAether } from "../store";
+import { NEBULA_POS } from "./sections/NebulaField";
+import { SYSTEM_POS } from "./sections/SolarSystem";
+import { SINGULARITY_POS } from "./sections/Singularity";
 
+/* One waypoint per section boundary. The path passes BELOW the nebula,
+   RISES to Sol System's altitude for free-flight, then dives to the hole. */
 const WAYPOINTS: [number, number, number][] = [
-  [0, 0, 14],
-  [0, 0.5, 30],
-  [-6, 1, 46],
-  [-24, 0.5, 68],
-  [-40, 0, 86],
-  [-54, -2, 104],
-  [-60, -3, 122],
-  [-60, -4, 138],
+  [0, 0, 14],        // hero
+  [0, 0, 30],        // warp entry
+  [2, -4, 44],       // warp exit / nebula approach
+  [0, -6, 52],       // nebula (under the cloud layers)
+  [-16, 22, 68],     // climb to Sol
+  [-24, 30, 80],     // Sol System — handover point
+  [-10, 12, 96],     // descend toward the hole
+  [0, 0, 104],       // singularity approach
+  [0, 0, 112],       // pass-through
+  [0, 0, 124],       // field
+  [0, 0, 136],       // outro
+  [0, 0, 142],       // settle
 ];
 
 const LOOK_TARGETS: [number, number, number][] = [
   [0, 0, 0],
-  [0, 0, 40],
-  [-4, 0, 55],
-  [-24, 0.5, 68],
-  [-40, 0, 86],
-  [-54, 0, 104],
-  [-60, 0, 124],
-  [-60, -2, 142],
+  [0, 0, 30],
+  [1, 0, 48],
+  [0, 2, 58],
+  [-20, 25, 76],
+  [-24, 30, 80],
+  [-6, 5, 98],
+  [0, 0, 108],
+  [0, 0, 118],
+  [0, 0, 126],
+  [0, 0, 136],
+  [0, 0, 140],
 ];
 
 export function CameraRig() {
@@ -42,10 +55,13 @@ export function CameraRig() {
     []
   );
 
+  void NEBULA_POS;
+  void SINGULARITY_POS;
+  void SYSTEM_POS;
+
   useFrame(({ pointer }) => {
     const section = useAether.getState().section;
-    const controls = (camera as unknown as { userData?: { orbit?: boolean } }).userData;
-    const orbitActive = !!controls?.orbit;
+    const orbitActive = !!(camera as unknown as { userData?: { orbit?: boolean } }).userData?.orbit;
 
     // Free-flight section owns the camera — rig stands down
     if (section === 3 && orbitActive) return;
@@ -57,8 +73,8 @@ export function CameraRig() {
     tmp.current.x += pointer.x * 0.6;
     tmp.current.y += pointer.y * 0.6;
 
-    pos.current.lerp(tmp.current, 0.045);
-    look.current.lerp(tmp2.current, 0.06);
+    pos.current.lerp(tmp.current, 0.05);
+    look.current.lerp(tmp2.current, 0.065);
 
     camera.position.copy(pos.current);
     camera.lookAt(look.current);

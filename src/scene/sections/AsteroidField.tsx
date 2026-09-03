@@ -3,11 +3,13 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { Physics, RigidBody, type RapierRigidBody } from "@react-three/rapier";
 
+export const FIELD_POS: [number, number, number] = [0, 0, 124];
+
 export function AsteroidField({ count }: { count: number }) {
   const [physicsFailed, setPhysicsFailed] = useState(false);
 
   return (
-    <group position={[-54, -2, 104]}>
+    <group position={FIELD_POS}>
       {physicsFailed ? (
         <FloatingFallback count={count} />
       ) : (
