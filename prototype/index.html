@@ -9,101 +9,256 @@
 <title>Sangeet — Telugu Music, Ad-Free</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0d17; --bg-2:#121526; --surface:rgba(255,255,255,.04);
-  --glass:rgba(255,255,255,.06); --glass-brd:rgba(255,255,255,.1);
-  --text:#f2f3fa; --text-dim:#9aa1b6; --text-faint:#5d6379;
-  --accent:#ff5e62; --accent-2:#b937f2; --teal:#2dd4bf;
-  --grad:linear-gradient(135deg,#ff5e62 0%,#b937f2 100%);
-  --radius:14px; --radius-sm:9px;
-  --font-ui:'Outfit',system-ui,sans-serif; --font-te:'Noto Sans Telugu','Outfit',sans-serif;
+  --bg:#0a0a0a; --bg-2:#141414; --surface:#1a1a1a; --surface-2:#222;
+  --glass:rgba(255,255,255,.06); --glass-brd:rgba(255,255,255,.08);
+  --text:#fff; --text-2:#b3b3b3; --text-3:#777;
+  --accent:#ff3b5c; --accent-2:#c026d3; --teal:#2dd4bf;
+  --grad:linear-gradient(135deg,#ff5e62 0%,#c026d3 100%);
+  --radius:12px; --radius-sm:8px;
+  --font-ui:'Outfit',system-ui,sans-serif;
+  --font-te:'Noto Sans Telugu','Outfit',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth;background:#2a1a6e}
+html,body{height:100%}
+html{scroll-behavior:smooth;background:#0a0a0a}
 body{
-  background-color:#2a1a6e;
-  background-image:radial-gradient(1200px 800px at 50% -10%,#6b3fb0 0%,#3d1f7a 35%,#2a1a6e 70%,#1a0f4d 100%);
-  background-repeat:no-repeat;
-  color:var(--text);font-family:var(--font-ui);min-height:100vh;padding-bottom:120px;
+  background:#0a0a0a;
+  color:var(--text);
+  font-family:var(--font-ui);
+  min-height:100vh;
+  padding-bottom:96px;
+  overflow-x:hidden;
 }
-.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:20px;padding:14px 26px;background:rgba(11,13,23,.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--glass-brd)}
-.brand{font-size:22px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:8px;white-space:nowrap;color:var(--text)}
-.brand-mark{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-size:26px}
-.search-wrap{display:flex;gap:10px;flex:1;max-width:720px}
-#search-input{flex:1;padding:11px 18px;border-radius:999px;border:1px solid var(--glass-brd);background:var(--glass);color:var(--text);font-size:15px;outline:none;transition:.2s;min-width:0}
-#search-input:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(185,55,242,.18)}
-#search-btn{padding:11px 22px;border-radius:999px;border:0;background:var(--grad);color:#fff;font-weight:600;cursor:pointer;font-size:14px;transition:.2s;white-space:nowrap}
-#search-btn:hover{filter:brightness(1.12)}
-#lang-select{padding:11px 14px;border-radius:999px;border:1px solid var(--glass-brd);background:var(--bg-2);color:var(--text);cursor:pointer;font-size:13px}
-#hero{max-width:1100px;margin:0 auto;padding:64px 26px 30px;text-align:center}
-#hero h1{
-  font-family:var(--font-te);font-size:64px;font-weight:700;
-  background:var(--grad);-webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;color:transparent;
-  text-shadow:0 0 40px rgba(185,55,242,.3);
-  display:inline-block;
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#555}
+::-webkit-scrollbar-track{background:transparent}
+
+/* topbar */
+.topbar{
+  position:sticky;top:0;z-index:30;
+  display:flex;align-items:center;gap:24px;
+  padding:12px 32px;
+  background:rgba(10,10,10,.85);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--glass-brd);
 }
-.hero-en{font-family:var(--font-ui);font-size:28px;vertical-align:middle;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
-.hero-sub{color:#c8cce0;margin-top:14px;font-size:17px;font-weight:300}
-#results{max-width:1100px;margin:0 auto;padding:10px 26px}
-.result-card{display:flex;align-items:center;gap:16px;padding:12px 16px;border-radius:var(--radius);background:var(--surface);border:1px solid transparent;cursor:pointer;transition:.15s;margin-bottom:8px}
-.result-card:hover{background:var(--glass);border-color:var(--glass-brd);transform:translateX(4px)}
-.result-card img{width:56px;height:56px;border-radius:var(--radius-sm);object-fit:cover;background:linear-gradient(135deg,#2a1b4d,#3d2352);flex-shrink:0}
-.rc-meta{flex:1;min-width:0}
-.rc-title{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rc-sub{color:var(--text-dim);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.rc-badges{display:flex;gap:6px;font-size:11px;color:var(--teal);margin-top:4px}
-.rc-play{width:40px;height:40px;border-radius:50%;border:0;background:var(--grad);color:#fff;font-size:15px;cursor:pointer;opacity:0;transition:.2s;flex-shrink:0}
-.result-card:hover .rc-play{opacity:1}
-#player{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;align-items:center;gap:18px;padding:12px 22px;background:rgba(15,17,29,.88);backdrop-filter:blur(18px);border-top:1px solid var(--glass-brd)}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand-mark{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;font-weight:700;
+  box-shadow:0 4px 20px rgba(192,38,211,.4);
+}
+.brand-name{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.search-wrap{display:flex;gap:8px;flex:1;max-width:640px;margin:0 auto}
+.search-input-wrap{position:relative;flex:1;min-width:0}
+.search-icon{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  color:var(--text-3);pointer-events:none;font-size:14px;
+}
+#search-input{
+  width:100%;padding:11px 16px 11px 40px;
+  border-radius:999px;border:1px solid var(--glass-brd);
+  background:#1a1a1a;color:var(--text);
+  font-size:14px;font-family:var(--font-ui);outline:none;transition:.2s;
+}
+#search-input::placeholder{color:var(--text-3)}
+#search-input:focus{border-color:var(--accent-2);background:#222;box-shadow:0 0 0 3px rgba(192,38,211,.18)}
+#lang-select{
+  padding:11px 12px;border-radius:999px;border:1px solid var(--glass-brd);
+  background:#1a1a1a;color:var(--text);cursor:pointer;font-size:13px;
+  font-family:var(--font-ui);outline:none;
+}
+#lang-select:hover{background:#222}
+
+/* main content */
+main{padding:24px 0 60px}
+.row{padding:0 32px;margin-bottom:36px}
+.row-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
+.row-title{font-size:22px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.row-emoji{font-size:22px}
+.row-see{color:var(--text-2);font-size:13px;cursor:pointer;transition:.15s}
+.row-see:hover{color:var(--text)}
+.row-track{
+  display:flex;gap:18px;overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding-bottom:8px;margin:0 -32px;padding-left:32px;padding-right:32px;
+  scrollbar-width:thin;
+}
+.row-track::-webkit-scrollbar{height:6px}
+.card{
+  flex:0 0 180px;scroll-snap-align:start;
+  display:flex;flex-direction:column;gap:10px;
+  cursor:pointer;border-radius:var(--radius);padding:8px;
+  transition:.2s;background:transparent;
+}
+.card:hover{background:var(--surface)}
+.card:hover .card-art-wrap{transform:scale(1.03)}
+.card:hover .card-play{opacity:1;transform:translateY(0)}
+.card-art-wrap{
+  position:relative;width:100%;aspect-ratio:1/1;border-radius:var(--radius-sm);
+  overflow:hidden;background:linear-gradient(135deg,#2a1b4d,#3d2352);
+  transition:.25s;box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.card-art{width:100%;height:100%;object-fit:cover;display:block}
+.card-play{
+  position:absolute;right:10px;bottom:10px;
+  width:46px;height:46px;border-radius:50%;
+  background:var(--grad);color:#fff;border:0;
+  font-size:16px;cursor:pointer;
+  opacity:0;transform:translateY(8px);
+  transition:.2s;
+  box-shadow:0 6px 20px rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+}
+.card-play:hover{filter:brightness(1.15);transform:scale(1.06) translateY(0)!important}
+.card-title{
+  font-size:14px;font-weight:600;color:var(--text);
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  line-height:1.3;min-height:36px;
+}
+.card-sub{font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-skel{
+  flex:0 0 180px;display:flex;flex-direction:column;gap:10px;padding:8px;
+}
+.card-skel-art{width:100%;aspect-ratio:1/1;border-radius:var(--radius-sm);background:#1a1a1a;animation:pulse 1.5s infinite}
+.card-skel-line{height:14px;border-radius:4px;background:#1a1a1a;animation:pulse 1.5s infinite}
+.card-skel-line.short{width:60%}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* hero */
+.hero{
+  position:relative;margin:0 32px 40px;border-radius:16px;overflow:hidden;
+  aspect-ratio:21/9;max-height:280px;
+  background:linear-gradient(135deg,#3d1f7a 0%,#c026d3 50%,#ff5e62 100%);
+  display:flex;align-items:flex-end;padding:28px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+.hero::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.18) 0%,transparent 60%);
+}
+.hero-content{position:relative;z-index:1;max-width:600px}
+.hero-tag{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:10px}
+.hero-title{font-family:var(--font-te);font-size:42px;font-weight:700;color:#fff;line-height:1.1;margin-bottom:10px;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.hero-sub{color:rgba(255,255,255,.9);font-size:15px;margin-bottom:18px;font-weight:300}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 24px;border-radius:999px;border:0;
+  background:#fff;color:#000;font-weight:600;cursor:pointer;font-size:14px;
+  transition:.15s;font-family:var(--font-ui);
+}
+.hero-cta:hover{transform:scale(1.04);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+
+/* player bar */
+#player{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:flex;align-items:center;gap:20px;
+  padding:10px 24px;
+  background:rgba(20,20,20,.95);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--glass-brd);
+  height:80px;
+}
 #player[hidden]{display:none}
-#p-art{border-radius:var(--radius-sm);background:linear-gradient(135deg,#2a1b4d,#3d2352)}
-.p-meta{width:200px;min-width:120px}
+#p-art{
+  width:56px;height:56px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,#2a1b4d,#3d2352);object-fit:cover;flex-shrink:0;
+}
+.p-meta{min-width:160px;max-width:220px}
 #p-title{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#p-artist{color:var(--text-dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.p-controls{display:flex;gap:8px}
-.p-controls button,#p-lyrics{width:40px;height:40px;border-radius:50%;border:1px solid var(--glass-brd);background:var(--glass);color:var(--text);cursor:pointer;font-size:15px;transition:.15s}
-.p-controls button:hover{border-color:var(--accent-2)}
-#p-play{background:var(--grad);border:0;width:46px;height:46px;font-size:17px}
-.p-timeline{flex:1;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-dim)}
-#p-seek{flex:1;appearance:none;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--glass);outline:none;cursor:pointer;min-width:0}
-#p-seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
-#p-seek::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);border:0;cursor:pointer}
-.p-modes{display:flex;gap:6px}
-.mode-btn{padding:8px 14px;border-radius:999px;border:1px solid var(--glass-brd);background:transparent;color:var(--text-dim);cursor:pointer;font-size:12px;font-weight:600;transition:.15s;font-family:var(--font-ui)}
-.mode-btn.active{background:var(--grad);border-color:transparent;color:#fff}
-.mode-btn:disabled{cursor:not-allowed}
-#lyrics-panel{position:fixed;right:0;top:0;bottom:120px;width:min(440px,100vw);z-index:35;background:rgba(15,17,29,.97);backdrop-filter:blur(20px);border-left:1px solid var(--glass-brd);transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+#p-artist{color:var(--text-2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.p-controls{display:flex;gap:6px;align-items:center}
+.p-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:transparent;border:0;color:var(--text);
+  cursor:pointer;font-size:16px;transition:.15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.p-btn:hover{background:rgba(255,255,255,.08)}
+#p-play{
+  width:42px;height:42px;
+  background:#fff;color:#000;font-size:15px;
+}
+#p-play:hover{background:#fff;transform:scale(1.06)}
+.p-timeline{flex:1;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text-2);min-width:0}
+#p-seek{
+  flex:1;appearance:none;-webkit-appearance:none;height:4px;border-radius:2px;
+  background:#333;outline:none;cursor:pointer;min-width:0;
+}
+#p-seek::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+#p-seek::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:0;cursor:pointer}
+.p-modes{display:flex;gap:4px}
+.mode-btn{
+  padding:7px 13px;border-radius:999px;
+  border:1px solid var(--glass-brd);
+  background:transparent;color:var(--text-2);
+  cursor:pointer;font-size:11px;font-weight:600;
+  transition:.15s;font-family:var(--font-ui);
+}
+.mode-btn:hover{color:var(--text);border-color:#444}
+.mode-btn.active{background:#fff;color:#000;border-color:#fff}
+.mode-btn:disabled{cursor:not-allowed;opacity:.4}
+
+/* lyrics */
+#lyrics-panel{
+  position:fixed;right:0;top:0;bottom:80px;width:min(420px,100vw);z-index:35;
+  background:rgba(10,10,10,.97);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-left:1px solid var(--glass-brd);
+  transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  display:flex;flex-direction:column;
+}
 #lyrics-panel.open{transform:none}
-.lyrics-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--glass-brd);font-weight:600}
-#lyrics-close{background:none;border:0;color:var(--text-dim);font-size:18px;cursor:pointer}
-#lyrics-body{flex:1;overflow-y:auto;padding:26px 22px;font-family:var(--font-te);font-size:18px;line-height:2.4;text-align:center;scrollbar-width:thin}
-.lyr-line{color:var(--text-faint);transition:.25s;cursor:default}
-.lyr-line.active{color:#fff;font-weight:700;transform:scale(1.06)}
-.lyr-line.near{color:var(--text-dim)}
-.lyr-none{color:var(--text-dim);font-family:var(--font-ui);font-size:14px}
-#video-stage{position:fixed;inset:0;z-index:50;background:rgba(5,6,12,.92);display:flex;align-items:center;justify-content:center}
+.lyrics-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--glass-brd);font-weight:600;font-size:14px}
+#lyrics-close{background:none;border:0;color:var(--text-2);font-size:18px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#lyrics-close:hover{background:rgba(255,255,255,.08);color:var(--text)}
+#lyrics-body{flex:1;overflow-y:auto;padding:24px 22px;font-family:var(--font-te);font-size:17px;line-height:2.3;text-align:center;scrollbar-width:thin}
+.lyr-line{color:#555;transition:.25s;cursor:default;padding:2px 0}
+.lyr-line.active{color:#fff;font-weight:700;transform:scale(1.04)}
+.lyr-line.near{color:var(--text-2)}
+.lyr-none{color:var(--text-2);font-family:var(--font-ui);font-size:13px;padding:40px 20px}
+
+/* video stage */
+#video-stage{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center}
 #video-stage[hidden]{display:none}
-#video-mount{width:min(92vw,1280px);aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6)}
-#video-close{position:absolute;top:22px;right:26px;width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-brd);background:var(--glass);color:#fff;font-size:17px;cursor:pointer}
-.empty{color:var(--text-dim);text-align:center;padding:60px 0;font-size:15px}
-.loading{color:var(--text-dim);text-align:center;padding:60px 0;font-size:15px}
+#video-mount{width:min(94vw,1400px);aspect-ratio:16/9;border-radius:8px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+#video-close{position:absolute;top:24px;right:28px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+#video-close:hover{background:rgba(40,40,40,.9)}
+
 @media(max-width:760px){
-  .p-meta{width:110px} .p-timeline{gap:6px} #p-lyrics{display:none}
-  #hero h1{font-size:44px} #hero{padding-top:36px}
-  #player{flex-wrap:wrap;gap:10px;padding:10px 14px}
-  .p-timeline{order:5;flex-basis:100%}
+  .topbar{padding:10px 14px;gap:10px}
+  .brand-name{display:none}
+  .row{padding:0 14px}
+  .row-track{margin:0 -14px;padding-left:14px;padding-right:14px;gap:14px}
+  .card{flex:0 0 140px}
+  .card-skel{flex:0 0 140px}
+  .hero{margin:0 14px 32px;padding:20px}
+  .hero-title{font-size:28px}
+  .hero-sub{font-size:13px}
+  .p-meta{display:none}
+  #p-lyrics,#p-mode-video{display:none}
+  #player{padding:8px 14px;gap:10px;height:72px}
 }
 </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="brand-mark">♪</span> Sangeet</div>
+    <div class="brand">
+      <div class="brand-mark">♪</div>
+      <div class="brand-name">Sangeet</div>
+    </div>
     <div class="search-wrap">
-      <input id="search-input" type="search" placeholder="Search Telugu songs, movies, artists…" autocomplete="off">
-      <button id="search-btn" aria-label="Search">Search</button>
+      <div class="search-input-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="search-input" type="search" placeholder="Search Telugu songs, movies, artists…" autocomplete="off">
+      </div>
       <select id="lang-select" title="Language">
         <option value="telugu" selected>Telugu</option>
         <option value="hindi">Hindi</option>
@@ -118,24 +273,24 @@ body{
     </div>
   </header>
 
-  <main>
-    <section id="hero">
-      <h1>సంగీతం <span class="hero-en">Sangeet</span></h1>
-      <p class="hero-sub">Every Telugu song ever — from Ghantasala to today. Free. No ads. With lyrics.</p>
+  <main id="main">
+    <section class="hero" id="hero">
+      <div class="hero-content">
+        <div class="hero-tag">Free · No Ads · With Lyrics</div>
+        <h1 class="hero-title">సంగీతం</h1>
+        <p class="hero-sub">Every Telugu song ever — from Ghantasala to today. The music that moves you.</p>
+        <button class="hero-cta" id="hero-cta">▶ Start Listening</button>
+      </div>
     </section>
-    <section id="results" aria-live="polite"></section>
-    <section id="video-stage" hidden>
-      <div id="video-mount"></div>
-      <button id="video-close" aria-label="Close video">✕</button>
-    </section>
+    <div id="rows"></div>
   </main>
 
-  <aside id="lyrics-panel" aria-label="Lyrics">
+  <aside id="lyrics-panel">
     <div class="lyrics-head">
-      <span id="lyrics-title"></span>
-      <button id="lyrics-close" aria-label="Close lyrics">✕</button>
+      <span id="lyrics-title">Lyrics</span>
+      <button id="lyrics-close" aria-label="Close">✕</button>
     </div>
-    <div id="lyrics-body"></div>
+    <div id="lyrics-body"><div class="lyr-none">Play a song to see lyrics.</div></div>
   </aside>
 
   <footer id="player" hidden>
@@ -145,9 +300,9 @@ body{
       <div id="p-artist"></div>
     </div>
     <div class="p-controls">
-      <button id="p-prev" aria-label="Previous">⏮</button>
-      <button id="p-play" aria-label="Play/Pause">▶</button>
-      <button id="p-next" aria-label="Next">⏭</button>
+      <button id="p-prev" class="p-btn" aria-label="Previous">⏮</button>
+      <button id="p-play" class="p-btn" aria-label="Play/Pause">▶</button>
+      <button id="p-next" class="p-btn" aria-label="Next">⏭</button>
     </div>
     <div class="p-timeline">
       <span id="p-cur">0:00</span>
@@ -155,315 +310,381 @@ body{
       <span id="p-dur">0:00</span>
     </div>
     <div class="p-modes">
-      <button id="p-mode-audio" class="mode-btn active" aria-label="Audio mode">Audio</button>
-      <button id="p-mode-video" class="mode-btn" aria-label="Video mode">Video</button>
-      <button id="p-lyrics" class="mode-btn" aria-label="Show lyrics">Lyrics</button>
+      <button id="p-mode-audio" class="mode-btn active">Audio</button>
+      <button id="p-mode-video" class="mode-btn">Video</button>
+      <button id="p-lyrics" class="mode-btn">Lyrics</button>
     </div>
     <audio id="audio-el" preload="none"></audio>
   </footer>
+
 <script>
 (() => {
 "use strict";
 
-// ── state ─────────────────────────────────────────────
 const state = {
-  query: "", lang: "telugu", page: 1, results: [],
-  queue: [], qIndex: -1,
-  current: null,
-  mode: "audio",
-  lyrics: null,
-  videoIds: {}
+  query:"", lang:"telugu", page:1, results:[],
+  queue:[], qIndex:-1, current:null,
+  mode:"audio", lyrics:null, videoIds:{}
 };
 
-// ── api: jiosaavn ──────────────────────────────────────
 const SAAVN = "https://saavn.sumit.co/api";
 const SaavnAPI = {
-  async search(query, language, page = 1) {
-    const url = `${SAAVN}/search/songs?query=${encodeURIComponent(query)}&limit=40&page=${page}`;
+  async search(query, language, page=1){
+    const url = `${SAAVN}/search/songs?query=${encodeURIComponent(query)}&limit=30&page=${page}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Saavn ${res.status}`);
+    if(!res.ok) throw new Error(`Saavn ${res.status}`);
     const json = await res.json();
-    const rows = (json.data?.results || []).map(normalize).filter(s => s.language === language);
-    return rows;
+    return (json.data?.results||[]).map(normalize).filter(s=>s.language===language);
   },
-  bestUrl(song) {
-    const tiers = [...song.downloadUrl]
-      .map(d => ({ ...d, kbps: parseInt(d.quality, 10) || 0 }))
-      .sort((a, b) => b.kbps - a.kbps);
-    return tiers[0]?.url || "";
+  bestUrl(song){
+    const tiers=[...song.downloadUrl].map(d=>({...d,kbps:parseInt(d.quality,10)||0})).sort((a,b)=>b.kbps-a.kbps);
+    return tiers[0]?.url||"";
   }
 };
-function normalize(r) {
+
+function normalize(r){
   return {
-    id: r.id, name: decodeHTML(r.name),
-    artist: (r.artists?.primary || []).map(a => decodeHTML(a.name)).join(", ") || "Unknown",
-    album: decodeHTML(r.album?.name || ""),
-    year: r.year || "", duration: r.duration || 0,
-    language: r.language || "", image: pickImage(r.image),
-    downloadUrl: r.downloadUrl || []
+    id:r.id, name:decodeHTML(r.name),
+    artist:(r.artists?.primary||[]).map(a=>decodeHTML(a.name)).join(", ")||"Unknown",
+    album:decodeHTML(r.album?.name||""),
+    year:r.year||"", duration:r.duration||0,
+    language:r.language||"", image:pickImage(r.image),
+    downloadUrl:r.downloadUrl||[],
+    playCount:r.playCount||0
   };
 }
-function pickImage(images) {
-  if (!images?.length) return "";
-  return [...images].sort((a, b) => parseInt(b.width) - parseInt(a.width))[0]?.url || images[images.length - 1].url;
+function pickImage(images){
+  if(!images?.length) return "";
+  return [...images].sort((a,b)=>parseInt(b.width)-parseInt(a.width))[0]?.url||images[images.length-1].url;
 }
-function decodeHTML(s) {
-  const t = document.createElement("textarea"); t.innerHTML = s || ""; return t.value.trim();
-}
-function esc(s) { const d = document.createElement("div"); d.textContent = s ?? ""; return d.innerHTML; }
-const el = id => document.getElementById(id);
-const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function decodeHTML(s){const t=document.createElement("textarea");t.innerHTML=s||"";return t.value.trim()}
+function esc(s){const d=document.createElement("div");d.textContent=s??"";return d.innerHTML}
+const el=id=>document.getElementById(id);
+const fmtTime=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
 
-// ── ui: render ─────────────────────────────────────────
-function renderResults(songs) {
-  const box = el("results");
-  box.innerHTML = "";
-  if (!songs.length) { box.innerHTML = `<div class="empty">No ${esc(state.lang)} songs found for "${esc(state.query)}" — try another spelling or movie name.</div>`; return; }
-  songs.forEach(s => {
-    const card = document.createElement("div");
-    card.className = "result-card";
-    card.innerHTML = `
-      <img src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-      <div class="rc-meta">
-        <div class="rc-title">${esc(s.name)}</div>
-        <div class="rc-sub">${esc(s.artist)} · ${esc(s.album)}${s.year ? " · " + s.year : ""}</div>
-        <div class="rc-badges"><span>${fmtTime(s.duration)}</span><span>${esc(s.language)}</span></div>
-      </div>
-      <button class="rc-play" aria-label="Play ${esc(s.name)}">▶</button>`;
-    card.addEventListener("click", () => playSong(s, state.results));
-    box.appendChild(card);
+// ── rows (YTM-style horizontal carousels) ─────────────
+const ROWS = [
+  { id:"trending", title:"Trending Now", emoji:"🔥", query:"telugu" },
+  { id:"new", title:"New Releases", emoji:"✨", query:"telugu 2026" },
+  { id:"charts", title:"Telugu Charts", emoji:"📈", query:"telugu top hits" },
+  { id:"classics", title:"Timeless Classics", emoji:"🏛️", query:"ghantasala spb ilaiyaraaja telugu" },
+  { id:"mass", title:"Mass Hits", emoji:"💥", query:"pushpa devara rrr" },
+  { id:"romance", title:"Romantic Telugu", emoji:"💕", query:"telugu love melody" }
+];
+
+function createRowSkeleton(row){
+  const sec=document.createElement("section");
+  sec.className="row"; sec.dataset.rowId=row.id;
+  sec.innerHTML=`
+    <div class="row-head">
+      <div class="row-title"><span class="row-emoji">${row.emoji}</span>${esc(row.title)}</div>
+    </div>
+    <div class="row-track">
+      ${Array.from({length:8}).map(()=>`
+        <div class="card-skel">
+          <div class="card-skel-art"></div>
+          <div class="card-skel-line"></div>
+          <div class="card-skel-line short"></div>
+        </div>`).join("")}
+    </div>`;
+  return sec;
+}
+
+function fillRow(sec, songs, row){
+  const track=sec.querySelector(".row-track");
+  track.innerHTML="";
+  songs.slice(0,15).forEach(s=>track.appendChild(createCard(s)));
+  sec.querySelector(".row-head").innerHTML=`
+    <div class="row-title"><span class="row-emoji">${row.emoji}</span>${esc(row.title)}</div>
+    <div class="row-see">See all</div>`;
+}
+
+function createCard(s){
+  const c=document.createElement("div");
+  c.className="card";
+  c.innerHTML=`
+    <div class="card-art-wrap">
+      <img class="card-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <button class="card-play" aria-label="Play ${esc(s.name)}">▶</button>
+    </div>
+    <div class="card-title">${esc(s.name)}</div>
+    <div class="card-sub">${esc(s.artist)}</div>`;
+  c.addEventListener("click",e=>{
+    e.stopPropagation();
+    playSong(s, currentListFromCard(c));
   });
+  return c;
+}
+
+// track which row a card belongs to for queue purposes
+let _cardLists=new WeakMap();
+function currentListFromCard(cardEl){
+  const sec=cardEl.closest(".row");
+  if(!sec) return [state.current].filter(Boolean);
+  const id=sec.dataset.rowId;
+  const cached=_cardLists.get(sec);
+  if(cached) return cached;
+  return state.results;
+}
+
+async function loadRow(row){
+  const sec=createRowSkeleton(row);
+  el("rows").appendChild(sec);
+  try{
+    const songs=await SaavnAPI.search(row.query, state.lang, 1);
+    if(!songs.length){ sec.remove(); return; }
+    _cardLists.set(sec, songs);
+    fillRow(sec, songs, row);
+  }catch(e){
+    sec.remove();
+  }
+}
+
+function loadHome(){
+  ROWS.forEach(r=>loadRow(r));
 }
 
 // ── player: audio ─────────────────────────────────────
-const audio = el("audio-el");
-const AudioCtl = {
-  play() { return audio.play().catch(err => console.warn("audio play blocked:", err)); },
-  pause() { audio.pause(); },
-  toggle() { audio.paused ? AudioCtl.play() : AudioCtl.pause(); },
-  seek(t) { if (isFinite(t)) audio.currentTime = Math.max(0, Math.min(t, audio.duration || t)); },
-  onTime(cb) { audio.addEventListener("timeupdate", cb); },
-  onEnded(cb) { audio.addEventListener("ended", cb); }
+const audio=el("audio-el");
+const AudioCtl={
+  play(){return audio.play().catch(err=>console.warn("audio play blocked:",err))},
+  pause(){audio.pause()},
+  toggle(){audio.paused?AudioCtl.play():AudioCtl.pause()},
+  seek(t){if(isFinite(t))audio.currentTime=Math.max(0,Math.min(t,audio.duration||t))},
+  onTime(cb){audio.addEventListener("timeupdate",cb)},
+  onEnded(cb){audio.addEventListener("ended",cb)}
 };
 
-function playSong(song, queue = [song]) {
-  state.queue = [...queue]; state.qIndex = state.queue.findIndex(q => q.id === song.id);
-  state.current = song;
-  const url = SaavnAPI.bestUrl(song);
-  audio.src = url; AudioCtl.play();
-  el("player").hidden = false;
-  el("p-art").src = song.image;
-  el("p-title").textContent = song.name;
-  el("p-artist").textContent = song.artist;
-  el("p-play").textContent = "⏸";
-  el("p-dur").textContent = fmtTime(song.duration);
-  el("p-seek").value = 0;
-  if (typeof loadLyrics === "function") loadLyrics(song);
-  if (typeof loadVideoFor === "function") loadVideoFor(song);
+function playSong(song, queue=[song]){
+  state.queue=[...queue]; state.qIndex=state.queue.findIndex(q=>q.id===song.id);
+  state.current=song;
+  const url=SaavnAPI.bestUrl(song);
+  audio.src=url; AudioCtl.play();
+  el("player").hidden=false;
+  el("p-art").src=song.image;
+  el("p-title").textContent=song.name;
+  el("p-artist").textContent=song.artist;
+  el("p-play").textContent="⏸";
+  el("p-dur").textContent=fmtTime(song.duration);
+  el("p-seek").value=0;
+  if(typeof loadLyrics==="function") loadLyrics(song);
+  if(typeof loadVideoFor==="function") loadVideoFor(song);
 }
-function nextSong() { if (state.qIndex < state.queue.length - 1) playSong(state.queue[state.qIndex + 1], state.queue); }
-function prevSong() { if (audio.currentTime > 3 || state.qIndex <= 0) { audio.currentTime = 0; } else { playSong(state.queue[state.qIndex - 1], state.queue); } }
+function nextSong(){if(state.qIndex<state.queue.length-1)playSong(state.queue[state.qIndex+1],state.queue)}
+function prevSong(){if(audio.currentTime>3||state.qIndex<=0){audio.currentTime=0}else{playSong(state.queue[state.qIndex-1],state.queue)}}
 
-el("p-play").addEventListener("click", () => { if (state.current) AudioCtl.toggle(); });
-el("p-next").addEventListener("click", nextSong);
-el("p-prev").addEventListener("click", prevSong);
-audio.addEventListener("play", () => el("p-play").textContent = "⏸");
-audio.addEventListener("pause", () => el("p-play").textContent = "▶");
-
-let seeking = false;
-el("p-seek").addEventListener("input", () => { seeking = true; el("p-cur").textContent = fmtTime(el("p-seek").value); });
-el("p-seek").addEventListener("change", () => { AudioCtl.seek(+el("p-seek").value); seeking = false; });
-audio.addEventListener("timeupdate", () => {
-  if (seeking) return;
-  el("p-seek").max = audio.duration || state.current?.duration || 0;
-  el("p-seek").value = audio.currentTime;
-  el("p-cur").textContent = fmtTime(audio.currentTime);
+el("p-play").addEventListener("click",()=>{if(state.current)AudioCtl.toggle()});
+el("p-next").addEventListener("click",nextSong);
+el("p-prev").addEventListener("click",prevSong);
+audio.addEventListener("play",()=>el("p-play").textContent="⏸");
+audio.addEventListener("pause",()=>el("p-play").textContent="▶");
+let seeking=false;
+el("p-seek").addEventListener("input",()=>{seeking=true;el("p-cur").textContent=fmtTime(el("p-seek").value)});
+el("p-seek").addEventListener("change",()=>{AudioCtl.seek(+el("p-seek").value);seeking=false});
+audio.addEventListener("timeupdate",()=>{
+  if(seeking) return;
+  el("p-seek").max=audio.duration||state.current?.duration||0;
+  el("p-seek").value=audio.currentTime;
+  el("p-cur").textContent=fmtTime(audio.currentTime);
 });
-audio.addEventListener("loadedmetadata", () => { el("p-dur").textContent = fmtTime(audio.duration); });
-audio.addEventListener("ended", nextSong);
+audio.addEventListener("loadedmetadata",()=>{el("p-dur").textContent=fmtTime(audio.duration)});
+audio.addEventListener("ended",nextSong);
 
-// ── ui: events (search) ────────────────────────────────
-async function doSearch() {
-  const q = el("search-input").value.trim();
-  if (!q) return;
-  state.query = q; state.page = 1;
-  el("results").innerHTML = `<div class="loading">Searching…</div>`;
-  try {
-    state.results = await SaavnAPI.search(q, state.lang, 1);
-    renderResults(state.results);
-  } catch (e) {
-    el("results").innerHTML = `<div class="empty">Search failed — ${esc(e.message)}. The JioSaavn instance may be down; try again.</div>`;
+// ── search ────────────────────────────────────────────
+async function doSearch(){
+  const q=el("search-input").value.trim();
+  if(!q) return;
+  state.query=q; state.page=1;
+  // build a single search row at the top of the rows list
+  el("rows").innerHTML=`<div class="loading" style="color:var(--text-2);padding:40px;text-align:center">Searching…</div>`;
+  try{
+    state.results=await SaavnAPI.search(q, state.lang, 1);
+    if(!state.results.length){
+      el("rows").innerHTML=`<div class="lyr-none" style="padding:60px 20px">No ${esc(state.lang)} songs found for "${esc(q)}".</div>`;
+      return;
+    }
+    const row={id:"search", title:`Results for "${q}"`, emoji:"🔎", query:q};
+    const sec=createRowSkeleton(row);
+    el("rows").innerHTML="";
+    el("rows").appendChild(sec);
+    _cardLists.set(sec, state.results);
+    fillRow(sec, state.results, row);
+    window.scrollTo({top:0, behavior:"smooth"});
+  }catch(e){
+    el("rows").innerHTML=`<div class="lyr-none" style="padding:60px 20px">Search failed: ${esc(e.message)}</div>`;
   }
 }
-el("search-btn").addEventListener("click", doSearch);
-el("search-input").addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
-el("lang-select").addEventListener("change", e => {
-  state.lang = e.target.value;
-  if (state.query) doSearch();
+el("search-btn")?.remove?.(); // legacy safety
+el("search-input").addEventListener("keydown",e=>{if(e.key==="Enter")doSearch()});
+el("lang-select").addEventListener("change",e=>{
+  state.lang=e.target.value;
+  if(state.query) doSearch();
+  else loadHome();
+});
+el("hero-cta").addEventListener("click",()=>{
+  // play the first available song from the first loaded row
+  const firstCard=document.querySelector(".card");
+  if(firstCard) firstCard.click();
 });
 
 // ── api: lrclib ───────────────────────────────────────
-const LRC = "https://lrclib.net/api";
-const LyricsAPI = {
-  async find(song) {
-    const primaryArtist = song.artist.split(",")[0].trim();
-    const attempts = [
-      `${LRC}/search?track_name=${encodeURIComponent(song.name)}&artist_name=${encodeURIComponent(primaryArtist)}`,
+const LRC="https://lrclib.net/api";
+const LyricsAPI={
+  async find(song){
+    const primary=song.artist.split(",")[0].trim();
+    const attempts=[
+      `${LRC}/search?track_name=${encodeURIComponent(song.name)}&artist_name=${encodeURIComponent(primary)}`,
       `${LRC}/search?track_name=${encodeURIComponent(song.name)}`,
-      `${LRC}/search?q=${encodeURIComponent(`${song.name} ${primaryArtist}`)}`
+      `${LRC}/search?q=${encodeURIComponent(song.name+" "+primary)}`
     ];
-    for (const url of attempts) {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) continue;
-        const rows = await res.json();
-        const inDur = r => Math.abs((r.duration || 0) - song.duration) <= 2;
-        const match = rows.find(r => inDur(r) && r.syncedLyrics) || rows.find(r => inDur(r));
-        if (match) return { synced: match.syncedLyrics || null, plain: match.plainLyrics || match.syncedLyrics || null };
-      } catch (_) { /* next strategy */ }
+    for(const url of attempts){
+      try{
+        const res=await fetch(url);
+        if(!res.ok) continue;
+        const rows=await res.json();
+        const inDur=r=>Math.abs((r.duration||0)-song.duration)<=2;
+        const match=rows.find(r=>inDur(r)&&r.syncedLyrics)||rows.find(r=>inDur(r));
+        if(match) return {synced:match.syncedLyrics||null, plain:match.plainLyrics||match.syncedLyrics||null};
+      }catch(_){}
     }
     return null;
   }
 };
 
-// ── lyrics engine ─────────────────────────────────────
-function parseLRC(lrc) {
-  const lines = [];
-  for (const raw of lrc.split("\n")) {
-    const stamps = [...raw.matchAll(/\[(\d+):(\d+)(?:\.(\d+))?\]/g)];
-    if (!stamps.length) continue;
-    const text = raw.replace(/\[[^\]]*\]/g, "").trim();
-    for (const m of stamps) {
-      const frac = m[3] ? +( "0." + m[3]) : 0;
-      lines.push({ t: (+m[1]) * 60 + (+m[2]) + frac, text });
+function parseLRC(lrc){
+  const lines=[];
+  for(const raw of lrc.split("\n")){
+    const stamps=[...raw.matchAll(/\[(\d+):(\d+)(?:\.(\d+))?\]/g)];
+    if(!stamps.length) continue;
+    const text=raw.replace(/\[[^\]]*\]/g,"").trim();
+    for(const m of stamps){
+      const frac=m[3]?+("0."+m[3]):0;
+      lines.push({t:(+m[1])*60+(+m[2])+frac,text});
     }
   }
-  return lines.sort((a, b) => a.t - b.t);
+  return lines.sort((a,b)=>a.t-b.t);
 }
 
-async function loadLyrics(song) {
-  state.lyrics = null;
-  el("lyrics-title").textContent = `${song.name} — Lyrics`;
-  el("lyrics-body").innerHTML = `<div class="lyr-none">Loading lyrics…</div>`;
-  const found = await LyricsAPI.find(song);
-  if (state.current?.id !== song.id) return;
-  if (!found || !found.plain) {
-    el("lyrics-body").innerHTML = `<div class="lyr-none">Lyrics not found for this song.</div>`;
+async function loadLyrics(song){
+  state.lyrics=null;
+  el("lyrics-title").textContent=`${song.name}`;
+  el("lyrics-body").innerHTML=`<div class="lyr-none">Loading lyrics…</div>`;
+  const found=await LyricsAPI.find(song);
+  if(state.current?.id!==song.id) return;
+  if(!found||!found.plain){
+    el("lyrics-body").innerHTML=`<div class="lyr-none">Lyrics not found for this song.</div>`;
     return;
   }
-  if (found.synced) {
-    const lines = parseLRC(found.synced);
-    state.lyrics = { lines, plainOnly: false };
-    el("lyrics-body").innerHTML = lines.map((l, i) =>
-      `<div class="lyr-line" data-i="${i}">${l.text ? esc(l.text) : "♪"}</div>`).join("");
-  } else {
-    state.lyrics = { lines: found.plain.split("\n").map(t => ({ t: 0, text: t })), plainOnly: true };
-    el("lyrics-body").innerHTML = found.plain.split("\n").map(t =>
-      `<div class="lyr-line">${t ? esc(t) : "♪"}</div>`).join("");
+  if(found.synced){
+    const lines=parseLRC(found.synced);
+    state.lyrics={lines, plainOnly:false};
+    el("lyrics-body").innerHTML=lines.map((l,i)=>`<div class="lyr-line" data-i="${i}">${l.text?esc(l.text):"♪"}</div>`).join("");
+  }else{
+    state.lyrics={lines:found.plain.split("\n").map(t=>({t:0,text:t})), plainOnly:true};
+    el("lyrics-body").innerHTML=found.plain.split("\n").map(t=>`<div class="lyr-line">${t?esc(t):"♪"}</div>`).join("");
   }
 }
 
-function toggleLyricsPanel() { el("lyrics-panel").classList.toggle("open"); }
-el("p-lyrics").addEventListener("click", toggleLyricsPanel);
-el("lyrics-close").addEventListener("click", () => el("lyrics-panel").classList.remove("open"));
+function toggleLyricsPanel(){el("lyrics-panel").classList.toggle("open")}
+el("p-lyrics").addEventListener("click",toggleLyricsPanel);
+el("lyrics-close").addEventListener("click",()=>el("lyrics-panel").classList.remove("open"));
 
-AudioCtl.onTime(() => {
-  const L = state.lyrics;
-  if (!L || L.plainOnly) return;
-  const t = audio.currentTime;
-  let active = -1;
-  for (let i = 0; i < L.lines.length; i++) { if (L.lines[i].t <= t) active = i; else break; }
-  const prevActive = document.querySelector(".lyr-line.active");
-  if (prevActive?.dataset?.i == active) return;
-  document.querySelectorAll(".lyr-line").forEach(n => n.classList.remove("active", "near"));
-  const node = document.querySelector(`.lyr-line[data-i="${active}"]`);
-  if (node) {
+AudioCtl.onTime(()=>{
+  const L=state.lyrics; if(!L||L.plainOnly) return;
+  const t=audio.currentTime;
+  let active=-1;
+  for(let i=0;i<L.lines.length;i++){if(L.lines[i].t<=t)active=i;else break}
+  const prevActive=document.querySelector(".lyr-line.active");
+  if(prevActive?.dataset?.i==active) return;
+  document.querySelectorAll(".lyr-line").forEach(n=>n.classList.remove("active","near"));
+  const node=document.querySelector(`.lyr-line[data-i="${active}"]`);
+  if(node){
     node.classList.add("active");
-    const near = node.previousElementSibling;
-    if (near?.classList?.contains("lyr-line")) near.classList.add("near");
-    node.scrollIntoView({ block: "center", behavior: "smooth" });
+    const near=node.previousElementSibling;
+    if(near?.classList?.contains("lyr-line")) near.classList.add("near");
+    node.scrollIntoView({block:"center",behavior:"smooth"});
   }
 });
 
-// ── player: video ─────────────────────────────────────
-state.videoIds = {
-  "pushpa pushpa": "wQksDYahKZs",
-  "abbani tiyyani": "Z-Xd8fMrfDk",
-  "kala sivunte kaladi": "65hYeLm4NcU",
-  "adiga adiga": "zrGs4AkqNyk",
-  "kaanunna kalyanam": "nj0iqDA3mZw",
-  "mass raja": "IW0NuTp4sUY"
+// ── video ─────────────────────────────────────────────
+state.videoIds={
+  "pushpa pushpa":"wQksDYahKZs",
+  "abbani tiyyani":"Z-Xd8fMrfDk",
+  "kala sivunte kaladi":"65hYeLm4NcU",
+  "adiga adiga":"zrGs4AkqNyk",
+  "kaanunna kalyanam":"nj0iqDA3mZw",
+  "mass raja":"IW0NuTp4sUY"
 };
-const videoKey = song => song.name.toLowerCase().replace(/\s+/g, " ").replace(/\s*\(.*?\)\s*/g, "").replace(/from|quot|amp;/g, "").replace(/[^a-z\u0C00-\u0C7F ]/g, "").trim();
+const videoKey=song=>song.name.toLowerCase().replace(/\s+/g," ").replace(/\s*\(.*?\)\s*/g,"").replace(/from|quot|amp;/g,"").replace(/[^a-z\u0C00-\u0C7F ]/g,"").trim();
 
-let yt = null;
-let ytReady = false;
-let ytApiLoading = false;
-
-function ensureYT() {
-  if (ytReady || ytApiLoading) return;
-  ytApiLoading = true;
-  const s = document.createElement("script");
-  s.src = "https://www.youtube.com/iframe_api";
+let yt=null, ytReady=false, ytApiLoading=false;
+function ensureYT(){
+  if(ytReady||ytApiLoading) return;
+  ytApiLoading=true;
+  const s=document.createElement("script");
+  s.src="https://www.youtube.com/iframe_api";
   document.head.appendChild(s);
 }
 
-function enterVideo() {
-  const song = state.current; if (!song) return;
-  const vid = state.videoIds[videoKey(song)];
-  if (!vid) { alert("No video mapped for this song in the prototype — the React app will auto-find it via server-side search."); return; }
+function enterVideo(){
+  const song=state.current; if(!song) return;
+  const vid=state.videoIds[videoKey(song)];
+  if(!vid){alert("No video mapped for this song in the prototype — the React app will auto-find it server-side.");return}
   ensureYT();
-  const t = audio.currentTime;
+  const t=audio.currentTime;
   audio.pause();
-  el("video-stage").hidden = false;
-  const whenReady = () => {
-    yt = new YT.Player("video-mount", {
-      videoId: vid,
-      playerVars: { autoplay: 1, playsinline: 1, start: Math.max(0, Math.floor(t)), rel: 0, modestbranding: 1 },
-      events: {
-        onReady: () => { yt.playVideo(); },
-        onStateChange: e => { if (e.data === YT.PlayerState.ENDED) exitVideo(true); }
+  el("video-stage").hidden=false;
+  const whenReady=()=>{
+    yt=new YT.Player("video-mount",{
+      videoId:vid,
+      playerVars:{autoplay:1,playsinline:1,start:Math.max(0,Math.floor(t)),rel:0,modestbranding:1},
+      events:{
+        onReady:()=>{yt.playVideo()},
+        onStateChange:e=>{if(e.data===YT.PlayerState.ENDED)exitVideo(true)}
       }
     });
   };
-  if (ytReady) whenReady(); else window.onYouTubeIframeAPIReady = () => { ytReady = true; whenReady(); };
+  if(ytReady) whenReady(); else window.onYouTubeIframeAPIReady=()=>{ytReady=true;whenReady()};
   el("p-mode-audio").classList.remove("active");
   el("p-mode-video").classList.add("active");
-  state.mode = "video";
+  state.mode="video";
 }
 
-function exitVideo(finished = false) {
-  const t = yt?.getCurrentTime?.() || 0;
-  try { yt?.destroy?.(); } catch (_) {}
-  yt = null;
-  const mount = el("video-mount");
-  mount.innerHTML = ""; mount.id = "video-mount";
-  el("video-stage").hidden = true;
+function exitVideo(finished=false){
+  const t=yt?.getCurrentTime?.()||0;
+  try{yt?.destroy?.()}catch(_){}
+  yt=null;
+  const mount=el("video-mount");
+  mount.innerHTML=""; mount.id="video-mount";
+  el("video-stage").hidden=true;
   el("p-mode-audio").classList.add("active");
   el("p-mode-video").classList.remove("active");
-  state.mode = "audio";
-  if (!finished && t > 0) { AudioCtl.seek(t); AudioCtl.play(); }
+  state.mode="audio";
+  if(!finished&&t>0){AudioCtl.seek(t);AudioCtl.play()}
 }
-el("p-mode-video").addEventListener("click", enterVideo);
-el("p-mode-audio").addEventListener("click", () => { if (state.mode === "video") exitVideo(); });
-el("video-close").addEventListener("click", () => exitVideo());
+el("p-mode-video").addEventListener("click",enterVideo);
+el("p-mode-audio").addEventListener("click",()=>{if(state.mode==="video")exitVideo()});
+el("video-close").addEventListener("click",()=>exitVideo());
 
-function loadVideoFor(song) {
-  const has = !!state.videoIds[videoKey(song)];
-  el("p-mode-video").disabled = !has;
-  el("p-mode-video").style.opacity = has ? "1" : ".4";
-  el("p-mode-video").title = has ? "Watch official video" : "No video mapped for this song (prototype)";
+function loadVideoFor(song){
+  const has=!!state.videoIds[videoKey(song)];
+  el("p-mode-video").disabled=!has;
+  el("p-mode-video").style.opacity=has?"1":".4";
+  el("p-mode-video").title=has?"Watch official video":"No video mapped for this song (prototype)";
 }
 
-// ── keyboard shortcuts ────────────────────────────────
-document.addEventListener("keydown", e => {
-  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
-  if (e.code === "Space" && state.current) { e.preventDefault(); AudioCtl.toggle(); }
-  if (e.key === "ArrowRight") nextSong();
-  if (e.key === "ArrowLeft") prevSong();
-  if (e.key.toLowerCase() === "l" && state.current) toggleLyricsPanel();
-  if (e.key === "Escape" && state.mode === "video") exitVideo();
+// ── keyboard ──────────────────────────────────────────
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT") return;
+  if(e.code==="Space"&&state.current){e.preventDefault();AudioCtl.toggle()}
+  if(e.key==="ArrowRight") nextSong();
+  if(e.key==="ArrowLeft") prevSong();
+  if(e.key.toLowerCase()==="l"&&state.current) toggleLyricsPanel();
+  if(e.key==="Escape"&&state.mode==="video") exitVideo();
 });
+
+// ── bootstrap ─────────────────────────────────────────
+loadHome();
 
 })();
 </script>
