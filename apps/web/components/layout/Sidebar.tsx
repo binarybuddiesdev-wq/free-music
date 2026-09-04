@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useUIStore } from '@/stores/ui.store'
 import { useSettingsStore } from '@/stores/settings.store'
 import { useLibraryStore } from '@/stores/library.store'
+import { usePlayerStore } from '@/stores/player.store'
 import { LANGUAGES } from '@/lib/languages'
 
 const NAV = [
@@ -40,50 +41,31 @@ export function Sidebar() {
   const pathname = usePathname()
   const { language, setLanguage } = useSettingsStore()
   const collapsed = useUIStore((s) => s.sidebarCollapsed)
-  const toggleSidebar = useUIStore((s) => s.toggleSidebar)
+  const currentSong = usePlayerStore((s) => s.currentSong)
   const likedSongs = useLibraryStore((s) => s.likedSongs)
   const history = useLibraryStore((s) => s.history)
 
   const likedCount = Object.keys(likedSongs).length
+  const playerHeight = currentSong ? 56 : 0
 
   return (
     <aside style={{
-      position: 'fixed', left: 0, top: 0, bottom: 56, width: collapsed ? 72 : 220,
-      background: '#030303', display: 'flex', flexDirection: 'column', zIndex: 20,
-      overflowY: 'auto', overflowX: 'hidden', transition: 'width .2s', flexShrink: 0,
-      borderRight: '1px solid rgba(255,255,255,.06)',
+      position: 'fixed',
+      left: 0,
+      top: 56,
+      bottom: playerHeight,
+      width: collapsed ? 72 : 220,
+      background: '#030303',
+      display: 'flex',
+      flexDirection: 'column',
+      zIndex: 20,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      transition: 'width .2s, bottom .2s',
+      flexShrink: 0,
     }}>
-      {/* Logo row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px 12px', minHeight: 56 }}>
-        <button
-          onClick={toggleSidebar}
-          style={{ width: 40, height: 40, borderRadius: '50%', background: 'transparent', border: 0, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.1)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          title="Menu"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-          </svg>
-        </button>
-
-        {!collapsed && (
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', flexShrink: 0 }}>
-            {/* YouTube Music logo: red rounded-rect with white triangle + "Music" */}
-            <div style={{ position: 'relative', width: 28, height: 20, flexShrink: 0 }}>
-              <div style={{ width: 28, height: 20, borderRadius: 6, background: '#ff0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: 0, height: 0, borderLeft: '9px solid #fff', borderTop: '5.5px solid transparent', borderBottom: '5.5px solid transparent', marginLeft: 2 }} />
-              </div>
-            </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: '-.2px', whiteSpace: 'nowrap', fontFamily: 'Roboto, sans-serif' }}>
-              Music
-            </span>
-          </Link>
-        )}
-      </div>
-
       {/* Nav items */}
-      <nav style={{ display: 'flex', flexDirection: 'column', paddingTop: 4 }}>
+      <nav style={{ display: 'flex', flexDirection: 'column', paddingTop: 8 }}>
         {NAV.map(({ href, label, icon }) => {
           const active = pathname === href
           return (
@@ -92,30 +74,35 @@ export function Sidebar() {
               href={href}
               title={collapsed ? label : undefined}
               style={{
-                display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 20,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
                 padding: collapsed ? '12px 0' : '10px 24px',
                 justifyContent: collapsed ? 'center' : 'flex-start',
-                borderRadius: 0,
                 background: active ? 'rgba(255,255,255,.12)' : 'transparent',
-                color: '#fff', fontSize: 14, fontWeight: active ? 600 : 400,
-                textDecoration: 'none', transition: 'background .12s', userSelect: 'none',
+                color: active ? '#fff' : 'rgba(255,255,255,.75)',
+                fontSize: 14,
+                fontWeight: active ? 600 : 400,
+                textDecoration: 'none',
+                transition: 'background .12s',
+                userSelect: 'none',
               }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.08)' }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.07)' }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
             >
-              <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: active ? '#fff' : 'rgba(255,255,255,.8)' }}>{icon}</span>
+              <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {icon}
+              </span>
               {!collapsed && <span>{label}</span>}
             </Link>
           )
         })}
       </nav>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: 'rgba(255,255,255,.08)', margin: '8px 0' }} />
-
-      {/* Playlists section */}
+      {/* Playlists */}
       {!collapsed && (
         <>
+          <div style={{ height: 1, background: 'rgba(255,255,255,.08)', margin: '8px 0' }} />
           <SidebarPlaylist
             label="Liked songs"
             sub="Auto playlist"
@@ -137,15 +124,16 @@ export function Sidebar() {
 
       <div style={{ flex: 1 }} />
 
-      {/* Language selector at bottom */}
+      {/* Language selector */}
       {!collapsed && (
         <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
           <div style={{ position: 'relative' }}>
             <button style={{
-              width: '100%', padding: '7px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,.15)',
-              background: 'transparent', color: 'rgba(255,255,255,.7)', fontSize: 12,
-              fontFamily: 'inherit', cursor: 'pointer', display: 'flex',
-              alignItems: 'center', justifyContent: 'space-between', gap: 4,
+              width: '100%', padding: '7px 10px', borderRadius: 6,
+              border: '1px solid rgba(255,255,255,.15)',
+              background: 'transparent', color: 'rgba(255,255,255,.65)',
+              fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">

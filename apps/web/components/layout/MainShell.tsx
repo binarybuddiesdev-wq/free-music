@@ -8,6 +8,7 @@ export function MainShell({ children }: { children: React.ReactNode }) {
       id="main-shell"
       style={{
         marginLeft: collapsed ? 72 : 220,
+        paddingTop: 56,
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',

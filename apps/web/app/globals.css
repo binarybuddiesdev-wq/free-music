@@ -1,14 +1,15 @@
 @import "tailwindcss";
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; background: #0f0f0f; }
+html { height: 100%; background: #0f0f0f !important; }
 body {
   height: 100%;
-  background: #0f0f0f;
-  color: #fff;
+  background: #0f0f0f !important;
+  color: #fff !important;
   font-family: Roboto, system-ui, sans-serif;
   overflow-x: hidden;
 }
+#main-shell, main { background: #0f0f0f; }
 
 ::selection { background: rgba(255, 0, 0, .3); }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -32,6 +33,9 @@ body {
 
 .slide-up { animation: slideUp .3s cubic-bezier(.4,0,.2,1); }
 .fade-in { animation: fadeIn .1s ease-out; }
+
+/* Hide Next.js dev indicator */
+nextjs-portal { display: none !important; }
 
 /* Range input */
 input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }

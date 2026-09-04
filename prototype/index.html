@@ -4,218 +4,279 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>Music</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config={theme:{extend:{
-  colors:{yt:{bg:'#0f0f0f',surface:'#272727',surface2:'#3a3a3a',text:'#fff',text2:'#aaa',text3:'#717171',red:'#ff0000'}},
-  fontFamily:{sans:['Roboto','system-ui','sans-serif'],te:['"Noto Sans Telugu"','Roboto','sans-serif']}
-}}};
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-html{background:#0f0f0f}
-body{background:#0f0f0f;color:#fff;font-family:'Roboto',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:72px}
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#444;border:2px solid #0f0f0f;border-radius:5px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{height:100%;background:#0f0f0f}
+body{height:100%;background:#0f0f0f;color:#fff;font-family:Roboto,system-ui,sans-serif;overflow-x:hidden;padding-bottom:56px}
 button{font-family:inherit;cursor:pointer}
+::selection{background:rgba(255,0,0,.3)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.35)}
+*:focus-visible{outline:2px solid rgba(255,0,0,.6);outline-offset:2px}
 
-/* ── shell ──────────────────────────────────────── */
-.shell{display:flex;min-height:100vh}
+.shell{display:flex;height:100%}
 
-/* ── sidebar (220px, compact) ──────────────────── */
-.sidebar{position:fixed;left:0;top:0;bottom:72px;width:220px;background:#000;display:flex;flex-direction:column;padding:8px 0;z-index:20;overflow-y:auto}
-.sb-top{display:flex;align-items:center;gap:12px;padding:10px 16px}
-.sb-burger{width:36px;height:36px;border-radius:50%;background:transparent;border:0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:background .15s}
+/* ── sidebar ───────────────────────────────────── */
+.sidebar{position:fixed;left:0;top:0;bottom:56px;width:220px;background:#000;display:flex;flex-direction:column;z-index:20;overflow-y:auto;padding:8px 0}
+.sb-top{display:flex;align-items:center;gap:12px;padding:8px 16px 12px}
+.sb-burger{width:32px;height:32px;border-radius:50%;background:transparent;border:0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background .15s}
 .sb-burger:hover{background:rgba(255,255,255,.1)}
-.sb-logo{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:18px;font-weight:700;letter-spacing:-.3px}
-.sb-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#ff0000;flex-shrink:0}
-.sb-logo-icon::before{content:"";display:block;width:0;height:0;border-left:9px solid #fff;border-top:5.5px solid transparent;border-bottom:5.5px solid transparent;margin-left:2px}
-.nav-item{display:flex;align-items:center;gap:20px;padding:8px 12px;border-radius:8px;cursor:pointer;color:#fff;font-size:14px;transition:background .15s;user-select:none}
-.nav-item:hover{background:rgba(255,255,255,.06)}
+.sb-logo{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:16px;font-weight:700;letter-spacing:-.3px}
+.sb-logo-icon{width:24px;height:24px;border-radius:50%;background:#ff0000;display:flex;align-items:center;justify-content:center}
+.sb-logo-icon::after{content:"";display:block;width:0;height:0;border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent;margin-left:2px}
+.nav-item{display:flex;align-items:center;gap:20px;padding:8px 24px;border-radius:0 10px 10px 0;margin-right:12px;cursor:pointer;color:#fff;font-size:14px;transition:background .15s;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.1)}
 .nav-item.active{background:rgba(255,255,255,.1);font-weight:700}
-.nav-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-
-/* language selector (single source of truth) */
-.lang-select-wrap{padding:6px 12px 10px}
-.lang-select{width:100%;padding:8px 10px;border-radius:8px;border:0;background:rgba(255,255,255,.08);color:#fff;font-size:13px;font-family:inherit;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center}
-.lang-select:hover{background-color:rgba(255,255,255,.12)}
-
-.new-pl-btn{display:flex;align-items:center;gap:14px;padding:8px 12px;margin:4px 12px;border-radius:8px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-size:14px;font-weight:500;border:0;width:calc(100% - 24px);text-align:left;transition:background .15s}
-.new-pl-btn:hover{background:rgba(255,255,255,.12)}
-.new-pl-icon{width:22px;height:22px;border-radius:4px;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:300;line-height:1}
-
-.sb-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 16px}
-.sb-list{display:flex;align-items:center;gap:12px;padding:6px 12px;border-radius:6px;cursor:pointer;color:#fff;font-size:14px;transition:color .15s;margin:1px 8px}
-.sb-list:hover{background:rgba(255,255,255,.06)}
-.sb-list-cover{width:36px;height:36px;border-radius:6px;flex-shrink:0;background:linear-gradient(135deg,#5e2e8e,#b937f2);display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden}
+.nav-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.lang-wrap{padding:6px 16px 8px;position:relative}
+.lang-btn{width:100%;padding:8px 10px;border-radius:8px;border:0;background:rgba(255,255,255,.1);color:#fff;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .15s}
+.lang-btn:hover{background:rgba(255,255,255,.15)}
+.lang-select{position:absolute;inset:0;opacity:0;cursor:pointer}
+.new-pl{display:flex;align-items:center;gap:14px;padding:8px 24px;border-radius:0;margin:4px 12px 4px 0;background:transparent;cursor:pointer;color:#fff;font-size:14px;font-weight:500;border:0;width:auto;text-align:left;transition:background .15s}
+.new-pl:hover{background:rgba(255,255,255,.1)}
+.new-pl-icon{width:24px;height:24px;border-radius:4px;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:300;line-height:1}
+.sb-divider{height:1px;background:rgba(255,255,255,.1);margin:8px 16px}
+.sb-list{display:flex;align-items:center;gap:12px;padding:6px 24px;cursor:pointer;color:#fff;font-size:14px;transition:background .15s;margin:0}
+.sb-list:hover{background:rgba(255,255,255,.1)}
+.sb-list-cover{width:40px;height:40px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden}
 .sb-list-cover img{width:100%;height:100%;object-fit:cover}
-.sb-list-meta{min-width:0;flex:1;line-height:1.25}
-.sb-list-title{font-size:13px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-list-sub{font-size:11px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.sb-list-meta{min-width:0;flex:1;line-height:1.3}
+.sb-list-title{font-size:14px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-list-sub{font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 
 /* ── main ─────────────────────────────────────── */
 .main{margin-left:220px;flex:1;min-width:0;padding:0 24px 32px}
-.topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:16px;padding:8px 0;background:rgba(15,15,15,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);margin:0 -24px;padding:8px 24px}
-.search-wrap{flex:1;max-width:580px;margin:0 auto;position:relative}
-#search-input{width:100%;padding:9px 14px 9px 38px;border-radius:8px;border:0;background:rgba(255,255,255,.08);color:#fff;font-size:14px;font-family:inherit;outline:none;transition:background .15s,box-shadow .15s}
+.topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:16px;background:rgba(15,15,15,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);margin:0 -24px;padding:8px 24px}
+.search-wrap{flex:1;max-width:480px;margin:0 auto;position:relative}
+#search-input{width:100%;padding:8px 12px 8px 36px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.1);color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s,background .15s}
 #search-input::placeholder{color:#aaa}
-#search-input:focus{background:rgba(255,255,255,.12);box-shadow:0 0 0 2px rgba(255,255,255,.18)}
-.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#aaa;font-size:16px;pointer-events:none}
+#search-input:focus{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.15)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#aaa;font-size:16px;pointer-events:none}
 .topbar-actions{display:flex;align-items:center;gap:4px}
-.icon-btn{width:38px;height:38px;border-radius:50%;background:transparent;border:0;color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:transparent;border:0;color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s}
 .icon-btn:hover{background:rgba(255,255,255,.1)}
 .avatar{width:32px;height:32px;border-radius:50%;background:#7c4dff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;margin-left:4px}
 
-.greet{margin:10px 0 14px}
-.greet h1{font-size:24px;font-weight:700;margin-bottom:2px}
-.greet p{color:#aaa;font-size:13px}
+/* ── greeting ─────────────────────────────────── */
+.greet{margin:12px 0 20px}
+.greet h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.greet p{color:#aaa;font-size:14px}
 
 /* ── section ──────────────────────────────────── */
-.section{margin-bottom:32px;position:relative}
-.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.section-title{font-size:20px;font-weight:700;letter-spacing:-.2px}
-.section-actions{display:flex;align-items:center;gap:6px}
-.section-more{padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);color:#fff;font-size:12px;font-weight:500;cursor:pointer;border:0;transition:background .15s}
-.section-more:hover{background:rgba(255,255,255,.15)}
+.section{margin-bottom:32px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:22px;font-weight:700;letter-spacing:-.2px}
+.section-more{padding:6px 16px;border-radius:20px;background:rgba(255,255,255,.1);color:#fff;font-size:12px;font-weight:500;cursor:pointer;border:0;transition:background .15s}
+.section-more:hover{background:rgba(255,255,255,.2)}
 
-/* carousels (horizontal scroll) */
-.track{display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x mandatory;padding-bottom:6px;margin:0 -24px;padding-left:24px;padding-right:24px;scrollbar-width:none}
+/* ── carousels ────────────────────────────────── */
+.track{display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x mandatory;padding-bottom:8px;margin:0 -24px;padding-left:24px;padding-right:24px;scrollbar-width:none}
 .track::-webkit-scrollbar{display:none}
+.track-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px;padding:0 8px}
+.track.expanded,.chart-list.expanded{display:none}
+.track-grid.hidden{display:none}
 
-/* TALL RECTANGULAR card (160×240, 2:3) — smaller than before */
-.tcard{flex:0 0 160px;scroll-snap-align:start;display:flex;flex-direction:column;gap:10px;padding:6px;border-radius:8px;cursor:pointer;transition:background .15s;background:transparent}
+/* ── CARD — uniform 160×(160+48) ──────────────────── */
+.tcard{width:160px;flex:0 0 160px;scroll-snap-align:start;display:flex;flex-direction:column;padding:8px;border-radius:8px;cursor:pointer;transition:background .15s;background:transparent}
 .tcard:hover{background:#272727}
-.tcard:hover .tcard-art-wrap{transform:scale(1.02)}
+.tcard:hover .tcard-art-wrap{transform:scale(1.03)}
 .tcard:hover .tcard-play{opacity:1;transform:translateY(0)}
-.tcard-art-wrap{position:relative;width:100%;aspect-ratio:2/3;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#2a1b4d,#3d2352);box-shadow:0 4px 16px rgba(0,0,0,.4);transition:.25s}
+.tcard-art-wrap{position:relative;width:160px;height:160px;border-radius:8px;overflow:hidden;background:#272727;flex-shrink:0}
 .tcard-art{width:100%;height:100%;object-fit:cover;display:block}
-.tcard-play{position:absolute;right:6px;bottom:6px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.95);color:#000;border:0;font-size:13px;opacity:0;transform:translateY(8px);transition:.2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.5)}
-.tcard-play::before{content:"";display:block;width:0;height:0;border-left:12px solid #000;border-top:7px solid transparent;border-bottom:7px solid transparent;margin-left:2px}
-.tcard-play:hover{transform:scale(1.06)!important;filter:brightness(1.1)}
-.tcard-title{font-size:14px;font-weight:500;color:#fff;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:36px}
-.tcard-sub{font-size:12px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tcard-skel{flex:0 0 160px;display:flex;flex-direction:column;gap:10px;padding:6px}
-.tcard-skel-art{width:100%;aspect-ratio:2/3;border-radius:8px;background:#272727;animation:p 1.4s infinite}
-.tcard-skel-line{height:14px;border-radius:4px;background:#272727;animation:p 1.4s infinite}
+.tcard-play{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:50%;background:rgba(30,30,30,.9);color:#fff;border:0;font-size:14px;opacity:0;transform:translateY(8px);transition:.2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.tcard-play::before{content:"";display:block;width:0;height:0;border-left:12px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;margin-left:2px}
+.tcard-play:hover{background:#fff;color:#000;transform:scale(1.06)!important}
+.tcard-play:hover::before{border-left-color:#000}
+.tcard-text{height:48px;margin-top:8px;overflow:hidden}
+.tcard-title{font-size:14px;font-weight:500;color:#fff;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tcard-sub{font-size:12px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+
+/* skeleton */
+.tcard-skel{flex:0 0 160px;display:flex;flex-direction:column;padding:8px}
+.tcard-skel-art{width:100%;aspect-ratio:1/1;border-radius:8px;background:#272727;animation:p 1.4s infinite}
+.tcard-skel-line{height:14px;border-radius:4px;background:#272727;animation:p 1.4s infinite;margin-top:8px}
 .tcard-skel-line.s{width:60%}
-
-/* mood cards (circular, 80px) */
-.mood-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;cursor:pointer;border-radius:8px;transition:background .15s;flex-shrink:0;width:96px}
-.mood-card:hover{background:#272727}
-.mood-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.3)}
-.mood-name{font-size:12px;font-weight:500;color:#fff;text-align:center}
-
-/* charts list */
-.chart-list{display:flex;flex-direction:column;gap:0;max-width:780px}
-.chart-row{display:flex;align-items:center;gap:14px;padding:6px;border-radius:8px;cursor:pointer;transition:background .15s}
-.chart-row:hover{background:#272727}
-.chart-row:hover .chart-play{opacity:1}
-.chart-rank{font-size:16px;font-weight:700;color:#aaa;width:24px;text-align:center;flex-shrink:0}
-.chart-art{width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#2a1b4d,#3d2352);object-fit:cover;flex-shrink:0}
-.chart-meta{flex:1;min-width:0;line-height:1.3}
-.chart-title{font-size:14px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chart-sub{font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.chart-play{width:36px;height:36px;border-radius:50%;background:transparent;border:0;color:#fff;cursor:pointer;font-size:16px;flex-shrink:0;opacity:0;transition:.15s;display:flex;align-items:center;justify-content:center}
-.chart-play:hover{background:rgba(255,255,255,.1)}
-
 @keyframes p{0%,100%{opacity:.55}50%{opacity:.95}}
 
-/* ── player bar (72px, compact) ────────────────── */
-#player{position:fixed;left:0;right:0;bottom:0;z-index:40;height:72px;display:flex;align-items:center;background:#000;border-top:1px solid rgba(255,255,255,.06);padding:0 16px;gap:16px}
-#player[hidden]{display:none}
-.p-left{display:flex;align-items:center;gap:12px;width:30%;min-width:180px;max-width:320px}
-#p-art{width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#2a1b4d,#3d2352);object-fit:cover}
-.p-info{min-width:0;flex:1}
-#p-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#p-artist{font-size:11px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.p-like{width:32px;height:32px;border-radius:50%;background:transparent;border:0;color:#aaa;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.p-like:hover{color:#fff}
-.p-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;max-width:640px;margin:0 auto}
-.p-controls{display:flex;align-items:center;gap:14px}
-.p-btn{background:transparent;border:0;color:#fff;cursor:pointer;font-size:16px;padding:4px;display:flex;align-items:center;justify-content:center;transition:transform .1s}
-.p-btn:hover{transform:scale(1.08)}
-#p-play{width:36px;height:36px;border-radius:50%;background:#fff;color:#000;font-size:12px}
-#p-play::before{content:"";display:block;width:0;height:0;border-left:11px solid #000;border-top:7px solid transparent;border-bottom:7px solid transparent;margin-left:2px}
-#p-play.playing::before{border:none;width:12px;height:12px;background:linear-gradient(to right,#000 0%,#000 35%,transparent 35%,transparent 65%,#000 65%,#000 100%);margin-left:0}
-#p-play:hover{transform:scale(1.08);background:#fff}
-.p-timeline{display:flex;align-items:center;gap:8px;width:100%;font-size:10px;color:#aaa}
-#p-seek{flex:1;appearance:none;-webkit-appearance:none;height:3px;border-radius:2px;background:#404040;outline:none;cursor:pointer;min-width:0}
-#p-seek::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:#fff;cursor:pointer}
-#p-seek::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#fff;border:0;cursor:pointer}
-.p-right{display:flex;align-items:center;gap:6px;width:30%;justify-content:flex-end;min-width:160px;max-width:240px}
-.mode-btn{width:32px;height:32px;border-radius:50%;background:transparent;border:0;color:#aaa;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.15s}
-.mode-btn:hover{color:#fff;background:rgba(255,255,255,.06)}
-.mode-btn.active{color:#fff;background:rgba(255,255,255,.12)}
-.mode-btn:disabled{opacity:.3;cursor:not-allowed}
-#p-vol{appearance:none;-webkit-appearance:none;width:70px;height:3px;border-radius:2px;background:#404040;outline:none}
-#p-vol::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:#fff;cursor:pointer}
-#p-vol::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#fff;border:0;cursor:pointer}
+/* ── mood cards ───────────────────────────────── */
+.mood-wrap{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px 8px}
+.mood-wrap::-webkit-scrollbar{display:none}
+.mood-card{flex:0 0 88px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px;cursor:pointer;border-radius:8px;transition:background .15s}
+.mood-card:hover{background:#272727}
+.mood-card:hover .mood-circle{transform:scale(1.05)}
+.mood-circle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+.mood-name{font-size:12px;font-weight:500;color:#fff;text-align:center}
 
-/* lyrics panel */
-#lyrics-panel{position:fixed;right:0;top:0;bottom:72px;width:min(380px,100vw);z-index:35;background:rgba(15,15,15,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-left:1px solid rgba(255,255,255,.08);transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+/* ── chart rows ───────────────────────────────── */
+.chart-list{display:flex;flex-direction:column;gap:2px}
+.chart-row{display:flex;align-items:center;gap:16px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background .15s}
+.chart-row:hover{background:#272727}
+.chart-row:hover .chart-play{opacity:1}
+.chart-rank{font-size:20px;font-weight:700;color:#aaa;width:32px;text-align:center;flex-shrink:0}
+.chart-art{width:56px;height:56px;border-radius:6px;background:#272727;object-fit:cover;flex-shrink:0}
+.chart-meta{flex:1;min-width:0;line-height:1.3}
+.chart-title{font-size:15px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-sub{font-size:13px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.chart-play{width:40px;height:40px;border-radius:50%;background:transparent;border:0;color:#fff;cursor:pointer;font-size:14px;flex-shrink:0;opacity:0;transition:.15s;display:flex;align-items:center;justify-content:center}
+.chart-play:hover{background:rgba(255,255,255,.1)}
+
+/* ── player (56px) ────────────────────────────── */
+#player{position:fixed;left:0;right:0;bottom:0;z-index:40;height:56px;display:flex;align-items:center;background:#000;border-top:1px solid rgba(255,255,255,.1);padding:0 16px;gap:12px}
+#player[hidden]{display:none}
+.p-left{display:flex;align-items:center;gap:12px;width:30%;min-width:180px;max-width:300px}
+#p-art{width:40px;height:40px;border-radius:4px;background:#272727;object-fit:cover;flex-shrink:0}
+.p-info{min-width:0;flex:1}
+#p-title{font-size:14px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#p-artist{font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.p-like{width:32px;height:32px;border-radius:50%;background:transparent;border:0;color:#aaa;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
+.p-like:hover{color:#fff}
+.p-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;max-width:600px;margin:0 auto}
+.p-controls{display:flex;align-items:center;gap:12px}
+.p-btn{background:transparent;border:0;color:#aaa;cursor:pointer;font-size:16px;padding:4px;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.p-btn:hover{color:#fff}
+#p-play{width:32px;height:32px;border-radius:50%;background:#fff;color:#000;font-size:12px}
+#p-play::before{content:"";display:block;width:0;height:0;border-left:10px solid #000;border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:2px}
+#p-play.playing::before{border:none;width:10px;height:10px;background:linear-gradient(to right,#000 0%,#000 35%,transparent 35%,transparent 65%,#000 65%,#000 100%);margin-left:0}
+#p-play:hover{background:#fff}
+.p-timeline{display:flex;align-items:center;gap:8px;width:100%;font-size:11px;color:#aaa}
+#p-seek{flex:1;appearance:none;-webkit-appearance:none;height:2px;border-radius:2px;background:#555;outline:none;cursor:pointer;min-width:0;transition:height .1s}
+#p-seek:hover{height:4px}
+#p-seek::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 0 4px rgba(0,0,0,.3)}
+#p-seek::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:0;cursor:pointer}
+.p-right{display:flex;align-items:center;gap:4px;width:30%;justify-content:flex-end;min-width:140px;max-width:220px}
+.mode-btn{width:32px;height:32px;border-radius:50%;background:transparent;border:0;color:#aaa;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.mode-btn:hover{color:#fff;background:rgba(255,255,255,.1)}
+.mode-btn.active{color:#fff;background:rgba(255,255,255,.15)}
+.mode-btn:disabled{opacity:.3;cursor:not-allowed}
+#p-vol{appearance:none;-webkit-appearance:none;width:72px;height:2px;border-radius:2px;background:#555;outline:none;transition:height .1s}
+#p-vol:hover{height:4px}
+#p-vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;cursor:pointer}
+#p-vol::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:0;cursor:pointer}
+
+/* ── lyrics panel ─────────────────────────────── */
+#lyrics-panel{position:fixed;right:0;top:0;bottom:56px;width:min(380px,100vw);z-index:35;background:rgba(15,15,15,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-left:1px solid rgba(255,255,255,.1);transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
 #lyrics-panel.open{transform:none}
-.lyrics-head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);font-weight:500;font-size:13px}
+.lyrics-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);font-weight:500;font-size:14px}
 #lyrics-close{background:none;border:0;color:#aaa;font-size:16px;cursor:pointer;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#lyrics-close:hover{background:rgba(255,255,255,.08);color:#fff}
-#lyrics-body{flex:1;overflow-y:auto;padding:28px 20px;font-family:'Noto Sans Telugu','Roboto',sans-serif;font-size:16px;line-height:2.4;text-align:center}
+#lyrics-close:hover{background:rgba(255,255,255,.1);color:#fff}
+#lyrics-body{flex:1;overflow-y:auto;padding:24px 20px;font-family:'Noto Sans Telugu','Roboto',sans-serif;font-size:16px;line-height:2.4;text-align:center}
 .lyr-line{color:#555;transition:.25s;padding:2px 0}
 .lyr-line.active{color:#fff;font-weight:700;transform:scale(1.05)}
 .lyr-line.near{color:#aaa}
-.lyr-none{color:#aaa;font-family:'Roboto',sans-serif;font-size:13px;padding:40px 20px;text-align:center}
+.lyr-none{color:#aaa;font-family:Roboto,sans-serif;font-size:13px;padding:40px 20px;text-align:center}
 
-/* video */
+/* ── video ────────────────────────────────────── */
 #video-stage{position:fixed;inset:0;z-index:50;background:#000;display:flex;align-items:center;justify-content:center}
 #video-stage[hidden]{display:none}
 #video-mount{width:min(95vw,1400px);aspect-ratio:16/9;border-radius:8px;overflow:hidden}
 #video-close{position:absolute;top:24px;right:28px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;font-size:18px;cursor:pointer;border:0;display:flex;align-items:center;justify-content:center}
 #video-close:hover{background:rgba(40,40,40,.9)}
 
+/* ── responsive ───────────────────────────────── */
 @media(max-width:1100px){
   .sidebar{width:64px}
-  .sb-logo span:last-child,.nav-item span,.lang-select-wrap,.new-pl-btn span,.sb-divider,.sb-list span{display:none}
-  .nav-item,.new-pl-btn{justify-content:center;width:auto;margin:4px 0;padding:8px 0}
+  .sb-logo span:last-child,.nav-item span,.lang-wrap,.new-pl span,.sb-divider,.sb-list span{display:none}
+  .nav-item,.new-pl{justify-content:center;width:auto;margin:4px 0;padding:8px 0}
   .sb-list{justify-content:center}
   .main{margin-left:64px}
 }
 @media(max-width:700px){
   .topbar{padding:6px 12px}
   .search-wrap{max-width:none}
-  .greet h1{font-size:20px}
+  .greet h1{font-size:22px}
   .p-left{width:auto;min-width:0}
   .p-info{display:none}
   .p-right{min-width:0;width:auto}
   .p-center{order:3;flex-basis:100%;max-width:none}
   #player{flex-wrap:wrap;height:auto;padding:8px;gap:8px}
 }
+
+/* ── expanded player overlay ───────────────────── */
+.ep-overlay{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:#0f0f0f;overflow-y:auto;transition:opacity .25s}
+.ep-overlay[hidden]{display:none}
+.ep-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.ep-bg img{width:100%;height:100%;object-fit:cover;filter:blur(60px) saturate(1.4) brightness(.35);transform:scale(1.3)}
+.ep-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:16px 24px 32px;max-width:600px;margin:0 auto;width:100%}
+.ep-topbar{display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 0 12px}
+.ep-top-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:0;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.ep-top-btn:hover{background:rgba(255,255,255,.2)}
+.ep-switcher{display:flex;gap:4px;background:rgba(255,255,255,.1);border-radius:20px;padding:3px}
+.ep-sw-btn{padding:6px 14px;border-radius:18px;border:0;background:transparent;color:#aaa;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit}
+.ep-sw-btn.active{background:#fff;color:#000}
+.ep-sw-btn:hover:not(.active){color:#fff}
+.ep-art-wrap{width:min(80vw,340px);aspect-ratio:1/1;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.6);margin:8px 0 20px;flex-shrink:0}
+.ep-art{width:100%;height:100%;object-fit:cover;display:block}
+.ep-info{text-align:center;width:100%;margin-bottom:20px}
+.ep-title{font-size:22px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ep-artist{font-size:15px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ep-progress{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:16px;font-size:12px;color:#aaa}
+.ep-seek-wrap{flex:1;position:relative;height:20px;display:flex;align-items:center}
+.ep-seek{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.2);border-radius:4px;outline:none;cursor:pointer;transition:height .15s}
+.ep-seek:hover{height:6px}
+.ep-seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;cursor:pointer;opacity:0;transition:opacity .15s}
+.ep-seek:hover::-webkit-slider-thumb{opacity:1}
+.ep-seek::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;cursor:pointer;border:0}
+.ep-controls{display:flex;align-items:center;justify-content:center;gap:20px;width:100%;margin-bottom:20px}
+.ep-ctrl-btn{width:40px;height:40px;border-radius:50%;background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ep-ctrl-btn:hover{transform:scale(1.1)}
+.ep-ctrl-btn.active{color:#3ea6ff}
+.ep-play-btn{width:56px;height:56px;border-radius:50%;background:#fff;border:0;color:#000;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.ep-play-btn:hover{transform:scale(1.06)}
+.ep-play-btn::before{content:"";display:block;width:0;height:0;border-left:16px solid #000;border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:3px}
+.ep-play-btn.playing::before{border-left:5px solid #000;border-right:5px solid #000;border-top:0;border-bottom:0;width:16px;height:20px;margin-left:0}
+.ep-actions{display:flex;gap:8px;width:100%;overflow-x:auto;scrollbar-width:none;padding-bottom:16px;margin-bottom:8px}
+.ep-actions::-webkit-scrollbar{display:none}
+.ep-action-btn{flex:0 0 auto;padding:8px 16px;border-radius:20px;background:rgba(255,255,255,.1);border:0;color:#fff;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s;font-family:inherit;display:flex;align-items:center;gap:5px}
+.ep-action-btn:hover{background:rgba(255,255,255,.2)}
+.ep-action-btn.liked{color:#3ea6ff}
+.ep-tabs{display:flex;gap:0;width:100%;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px}
+.ep-tab{flex:1;padding:10px 0;border:0;background:transparent;color:#aaa;font-size:14px;font-weight:500;cursor:pointer;position:relative;transition:color .2s;font-family:inherit}
+.ep-tab.active{color:#fff}
+.ep-tab.active::after{content:"";position:absolute;bottom:0;left:20%;right:20%;height:3px;background:#fff;border-radius:3px 3px 0 0}
+.ep-panels{width:100%;flex:1;overflow-y:auto;min-height:200px}
+.ep-panel{display:none}
+.ep-panel.active{display:block}
+.ep-queue-header{padding:4px 0 8px;font-size:13px;color:#aaa;font-weight:500}
+.ep-queue-list{display:flex;flex-direction:column;gap:2px}
+.ep-queue-item{display:flex;align-items:center;gap:12px;padding:8px;border-radius:8px;cursor:pointer;transition:background .15s}
+.ep-queue-item:hover{background:rgba(255,255,255,.08)}
+.ep-queue-item.playing{background:rgba(255,255,255,.12)}
+.ep-queue-art{width:44px;height:44px;border-radius:4px;background:#272727;object-fit:cover;flex-shrink:0}
+.ep-queue-meta{flex:1;min-width:0;line-height:1.3}
+.ep-queue-title{font-size:14px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep-queue-sub{font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.ep-queue-drag{color:#555;font-size:14px;cursor:grab;flex-shrink:0}
+.ep-lyrics-body{padding:8px 0;line-height:2;font-size:16px;color:#aaa;text-align:center}
+.ep-lyrics-body .lyr-line{padding:2px 0;transition:all .3s}
+.ep-lyrics-body .lyr-line.active{color:#fff;font-weight:700;font-size:18px}
+.ep-lyrics-body .lyr-line.near{color:#888}
+.ep-related-list{display:flex;flex-direction:column;gap:2px}
 </style>
 </head>
 <body>
 <div class="shell">
   <aside class="sidebar">
     <div class="sb-top">
-      <button class="sb-burger" aria-label="Menu">≡</button>
+      <button class="sb-burger" aria-label="Menu">☰</button>
       <div class="sb-logo">
-        <span class="sb-logo-icon"></span>
+        <div class="sb-logo-icon"></div>
         <span>Music</span>
       </div>
     </div>
-    <nav style="padding:6px 8px 4px">
+    <nav style="padding:4px 0">
       <div class="nav-item active" data-section="home"><div class="nav-icon">⌂</div><span>Home</span></div>
       <div class="nav-item" data-section="explore"><div class="nav-icon">◎</div><span>Explore</span></div>
-      <div class="nav-item" data-section="library"><div class="nav-icon">▦</div><span>Library</span></div>
-      <div class="nav-item" data-section="upgrade"><div class="nav-icon">▶</div><span>Upgrade</span></div>
+      <div class="nav-item" data-section="library"><div class="nav-icon">☰</div><span>Library</span></div>
+      <div class="nav-item" data-section="upgrade"><div class="nav-icon">★</div><span>Upgrade</span></div>
     </nav>
-
-    <!-- language selector: SINGLE source of truth (in sidebar only) -->
-    <div class="lang-select-wrap">
+    <div class="lang-wrap">
+      <div class="lang-btn"><span id="lang-label">Telugu</span><span>▾</span></div>
       <select class="lang-select" id="lang-select" title="Language">
         <option value="telugu" selected>Telugu</option>
         <option value="hindi">Hindi</option>
@@ -226,64 +287,39 @@ button{font-family:inherit;cursor:pointer}
         <option value="english">English</option>
       </select>
     </div>
-
-    <button class="new-pl-btn" id="new-pl-btn">
-      <span class="new-pl-icon">+</span>
-      <span>New playlist</span>
-    </button>
-
+    <button class="new-pl" id="new-pl-btn"><span class="new-pl-icon">+</span><span>New playlist</span></button>
     <div class="sb-divider"></div>
-
     <div class="sb-list" data-list="liked">
-      <div class="sb-list-cover" style="background:linear-gradient(135deg,#5e2e8e,#b937f2)">♡</div>
+      <div class="sb-list-cover" style="background:linear-gradient(135deg,#5e2e8e,#b937f2)">♥</div>
       <div class="sb-list-meta"><div class="sb-list-title">Liked songs</div><div class="sb-list-sub">Auto playlist</div></div>
     </div>
     <div class="sb-list" data-list="history">
       <div class="sb-list-cover" style="background:linear-gradient(135deg,#2d4a8a,#4a7fc4)">↻</div>
       <div class="sb-list-meta"><div class="sb-list-title">Recent</div><div class="sb-list-sub">Auto playlist</div></div>
     </div>
-
     <div class="sb-divider"></div>
-
-    <div class="sb-list" data-pl="Top Hits">
-      <div class="sb-list-cover" style="background:linear-gradient(135deg,#c026d3,#ff5e62)">♪</div>
-      <div class="sb-list-meta"><div class="sb-list-title">Top Hits</div><div class="sb-list-sub">Your playlist</div></div>
-    </div>
-    <div class="sb-list" data-pl="Classics">
-      <div class="sb-list-cover" style="background:linear-gradient(135deg,#8a5a2d,#c4a44a)">♬</div>
-      <div class="sb-list-meta"><div class="sb-list-title">Timeless Classics</div><div class="sb-list-sub">Your playlist</div></div>
-    </div>
-    <div class="sb-list" data-pl="Romantic">
-      <div class="sb-list-cover" style="background:linear-gradient(135deg,#c42d6b,#ff4a8a)">♥</div>
-      <div class="sb-list-meta"><div class="sb-list-title">Romantic</div><div class="sb-list-sub">Your playlist</div></div>
-    </div>
-    <div class="sb-list" data-pl="Mass Hits">
-      <div class="sb-list-cover" style="background:linear-gradient(135deg,#d32d2d,#ff6b35)">⚡</div>
-      <div class="sb-list-meta"><div class="sb-list-title">Mass Hits</div><div class="sb-list-sub">Your playlist</div></div>
-    </div>
-    <div class="sb-list" data-pl="Workout">
-      <div class="sb-list-cover" style="background:linear-gradient(135deg,#2d8a4a,#4ac46b)">🏋</div>
-      <div class="sb-list-meta"><div class="sb-list-title">Workout</div><div class="sb-list-sub">Your playlist</div></div>
-    </div>
+    <div class="sb-list" data-pl="Top Hits"><div class="sb-list-cover" style="background:linear-gradient(135deg,#c026d3,#ff5e62)">♪</div><div class="sb-list-meta"><div class="sb-list-title">Top Hits</div><div class="sb-list-sub">Playlist</div></div></div>
+    <div class="sb-list" data-pl="Classics"><div class="sb-list-cover" style="background:linear-gradient(135deg,#8a5a2d,#c4a44a)">♫</div><div class="sb-list-meta"><div class="sb-list-title">Timeless Classics</div><div class="sb-list-sub">Playlist</div></div></div>
+    <div class="sb-list" data-pl="Romantic"><div class="sb-list-cover" style="background:linear-gradient(135deg,#c42d6b,#ff4a8a)">♡</div><div class="sb-list-meta"><div class="sb-list-title">Romantic</div><div class="sb-list-sub">Playlist</div></div></div>
+    <div class="sb-list" data-pl="Mass Hits"><div class="sb-list-cover" style="background:linear-gradient(135deg,#d32d2d,#ff6b35)">⚡</div><div class="sb-list-meta"><div class="sb-list-title">Mass Hits</div><div class="sb-list-sub">Playlist</div></div></div>
+    <div class="sb-list" data-pl="Workout"><div class="sb-list-cover" style="background:linear-gradient(135deg,#2d8a4a,#4ac46b)">▶</div><div class="sb-list-meta"><div class="sb-list-title">Workout</div><div class="sb-list-sub">Playlist</div></div></div>
   </aside>
 
   <main class="main">
     <div class="topbar">
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
-        <input id="search-input" type="search" placeholder="Search songs, albums, artists, podcasts" autocomplete="off">
+        <input id="search-input" type="search" placeholder="Search songs, albums, artists" autocomplete="off">
       </div>
       <div class="topbar-actions">
-        <button class="icon-btn" aria-label="Cast">▣</button>
+        <button class="icon-btn" aria-label="Cast">⊞</button>
         <div class="avatar">B</div>
       </div>
     </div>
-
     <div class="greet">
       <h1>Good evening</h1>
       <p>Music picked for you</p>
     </div>
-
     <div id="sections"></div>
   </main>
 </div>
@@ -298,7 +334,7 @@ button{font-family:inherit;cursor:pointer}
 
 <footer id="player" hidden>
   <div class="p-left">
-    <img id="p-art" alt="" width="48" height="48">
+    <img id="p-art" alt="" width="40" height="40">
     <div class="p-info">
       <div id="p-title"></div>
       <div id="p-artist"></div>
@@ -307,11 +343,11 @@ button{font-family:inherit;cursor:pointer}
   </div>
   <div class="p-center">
     <div class="p-controls">
-      <button id="p-shuffle" class="p-btn" aria-label="Shuffle">⤮</button>
+      <button id="p-shuffle" class="p-btn" aria-label="Shuffle">⇄</button>
       <button id="p-prev" class="p-btn" aria-label="Previous">⏮</button>
       <button id="p-play" class="p-btn" aria-label="Play/Pause"></button>
       <button id="p-next" class="p-btn" aria-label="Next">⏭</button>
-      <button id="p-repeat" class="p-btn" aria-label="Repeat">⟳</button>
+      <button id="p-repeat" class="p-btn" aria-label="Repeat">↻</button>
     </div>
     <div class="p-timeline">
       <span id="p-cur">0:00</span>
@@ -320,7 +356,7 @@ button{font-family:inherit;cursor:pointer}
     </div>
   </div>
   <div class="p-right">
-    <button id="p-mode-video" class="mode-btn" aria-label="Video" title="Video">▣</button>
+    <button id="p-mode-video" class="mode-btn" aria-label="Video" title="Video">▷</button>
     <button id="p-lyrics" class="mode-btn" aria-label="Lyrics" title="Lyrics">≡</button>
     <input id="p-vol" type="range" min="0" max="100" value="80" step="1" aria-label="Volume">
   </div>
@@ -332,12 +368,71 @@ button{font-family:inherit;cursor:pointer}
   <button id="video-close" aria-label="Close">✕</button>
 </section>
 
+<!-- ── expanded player (YTM-style) ─────────────── -->
+<div id="ep-overlay" class="ep-overlay" hidden>
+  <div class="ep-bg"><img id="ep-bg-img" src="" alt=""></div>
+  <div class="ep-content">
+    <div class="ep-topbar">
+      <button id="ep-minimize" class="ep-top-btn" aria-label="Minimize">▾</button>
+      <div class="ep-switcher">
+        <button class="ep-sw-btn active" data-mode="audio" aria-label="Song">♫</button>
+        <button class="ep-sw-btn" data-mode="video" aria-label="Video">▷</button>
+      </div>
+      <button id="ep-overflow" class="ep-top-btn" aria-label="More">⋯</button>
+    </div>
+    <div class="ep-art-wrap">
+      <img id="ep-art" src="" alt="" class="ep-art">
+    </div>
+    <div class="ep-info">
+      <div class="ep-title" id="ep-title"></div>
+      <div class="ep-artist" id="ep-artist"></div>
+    </div>
+    <div class="ep-progress">
+      <span id="ep-cur">0:00</span>
+      <div class="ep-seek-wrap">
+        <input id="ep-seek" type="range" min="0" max="100" value="0" step="0.1" class="ep-seek" aria-label="Seek">
+      </div>
+      <span id="ep-dur">0:00</span>
+    </div>
+    <div class="ep-controls">
+      <button id="ep-shuffle" class="ep-ctrl-btn" aria-label="Shuffle">⇄</button>
+      <button id="ep-prev" class="ep-ctrl-btn" aria-label="Previous">⏮</button>
+      <button id="ep-play" class="ep-play-btn" aria-label="Play/Pause"></button>
+      <button id="ep-next" class="ep-ctrl-btn" aria-label="Next">⏭</button>
+      <button id="ep-repeat" class="ep-ctrl-btn" aria-label="Repeat">↻</button>
+    </div>
+    <div class="ep-actions">
+      <button id="ep-like" class="ep-action-btn" aria-label="Like">♡</button>
+      <button id="ep-lyrics-btn" class="ep-action-btn" aria-label="Lyrics">≡ Lyrics</button>
+      <button id="ep-video-btn" class="ep-action-btn" aria-label="Video">▷ Video</button>
+      <button id="ep-download" class="ep-action-btn" aria-label="Download">⤓ Download</button>
+      <button id="ep-share" class="ep-action-btn" aria-label="Share">↗ Share</button>
+    </div>
+    <div class="ep-tabs">
+      <button class="ep-tab active" data-tab="queue">Up Next</button>
+      <button class="ep-tab" data-tab="lyrics">Lyrics</button>
+      <button class="ep-tab" data-tab="related">Related</button>
+    </div>
+    <div class="ep-panels">
+      <div class="ep-panel active" data-panel="queue">
+        <div class="ep-queue-header"><span id="ep-queue-title">Up next</span></div>
+        <div id="ep-queue-list" class="ep-queue-list"></div>
+      </div>
+      <div class="ep-panel" data-panel="lyrics">
+        <div id="ep-lyrics-body" class="ep-lyrics-body"><div class="lyr-none">Play a song to see lyrics.</div></div>
+      </div>
+      <div class="ep-panel" data-panel="related">
+        <div id="ep-related-list" class="ep-related-list"><div class="lyr-none">No related songs.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (() => {
 "use strict";
 
-const state={query:"",lang:"telugu",page:1,results:[],queue:[],qIndex:-1,current:null,mode:"audio",lyrics:null,videoIds:{},lists:new Map(),liked:new Set()};
-
+const state={query:"",lang:"telugu",page:1,results:[],queue:[],qIndex:-1,current:null,mode:"audio",lyrics:null,videoIds:{},lists:new Map(),liked:new Set(),shuffleOn:false,repeatOn:false};
 const SAAVN="https://saavn.sumit.co/api";
 const SaavnAPI={
   async search(query,language,page=1){
@@ -352,105 +447,183 @@ const SaavnAPI={
     return tiers[0]?.url||"";
   }
 };
+
 function normalize(r){
-  return {id:r.id,name:decodeHTML(r.name),artist:(r.artists?.primary||[]).map(a=>decodeHTML(a.name)).join(", ")||"Unknown",album:decodeHTML(r.album?.name||""),year:r.year||"",duration:r.duration||0,language:r.language||"",image:pickImage(r.image),downloadUrl:r.downloadUrl||[],playCount:r.playCount||0};
+  const artists=(r.artists?.primary||[]).map(a=>{
+    if(typeof a==="object"&&a!==null) return a.name||"";
+    if(typeof a==="string"){
+      const m=a.match(/name=([^;]+)/);
+      return m?m[1].trim():"";
+    }
+    return "";
+  }).filter(Boolean).join(", ");
+  return {
+    id:r.id,
+    name:decodeHTML(r.name),
+    artist:artists||"Unknown",
+    album:decodeHTML(r.album?.name||""),
+    year:r.year||"",
+    duration:r.duration||0,
+    language:r.language||"",
+    image:pickImage(r.image),
+    downloadUrl:r.downloadUrl||[],
+    playCount:r.playCount||0
+  };
 }
-function pickImage(images){if(!images?.length) return "";return images[images.length-1].url||images[0].url||""}
+
+function pickImage(images){
+  if(!images?.length) return "";
+  const sizeMap={"50x50":50,"150x150":150,"500x500":500};
+  const best=images.reduce((a,b)=>{
+    const sa=sizeMap[a.quality]||parseInt(a.quality)||0;
+    const sb=sizeMap[b.quality]||parseInt(b.quality)||0;
+    return sb>sa?b:a;
+  },images[0]);
+  return best?.url||images[images.length-1]?.url||images[0]?.url||"";
+}
+
 function decodeHTML(s){const t=document.createElement("textarea");t.innerHTML=s||"";return t.value.trim()}
 function esc(s){const d=document.createElement("div");d.textContent=s??"";return d.innerHTML}
-const el=id=>document.getElementById(id);
+const $=id=>document.getElementById(id);
 const fmtTime=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
-const fmtPlays=n=>n>=1e7?(n/1e7).toFixed(1)+"B plays":n>=1e6?(n/1e6).toFixed(1)+"M plays":n>=1e3?(n/1e3).toFixed(0)+"K plays":(n||0)+" plays";
+const fmtPlays=n=>n>=1e7?(n/1e7).toFixed(1)+"B":n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"K":String(n||0);
 
 const SECTION_QUERIES={
   listenAgain:{telugu:"telugu",hindi:"hindi",tamil:"tamil",kannada:"kannada",malayalam:"malayalam",punjabi:"punjabi",english:"english"},
+  quickPicks:{telugu:"telugu hits 2026",hindi:"hindi hits 2026",tamil:"tamil hits 2026",kannada:"kannada hits 2026",malayalam:"malayalam hits 2026",punjabi:"punjabi hits 2026",english:"english hits 2026"},
   new:{telugu:"telugu 2026",hindi:"hindi 2026",tamil:"tamil 2026",kannada:"kannada 2026",malayalam:"malayalam 2026",punjabi:"punjabi 2026",english:"english 2026"},
   trending:{telugu:"telugu top",hindi:"hindi top",tamil:"tamil top",kannada:"kannada top",malayalam:"malayalam top",punjabi:"punjabi top",english:"english top"},
   charts:{telugu:"telugu chart",hindi:"hindi chart",tamil:"tamil chart",kannada:"kannada chart",malayalam:"malayalam chart",punjabi:"punjabi chart",english:"english chart"},
   classics:{telugu:"ghantasala spb ilaiyaraaja telugu",hindi:"mukesh lata mangeshkar",tamil:"msv ilaiyaraaja tamil",kannada:"dr rajkumar kannada",malayalam:"k j yesudas malayalam",punjabi:"old punjabi classics",english:"classic english"},
   mass:{telugu:"telugu mass",hindi:"hindi party",tamil:"tamil mass",kannada:"kannada mass",malayalam:"malayalam hit",punjabi:"punjabi bhangra",english:"english party"},
   romance:{telugu:"telugu love melody",hindi:"hindi romantic",tamil:"tamil melody",kannada:"kannada love",malayalam:"malayalam melody",punjabi:"punjabi love",english:"english love songs"},
+  throwback:{telugu:"telugu old hits 90s",hindi:"bollywood 90s hits",tamil:"tamil old hits 90s",kannada:"kannada old hits",malayalam:"malayalam old hits",punjabi:"old punjabi hits",english:"90s hits"},
+  forYou:{telugu:"telugu fresh",hindi:"hindi fresh",tamil:"tamil fresh",kannada:"kannada fresh",malayalam:"malayalam fresh",punjabi:"punjabi fresh",english:"fresh music"},
+  freshHits:{telugu:"telugu new song 2026",hindi:"hindi new song 2026",tamil:"tamil new song 2026",kannada:"kannada new song 2026",malayalam:"malayalam new song 2026",punjabi:"punjabi new song 2026",english:"new song 2026"},
   workout:{telugu:"telugu dj",hindi:"hindi workout",tamil:"tamil workout",kannada:"kannada workout",malayalam:"malayalam workout",punjabi:"punjabi workout",english:"english workout"},
   devotional:{telugu:"telugu devotional",hindi:"hindi bhajan",tamil:"tamil devotional",kannada:"kannada devotional",malayalam:"malayalam devotional",punjabi:"punjabi devotional",english:"english gospel"},
   sad:{telugu:"telugu sad",hindi:"hindi sad",tamil:"tamil sad",kannada:"kannada sad",malayalam:"malayalam sad",punjabi:"punjabi sad",english:"english sad"}
 };
 const SECTIONS=[
   {id:"listenAgain",title:"Listen again"},
+  {id:"quickPicks",title:"Quick picks"},
   {id:"new",title:"New releases"},
   {id:"trending",title:"Trending"},
-  {id:"charts",title:"Top charts",layout:"chart"},
   {id:"moods",title:"Moods & genres",layout:"mood"},
   {id:"classics",title:"Timeless classics"},
   {id:"mass",title:"Mass hits"},
-  {id:"romance",title:"Romantic"}
+  {id:"romance",title:"Romantic"},
+  {id:"throwback",title:"Throwback"},
+  {id:"forYou",title:"For you"},
+  {id:"freshHits",title:"Fresh hits"},
+  {id:"workout",title:"Workout"},
+  {id:"devotional",title:"Devotional"},
+  {id:"sad",title:"Sad songs"},
+  {id:"charts",title:"Top charts",layout:"chart"}
 ];
-function queryFor(sectionId,lang){const m=SECTION_QUERIES[sectionId];return (m&&m[lang])||lang}
+function queryFor(id,lang){const m=SECTION_QUERIES[id];return (m&&m[lang])||lang}
 
 let _seenIds=new Set();
 function resetDedup(){_seenIds=new Set()}
 function filterUnique(songs){const out=[];for(const s of songs){if(_seenIds.has(s.id))continue;_seenIds.add(s.id);out.push(s)}return out}
 
-function createTallCard(s){
+function createCard(s){
   const c=document.createElement("div");
   c.className="tcard";
-  c.innerHTML=`<div class="tcard-art-wrap"><img class="tcard-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><button class="tcard-play" aria-label="Play"></button></div><div class="tcard-title">${esc(s.name)}</div><div class="tcard-sub">${esc(s.artist)}</div>`;
-  c.addEventListener("click",()=>{const sec=c.closest("[data-section-id]");const list=sec?state.lists.get(sec.dataset.sectionId):state.results;playSong(s,list&&list.length?list:[s])});
+  const imgSrc=esc(s.image);
+  c.innerHTML=`<div class="tcard-art-wrap"><img class="tcard-art" src="${imgSrc}" alt="" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 160 160%22><rect fill=%22%23272727%22 width=%22160%22 height=%22160%22/><text x=%2280%22 y=%2290%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2240%22>♪</text></svg>'"><button class="tcard-play" aria-label="Play"></button></div><div class="tcard-text"><div class="tcard-title">${esc(s.name)}</div><div class="tcard-sub">${esc(s.artist)}</div></div>`;
+  c.addEventListener("click",()=>{const sec=c.closest("[data-sid]");const list=sec?state.lists.get(sec.dataset.sid):state.results;playSong(s,list&&list.length?list:[s])});
   return c;
 }
-function createTallSkeleton(){const c=document.createElement("div");c.className="tcard-skel";c.innerHTML=`<div class="tcard-skel-art"></div><div class="tcard-skel-line"></div><div class="tcard-skel-line s"></div>`;return c}
-function createChartRow(s,rank){const r=document.createElement("div");r.className="chart-row";r.innerHTML=`<div class="chart-rank">${rank}</div><img class="chart-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><div class="chart-meta"><div class="chart-title">${esc(s.name)}</div><div class="chart-sub">${esc(s.artist)}<span style="color:#717171;font-size:11px;margin-left:4px">· ${fmtPlays(s.playCount)}</span></div></div><button class="chart-play" aria-label="Play">▶</button>`;r.addEventListener("click",()=>{const sec=r.closest("[data-section-id]");const list=sec?state.lists.get(sec.dataset.sectionId):state.results;playSong(s,list&&list.length?list:[s])});return r}
+
+function createChartRow(s,rank){
+  const r=document.createElement("div");
+  r.className="chart-row";
+  const imgSrc=esc(s.image);
+  r.innerHTML=`<div class="chart-rank">${rank}</div><img class="chart-art" src="${imgSrc}" alt="" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><rect fill=%22%23272727%22 width=%2248%22 height=%2248%22/><text x=%2224%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2216%22>♪</text></svg>'"><div class="chart-meta"><div class="chart-title">${esc(s.name)}</div><div class="chart-sub">${esc(s.artist)}<span style="color:#717171;font-size:11px;margin-left:4px">· ${fmtPlays(s.playCount)} plays</span></div></div><button class="chart-play" aria-label="Play">▶</button>`;
+  r.addEventListener("click",()=>{const sec=r.closest("[data-sid]");const list=sec?state.lists.get(sec.dataset.sid):state.results;playSong(s,list&&list.length?list:[s])});
+  return r;
+}
 
 const MOODS=[
-  {id:"workout",name:"Workout",emoji:"🏋",color:"linear-gradient(135deg,#d32d2d,#ff6b35)"},
-  {id:"romance",name:"Romance",emoji:"♥",color:"linear-gradient(135deg,#c42d6b,#ff4a8a)"},
+  {id:"workout",name:"Workout",emoji:"◆",color:"linear-gradient(135deg,#d32d2d,#ff6b35)"},
+  {id:"romance",name:"Romance",emoji:"♡",color:"linear-gradient(135deg,#c42d6b,#ff4a8a)"},
   {id:"mass",name:"Energize",emoji:"⚡",color:"linear-gradient(135deg,#ff8c00,#ffba00)"},
-  {id:"devotional",name:"Devotional",emoji:"🪔",color:"linear-gradient(135deg,#8a4a1a,#c4a44a)"},
-  {id:"classics",name:"Relax",emoji:"☁",color:"linear-gradient(135deg,#2d6e8a,#5fb4d4)"},
-  {id:"sad",name:"Sad",emoji:"💧",color:"linear-gradient(135deg,#2d4a8a,#4a7fc4)"},
-  {id:"new",name:"Feel good",emoji:"😊",color:"linear-gradient(135deg,#2d8a4a,#4ac46b)"},
-  {id:"trending",name:"Party",emoji:"🎉",color:"linear-gradient(135deg,#c026d3,#ff5e62)"}
+  {id:"devotional",name:"Devotional",emoji:"✦",color:"linear-gradient(135deg,#8a4a1a,#c4a44a)"},
+  {id:"classics",name:"Relax",emoji:"○",color:"linear-gradient(135deg,#2d6e8a,#5fb4d4)"},
+  {id:"sad",name:"Sad",emoji:"♪",color:"linear-gradient(135deg,#2d4a8a,#4a7fc4)"},
+  {id:"new",name:"Feel good",emoji:"△",color:"linear-gradient(135deg,#2d8a4a,#4ac46b)"},
+  {id:"trending",name:"Party",emoji:"★",color:"linear-gradient(135deg,#c026d3,#ff5e62)"}
 ];
 function createMoodCard(m){const c=document.createElement("div");c.className="mood-card";c.innerHTML=`<div class="mood-circle" style="background:${m.color}">${m.emoji}</div><div class="mood-name">${m.name}</div>`;c.addEventListener("click",()=>loadMood(m));return c}
 
 function loadMood(m){
   document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   resetDedup();
-  el("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Loading ${esc(m.name)}…</div>`;
+  $("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Loading ${esc(m.name)}…</div>`;
   (async()=>{
     try{
       const songs=await SaavnAPI.search(queryFor(m.id,state.lang),state.lang,1);
-      if(!songs.length){el("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">No ${esc(state.lang)} songs for ${esc(m.name)}.</div>`;return}
+      if(!$("sections").querySelector(".section"))return;
+      if(!songs.length){$("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">No ${esc(state.lang)} songs for ${esc(m.name)}.</div>`;return}
       const sec={id:"mood_"+m.id,title:m.name,emoji:m.emoji};
       const secEl=document.createElement("div");
-      secEl.className="section";secEl.dataset.sectionId=sec.id;
-      secEl.innerHTML=`<div class="section-head"><div class="section-title">${m.emoji} ${esc(sec.title)}</div><div class="section-actions"><button class="section-more">More</button></div></div><div class="track"></div>`;
-      el("sections").innerHTML="";el("sections").appendChild(secEl);
+      secEl.className="section";secEl.dataset.sid=sec.id;
+      secEl.innerHTML=`<div class="section-head"><div class="section-title">${m.emoji} ${esc(sec.title)}</div></div><div class="track"></div>`;
+      $("sections").innerHTML="";$("sections").appendChild(secEl);
       state.lists.set(sec.id,songs);
-      songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
+      songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createCard(s)));
       window.scrollTo({top:0,behavior:"smooth"});
-    }catch(e){el("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">Failed: ${esc(e.message)}</div>`}
+    }catch(e){$("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">Failed: ${esc(e.message)}</div>`}
   })();
 }
 
-function createSectionSkeleton(sec){
+function createSection(sec){
   const el2=document.createElement("div");
-  el2.className="section";el2.dataset.sectionId=sec.id;
+  el2.className="section";el2.dataset.sid=sec.id;
   const layout=sec.layout||"track";
   const skel=layout==="chart"?"":Array.from({length:8}).map(()=>`<div class="tcard-skel"><div class="tcard-skel-art"></div><div class="tcard-skel-line"></div><div class="tcard-skel-line s"></div></div>`).join("");
-  el2.innerHTML=`<div class="section-head"><div class="section-title">${esc(sec.title)}</div><div class="section-actions"><button class="section-more">More</button></div></div>${layout==="mood"?`<div class="track" data-track></div>`:layout==="chart"?`<div class="chart-list" data-chart></div>`:`<div class="track" data-track></div>`}`;
-  if(layout==="mood"){MOODS.forEach(m=>el2.querySelector("[data-track]").appendChild(createMoodCard(m)))}
+  const trackHTML=layout==="mood"?`<div class="mood-wrap" data-mood></div>`:layout==="chart"?`<div class="chart-list" data-chart></div>`:`<div class="track" data-track></div>`;
+  const gridHTML=layout==="track"||layout==="chart"?`<div class="track-grid hidden" data-grid></div>`:"";
+  const moreHTML=layout==="track"?`<button class="section-more">More</button>`:layout==="chart"?`<button class="section-more">More</button>`:"";
+  el2.innerHTML=`<div class="section-head"><div class="section-title">${esc(sec.title)}</div><div class="section-actions">${moreHTML}</div></div>${trackHTML}${gridHTML}`;
+  if(layout==="mood"){MOODS.forEach(m=>el2.querySelector("[data-mood]").appendChild(createMoodCard(m)))}
   else if(layout==="track"){el2.querySelector("[data-track]").innerHTML=skel}
+  const moreBtn=el2.querySelector(".section-more");
+  if(moreBtn){
+    moreBtn.addEventListener("click",()=>{
+      const trackEl=el2.querySelector("[data-track]");
+      const chartEl=el2.querySelector("[data-chart]");
+      const gridEl=el2.querySelector("[data-grid]");
+      if(!gridEl)return;
+      const isExpanded=(trackEl||chartEl)?.classList.contains("expanded");
+      if(isExpanded){(trackEl||chartEl).classList.remove("expanded");gridEl.classList.add("hidden");moreBtn.textContent="More"}
+      else{
+        if(!gridEl.children.length){const songs=state.lists.get(sec.id);if(songs)songs.forEach(s=>gridEl.appendChild(createCard(s)))}
+        (trackEl||chartEl).classList.add("expanded");gridEl.classList.remove("hidden");moreBtn.textContent="Less"
+      }
+    });
+  }
   return el2;
 }
 
 function fillSection(secEl,sec,songs){
-  if(sec.layout==="chart"){const list=secEl.querySelector("[data-chart]");list.innerHTML="";songs.slice(0,10).forEach((s,i)=>list.appendChild(createChartRow(s,i+1)))}
-  else{const track=secEl.querySelector("[data-track]");track.innerHTML="";songs.slice(0,15).forEach(s=>track.appendChild(createTallCard(s)))}
+  if(sec.layout==="chart"){
+    const list=secEl.querySelector("[data-chart]");list.innerHTML="";
+    songs.slice(0,10).forEach((s,i)=>list.appendChild(createChartRow(s,i+1)));
+    const grid=secEl.querySelector("[data-grid]");
+    if(grid){grid.innerHTML="";songs.forEach(s=>grid.appendChild(createCard(s)))}
+  }else{
+    const track=secEl.querySelector("[data-track]");track.innerHTML="";
+    songs.slice(0,15).forEach(s=>track.appendChild(createCard(s)));
+    const grid=secEl.querySelector("[data-grid]");
+    if(grid){grid.innerHTML="";songs.forEach(s=>grid.appendChild(createCard(s)))}
+  }
 }
 
 async function loadSection(sec){
-  const secEl=createSectionSkeleton(sec);
-  el("sections").appendChild(secEl);
+  const secEl=createSection(sec);
+  $("sections").appendChild(secEl);
   if(sec.layout==="mood")return;
   try{
     const songs=await SaavnAPI.search(queryFor(sec.id,state.lang),state.lang,1);
@@ -462,14 +635,14 @@ async function loadSection(sec){
   }catch(e){secEl.remove()}
 }
 
-function loadHome(){el("sections").innerHTML="";state.lists.clear();resetDedup();SECTIONS.forEach(s=>loadSection(s))}
+function loadHome(){$("sections").innerHTML="";state.lists.clear();resetDedup();SECTIONS.forEach(s=>loadSection(s))}
 
-// language selector (single source of truth: sidebar)
-el("lang-select").addEventListener("change",e=>{state.lang=e.target.value;updateGreet();loadHome()});
+/* ── language ──────────────────────────────────── */
+$("lang-select").addEventListener("change",e=>{state.lang=e.target.value;$("lang-label").textContent=LANG_LABELS[state.lang]||state.lang;updateGreet();loadHome()});
 const LANG_LABELS={telugu:"Telugu",hindi:"Hindi",tamil:"Tamil",kannada:"Kannada",malayalam:"Malayalam",punjabi:"Punjabi",english:"English"};
 function updateGreet(){const p=document.querySelector(".greet p");if(p)p.textContent=`${LANG_LABELS[state.lang]||state.lang} music picked for you`}
 
-// sidebar nav
+/* ── sidebar nav ──────────────────────────────── */
 document.querySelectorAll(".nav-item").forEach(item=>{
   item.addEventListener("click",()=>{
     document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
@@ -493,23 +666,23 @@ document.querySelectorAll(".sb-list[data-list]").forEach(item=>{
 
 function showLiked(){
   const songs=Array.from(state.liked);
-  el("sections").innerHTML="";
+  $("sections").innerHTML="";
   const secEl=document.createElement("div");
-  secEl.className="section";secEl.dataset.sectionId="liked";
+  secEl.className="section";secEl.dataset.sid="liked";
   secEl.innerHTML=`<div class="section-head"><div class="section-title">♡ Liked songs</div></div><div class="track"></div>`;
-  el("sections").appendChild(secEl);
+  $("sections").appendChild(secEl);
   state.lists.set("liked",songs);
-  songs.forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
+  songs.forEach(s=>secEl.querySelector(".track").appendChild(createCard(s)));
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
 const PLAYLIST_QUERIES={
-  "Top Hits":  {telugu:"telugu hits",hindi:"hindi hits",tamil:"tamil hits",kannada:"kannada hits",malayalam:"malayalam hits",punjabi:"punjabi hits",english:"english hits",emoji:"🎵"},
-  "Romantic":  {telugu:"telugu love melody",hindi:"hindi romantic",tamil:"tamil melody",kannada:"kannada love",malayalam:"malayalam melody",punjabi:"punjabi love",english:"english love",emoji:"♥"},
+  "Top Hits":  {telugu:"telugu hits",hindi:"hindi hits",tamil:"tamil hits",kannada:"kannada hits",malayalam:"malayalam hits",punjabi:"punjabi hits",english:"english hits",emoji:"♪"},
+  "Romantic":  {telugu:"telugu love melody",hindi:"hindi romantic",tamil:"tamil melody",kannada:"kannada love",malayalam:"malayalam melody",punjabi:"punjabi love",english:"english love",emoji:"♡"},
   "Mass Hits": {telugu:"telugu mass",hindi:"hindi party",tamil:"tamil mass",kannada:"kannada mass",malayalam:"malayalam hit",punjabi:"punjabi bhangra",english:"english party",emoji:"⚡"},
-  "Devotional":{telugu:"telugu devotional",hindi:"hindi bhajan",tamil:"tamil devotional",kannada:"kannada devotional",malayalam:"malayalam devotional",punjabi:"punjabi devotional",english:"english gospel",emoji:"🪔"},
-  "Workout":   {telugu:"telugu dj",hindi:"hindi workout",tamil:"tamil workout",kannada:"kannada workout",malayalam:"malayalam workout",punjabi:"punjabi workout",english:"english workout",emoji:"🏋"},
-  "Classics":  {telugu:"ghantasala spb ilaiyaraaja",hindi:"mukesh lata mangeshkar",tamil:"msv ilaiyaraaja",kannada:"dr rajkumar",malayalam:"k j yesudas",punjabi:"old punjabi",english:"classic english",emoji:"♬"}
+  "Devotional":{telugu:"telugu devotional",hindi:"hindi bhajan",tamil:"tamil devotional",kannada:"kannada devotional",malayalam:"malayalam devotional",punjabi:"punjabi devotional",english:"english gospel",emoji:"✦"},
+  "Workout":   {telugu:"telugu dj",hindi:"hindi workout",tamil:"tamil workout",kannada:"kannada workout",malayalam:"malayalam workout",punjabi:"punjabi workout",english:"english workout",emoji:"◆"},
+  "Classics":  {telugu:"ghantasala spb ilaiyaraaja",hindi:"mukesh lata mangeshkar",tamil:"msv ilaiyaraaja",kannada:"dr rajkumar",malayalam:"k j yesudas",punjabi:"old punjabi",english:"classic english",emoji:"♫"}
 };
 document.querySelectorAll(".sb-list[data-pl]").forEach(item=>{
   item.addEventListener("click",()=>{
@@ -518,46 +691,46 @@ document.querySelectorAll(".sb-list[data-pl]").forEach(item=>{
     if(!cfg)return;
     document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
     resetDedup();
-    el("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Loading ${esc(name)}…</div>`;
+    $("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Loading ${esc(name)}…</div>`;
     (async()=>{
       try{
-        const songs=await SaavnAPI.search(cfg.query,state.lang,1);
-        if(!songs.length){el("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">No ${esc(state.lang)} songs in ${esc(name)}.</div>`;return}
+        const songs=await SaavnAPI.search(cfg[state.lang]||cfg.english,state.lang,1);
+        if(!songs.length){$("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">No ${esc(state.lang)} songs in ${esc(name)}.</div>`;return}
         const sec={id:"pl_"+name,title:name,emoji:cfg.emoji};
         const secEl=document.createElement("div");
-        secEl.className="section";secEl.dataset.sectionId=sec.id;
+        secEl.className="section";secEl.dataset.sid=sec.id;
         secEl.innerHTML=`<div class="section-head"><div class="section-title">${cfg.emoji} ${esc(sec.title)}</div></div><div class="track"></div>`;
-        el("sections").innerHTML="";el("sections").appendChild(secEl);
+        $("sections").innerHTML="";$("sections").appendChild(secEl);
         state.lists.set(sec.id,songs);
-        songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
+        songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createCard(s)));
         window.scrollTo({top:0,behavior:"smooth"});
-      }catch(e){el("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">Failed: ${esc(e.message)}</div>`}
+      }catch(e){$("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">Failed: ${esc(e.message)}</div>`}
     })();
   });
 });
 
-el("new-pl-btn").addEventListener("click",()=>alert("Playlist creation is a backend feature — not in the prototype."));
+$("new-pl-btn").addEventListener("click",()=>alert("Playlist creation is a backend feature — not in the prototype."));
 
 function showEmpty(title,msg){
-  el("sections").innerHTML=`<div style="text-align:center;padding:80px 20px"><div style="font-size:42px;margin-bottom:14px">📭</div><div style="font-size:20px;font-weight:700;margin-bottom:6px">${esc(title)}</div><div style="color:#aaa;font-size:13px;max-width:380px;margin:0 auto">${esc(msg)}</div></div>`;
+  $("sections").innerHTML=`<div style="text-align:center;padding:80px 20px"><div style="font-size:42px;margin-bottom:14px">📭</div><div style="font-size:20px;font-weight:700;margin-bottom:6px">${esc(title)}</div><div style="color:#aaa;font-size:13px;max-width:380px;margin:0 auto">${esc(msg)}</div></div>`;
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function loadExplore(){
-  el("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Loading explore…</div>`;
+  $("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Loading explore…</div>`;
   resetDedup();
   (async()=>{
     const explore=[
-      {id:"exp_new",title:"Fresh finds",emoji:"✨",sectionKey:"new"},
-      {id:"exp_trend",title:"Trending",emoji:"🔥",sectionKey:"trending"},
-      {id:"exp_chart",title:"Top charts",emoji:"📈",sectionKey:"charts"},
-      {id:"exp_class",title:"Timeless",emoji:"🏛",sectionKey:"classics"},
-      {id:"exp_rom",title:"Romantic",emoji:"💕",sectionKey:"romance"},
-      {id:"exp_work",title:"Workout",emoji:"🏋",sectionKey:"workout"},
-      {id:"exp_dev",title:"Devotional",emoji:"🪔",sectionKey:"devotional"},
-      {id:"exp_sad",title:"Sad",emoji:"💧",sectionKey:"sad"}
+      {id:"exp_new",title:"Fresh finds",emoji:"◇",sectionKey:"new"},
+      {id:"exp_trend",title:"Trending",emoji:"▲",sectionKey:"trending"},
+      {id:"exp_chart",title:"Top charts",emoji:"▤",sectionKey:"charts"},
+      {id:"exp_class",title:"Timeless",emoji:"◎",sectionKey:"classics"},
+      {id:"exp_rom",title:"Romantic",emoji:"♡",sectionKey:"romance"},
+      {id:"exp_work",title:"Workout",emoji:"◆",sectionKey:"workout"},
+      {id:"exp_dev",title:"Devotional",emoji:"✦",sectionKey:"devotional"},
+      {id:"exp_sad",title:"Sad",emoji:"♪",sectionKey:"sad"}
     ];
-    el("sections").innerHTML="";
+    $("sections").innerHTML="";
     for(const sec of explore){
       try{
         const songs=await SaavnAPI.search(queryFor(sec.sectionKey,state.lang),state.lang,1);
@@ -565,11 +738,11 @@ function loadExplore(){
         const unique=filterUnique(songs);
         if(!unique.length)continue;
         const secEl=document.createElement("div");
-        secEl.className="section";secEl.dataset.sectionId=sec.id;
+        secEl.className="section";secEl.dataset.sid=sec.id;
         secEl.innerHTML=`<div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div><div class="section-actions"><button class="section-more">More</button></div></div><div class="track"></div>`;
-        el("sections").appendChild(secEl);
+        $("sections").appendChild(secEl);
         state.lists.set(sec.id,unique);
-        unique.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
+        unique.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createCard(s)));
       }catch(_){}
     }
     window.scrollTo({top:0,behavior:"smooth"});
@@ -581,82 +754,272 @@ function loadLibrary(){
   showLiked();
 }
 
-el("search-input").addEventListener("keydown",e=>{
+$("search-input").addEventListener("keydown",e=>{
   if(e.key!=="Enter")return;
   const q=e.target.value.trim();
   if(!q)return;
   state.query=q;
-  el("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Searching…</div>`;
+  $("sections").innerHTML=`<div style="text-align:center;color:#aaa;padding:50px 20px">Searching…</div>`;
   resetDedup();
   (async()=>{
     try{
       const songs=await SaavnAPI.search(q,state.lang,1);
-      if(!songs.length){el("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">No ${esc(state.lang)} results for "${esc(q)}"</div>`;return}
+      if(!songs.length){$("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">No ${esc(state.lang)} results for "${esc(q)}"</div>`;return}
       state.results=songs;
-      const sec={id:"search",title:`Results for "${q}"`,emoji:"🔎"};
+      const sec={id:"search",title:`Results for "${q}"`,emoji:"⌕"};
       const secEl=document.createElement("div");
-      secEl.className="section";secEl.dataset.sectionId="search";
+      secEl.className="section";secEl.dataset.sid="search";
       secEl.innerHTML=`<div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div></div><div class="track"></div>`;
-      el("sections").innerHTML="";el("sections").appendChild(secEl);
+      $("sections").innerHTML="";$("sections").appendChild(secEl);
       state.lists.set("search",songs);
-      songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
+      songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createCard(s)));
       window.scrollTo({top:0,behavior:"smooth"});
-    }catch(e){el("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">Search failed: ${esc(e.message)}</div>`}
+    }catch(e){$("sections").innerHTML=`<div class="lyr-none" style="padding:50px 20px">Search failed: ${esc(e.message)}</div>`}
   })();
 });
 
-// audio
-const audio=el("audio-el");audio.volume=0.8;
-const AudioCtl={play(){return audio.play().catch(err=>console.warn("audio blocked:",err))},pause(){audio.pause()},toggle(){audio.paused?AudioCtl.play():AudioCtl.pause()},seek(t){if(isFinite(t))audio.currentTime=Math.max(0,Math.min(t,audio.duration||t))},onTime(cb){audio.addEventListener("timeupdate",cb)},onEnded(cb){audio.addEventListener("ended",cb)}};
+/* ── audio ─────────────────────────────────────── */
+const audio=$("audio-el");audio.volume=0.8;
+let _audioErrCnt=0;
+const AudioCtl={
+  play(){return audio.play().catch(err=>{console.warn("audio blocked:",err);_audioErrCnt++;if(_audioErrCnt>3){console.error("Too many audio errors, stopping");audio.src=""}})},
+  pause(){audio.pause()},
+  toggle(){audio.paused?AudioCtl.play():AudioCtl.pause()},
+  seek(t){if(isFinite(t))audio.currentTime=Math.max(0,Math.min(t,audio.duration||t))}
+};
 function playSong(song,queue=[song]){
-  state.queue=[...queue];state.qIndex=state.queue.findIndex(q=>q.id===song.id);state.current=song;
-  audio.src=SaavnAPI.bestUrl(song);AudioCtl.play();
-  el("player").hidden=false;el("p-art").src=song.image;el("p-title").textContent=song.name;el("p-artist").textContent=song.artist;
-  el("p-play").classList.add("playing");el("p-dur").textContent=fmtTime(song.duration);el("p-seek").value=0;
-  el("p-like").textContent=state.liked.has(song.id)?"♥":"♡";el("p-like").style.color=state.liked.has(song.id)?"#ff4081":"";
+  _audioErrCnt=0;
+  state.queue=[...queue];state.qIndex=state.queue.findIndex(q=>q.id===song.id);if(state.qIndex<0)state.qIndex=0;state.current=song;
+  const url=SaavnAPI.bestUrl(song);
+  if(!url){console.warn("No audio URL for",song.name);return}
+  audio.src=url;AudioCtl.play();
+  $("player").hidden=false;
+  $("p-art").src=song.image;
+  $("p-title").textContent=song.name;
+  $("p-artist").textContent=song.artist;
+  $("p-play").classList.add("playing");
+  $("p-dur").textContent=fmtTime(song.duration);
+  $("p-seek").value=0;
+  $("p-like").textContent=state.liked.has(song.id)?"♥":"♡";
+  $("p-like").style.color=state.liked.has(song.id)?"#ff0000":"";
+  updateExpandedPlayer(song);
   if(typeof loadLyrics==="function")loadLyrics(song);
   if(typeof loadVideoFor==="function")loadVideoFor(song);
 }
-function nextSong(){if(state.qIndex<state.queue.length-1)playSong(state.queue[state.qIndex+1],state.queue)}
+let _nextLock=false;
+function nextSong(){
+  if(_nextLock)return;_nextLock=true;setTimeout(()=>_nextLock=false,300);
+  if(!state.queue.length)return;
+  if(state.qIndex<state.queue.length-1){playSong(state.queue[state.qIndex+1],state.queue)}
+  else if(state.queue.length>1){playSong(state.queue[0],state.queue)}
+}
 function prevSong(){if(audio.currentTime>3||state.qIndex<=0){audio.currentTime=0}else{playSong(state.queue[state.qIndex-1],state.queue)}}
-el("p-play").addEventListener("click",()=>{if(state.current)AudioCtl.toggle()});
-el("p-next").addEventListener("click",nextSong);el("p-prev").addEventListener("click",prevSong);
-audio.addEventListener("play",()=>el("p-play").classList.add("playing"));
-audio.addEventListener("pause",()=>el("p-play").classList.remove("playing"));
+$("p-play").addEventListener("click",()=>{if(state.current)AudioCtl.toggle()});
+$("p-next").addEventListener("click",nextSong);
+$("p-prev").addEventListener("click",prevSong);
+audio.addEventListener("play",()=>$("p-play").classList.add("playing"));
+audio.addEventListener("pause",()=>$("p-play").classList.remove("playing"));
+audio.addEventListener("error",()=>{
+  _audioErrCnt++;
+  console.warn("Audio error, attempt",_audioErrCnt);
+  if(_audioErrCnt<3&&state.current){setTimeout(()=>{audio.src=SaavnAPI.bestUrl(state.current);AudioCtl.play()},500)}
+  else{_audioErrCnt=0;nextSong()}
+});
 let seeking=false;
-el("p-seek").addEventListener("input",()=>{seeking=true;el("p-cur").textContent=fmtTime(el("p-seek").value)});
-el("p-seek").addEventListener("change",()=>{AudioCtl.seek(+el("p-seek").value);seeking=false});
-audio.addEventListener("timeupdate",()=>{if(seeking)return;el("p-seek").max=audio.duration||state.current?.duration||0;el("p-seek").value=audio.currentTime;el("p-cur").textContent=fmtTime(audio.currentTime)});
-audio.addEventListener("loadedmetadata",()=>{el("p-dur").textContent=fmtTime(audio.duration)});
+$("p-seek").addEventListener("input",()=>{seeking=true;$("p-cur").textContent=fmtTime(+$("p-seek").value)});
+$("p-seek").addEventListener("change",()=>{AudioCtl.seek(+$("p-seek").value);seeking=false});
+audio.addEventListener("timeupdate",()=>{if(seeking)return;$("p-seek").max=audio.duration||state.current?.duration||0;$("p-seek").value=audio.currentTime;$("p-cur").textContent=fmtTime(audio.currentTime)});
+audio.addEventListener("loadedmetadata",()=>{$("p-dur").textContent=fmtTime(audio.duration)});
 audio.addEventListener("ended",nextSong);
-el("p-vol").addEventListener("input",e=>{audio.volume=+e.target.value/100});
-el("p-like").addEventListener("click",()=>{
+$("p-vol").addEventListener("input",e=>{audio.volume=+e.target.value/100});
+$("p-like").addEventListener("click",()=>{
   if(!state.current)return;
-  if(state.liked.has(state.current.id)){state.liked.delete(state.current.id);el("p-like").textContent="♡";el("p-like").style.color=""}
-  else{state.liked.add(state.current.id);el("p-like").textContent="♥";el("p-like").style.color="#ff4081"}
+  if(state.liked.has(state.current.id)){state.liked.delete(state.current.id);$("p-like").textContent="♡";$("p-like").style.color=""}
+  else{state.liked.add(state.current.id);$("p-like").textContent="♥";$("p-like").style.color="#ff0000"}
 });
 
-// lyrics
+/* ── lyrics ────────────────────────────────────── */
 const LRC="https://lrclib.net/api";
-const LyricsAPI={async find(song){const primary=song.artist.split(",")[0].trim();const attempts=[`${LRC}/search?track_name=${encodeURIComponent(song.name)}&artist_name=${encodeURIComponent(primary)}`,`${LRC}/search?track_name=${encodeURIComponent(song.name)}`,`${LRC}/search?q=${encodeURIComponent(song.name+" "+primary)}`];for(const url of attempts){try{const res=await fetch(url);if(!res.ok)continue;const rows=await res.json();const inDur=r=>Math.abs((r.duration||0)-song.duration)<=2;const match=rows.find(r=>inDur(r)&&r.syncedLyrics)||rows.find(r=>inDur(r));if(match)return{synced:match.syncedLyrics||null,plain:match.plainLyrics||match.syncedLyrics||null}}catch(_){}}return null}};
-function parseLRC(lrc){const lines=[];for(const raw of lrc.split("\n")){const stamps=[...raw.matchAll(/\[(\d+):(\d+)(?:\.(\d+))?\]/g)];if(!stamps.length)continue;const text=raw.replace(/\[[^\]]*\]/g,"").trim();for(const m of stamps){const frac=m[3]?+("0."+m[3]):0;lines.push({t:(+m[1])*60+(+m[2])+frac,text})}}return lines.sort((a,b)=>a.t-b.t)}
-async function loadLyrics(song){state.lyrics=null;el("lyrics-title").textContent=song.name;el("lyrics-body").innerHTML=`<div class="lyr-none">Loading lyrics…</div>`;const found=await LyricsAPI.find(song);if(state.current?.id!==song.id)return;if(!found||!found.plain){el("lyrics-body").innerHTML=`<div class="lyr-none">Lyrics not found for this song.</div>`;return}if(found.synced){const lines=parseLRC(found.synced);state.lyrics={lines,plainOnly:false};el("lyrics-body").innerHTML=lines.map((l,i)=>`<div class="lyr-line" data-i="${i}">${l.text?esc(l.text):"♪"}</div>`).join("")}else{state.lyrics={lines:found.plain.split("\n").map(t=>({t:0,text:t})),plainOnly:true};el("lyrics-body").innerHTML=found.plain.split("\n").map(t=>`<div class="lyr-line">${t?esc(t):"♪"}</div>`).join("")}}
-function toggleLyricsPanel(){el("lyrics-panel").classList.toggle("open")}
-el("p-lyrics").addEventListener("click",toggleLyricsPanel);
-el("lyrics-close").addEventListener("click",()=>el("lyrics-panel").classList.remove("open"));
-AudioCtl.onTime(()=>{const L=state.lyrics;if(!L||L.plainOnly)return;const t=audio.currentTime;let active=-1;for(let i=0;i<L.lines.length;i++){if(L.lines[i].t<=t)active=i;else break}const prevActive=document.querySelector(".lyr-line.active");if(prevActive?.dataset?.i==active)return;document.querySelectorAll(".lyr-line").forEach(n=>n.classList.remove("active","near"));const node=document.querySelector(`.lyr-line[data-i="${active}"]`);if(node){node.classList.add("active");const near=node.previousElementSibling;if(near?.classList?.contains("lyr-line"))near.classList.add("near");node.scrollIntoView({block:"center",behavior:"smooth"})}});
+const LyricsAPI={async find(song){
+  const primary=song.artist.split(",")[0].trim();
+  const attempts=[
+    `${LRC}/search?track_name=${encodeURIComponent(song.name)}&artist_name=${encodeURIComponent(primary)}`,
+    `${LRC}/search?track_name=${encodeURIComponent(song.name)}`,
+    `${LRC}/search?q=${encodeURIComponent(song.name+" "+primary)}`
+  ];
+  for(const url of attempts){
+    try{
+      const res=await fetch(url);
+      if(!res.ok)continue;
+      const rows=await res.json();
+      const inDur=r=>Math.abs((r.duration||0)-song.duration)<=2;
+      const match=rows.find(r=>inDur(r)&&r.syncedLyrics)||rows.find(r=>inDur(r));
+      if(match)return{synced:match.syncedLyrics||null,plain:match.plainLyrics||match.syncedLyrics||null};
+    }catch(_){}
+  }
+  return null;
+}};
+function parseLRC(lrc){
+  const lines=[];
+  for(const raw of lrc.split("\n")){
+    const stamps=[...raw.matchAll(/\[(\d+):(\d+)(?:\.(\d+))?\]/g)];
+    if(!stamps.length)continue;
+    const text=raw.replace(/\[[^\]]*\]/g,"").trim();
+    for(const m of stamps){
+      const frac=m[3]?+("0."+m[3]):0;
+      lines.push({t:(+m[1])*60+(+m[2])+frac,text});
+    }
+  }
+  return lines.sort((a,b)=>a.t-b.t);
+}
+async function loadLyrics(song){
+  state.lyrics=null;
+  $("lyrics-title").textContent=song.name;
+  $("lyrics-body").innerHTML=`<div class="lyr-none">Loading lyrics…</div>`;
+  $("ep-lyrics-body").innerHTML=`<div class="lyr-none">Loading lyrics…</div>`;
+  const found=await LyricsAPI.find(song);
+  if(state.current?.id!==song.id)return;
+  if(!found||!found.plain){$("lyrics-body").innerHTML=`<div class="lyr-none">Lyrics not found for this song.</div>`;$("ep-lyrics-body").innerHTML=`<div class="lyr-none">Lyrics not found for this song.</div>`;return}
+  if(found.synced){
+    const lines=parseLRC(found.synced);
+    state.lyrics={lines,plainOnly:false};
+    const html=lines.map((l,i)=>`<div class="lyr-line" data-i="${i}">${l.text?esc(l.text):"♪"}</div>`).join("");
+    $("lyrics-body").innerHTML=html;
+    $("ep-lyrics-body").innerHTML=lines.map((l,i)=>`<div class="lyr-line" data-i="${i}">${l.text?esc(l.text):"♪"}</div>`).join("");
+  }else{
+    state.lyrics={lines:found.plain.split("\n").map(t=>({t:0,text:t})),plainOnly:true};
+    const html=found.plain.split("\n").map(t=>`<div class="lyr-line">${t?esc(t):"♪"}</div>`).join("");
+    $("lyrics-body").innerHTML=html;
+    $("ep-lyrics-body").innerHTML=html;
+  }
+}
+function toggleLyricsPanel(){$("lyrics-panel").classList.toggle("open")}
+$("p-lyrics").addEventListener("click",toggleLyricsPanel);
+$("lyrics-close").addEventListener("click",()=>$("lyrics-panel").classList.remove("open"));
+audio.addEventListener("timeupdate",()=>{
+  const L=state.lyrics;if(!L||L.plainOnly)return;
+  const t=audio.currentTime;
+  let active=-1;
+  for(let i=0;i<L.lines.length;i++){if(L.lines[i].t<=t)active=i;else break}
+  const prev=document.querySelector(".lyr-line.active");
+  if(prev?.dataset?.i==active)return;
+  document.querySelectorAll(".lyr-line").forEach(n=>n.classList.remove("active","near"));
+  document.querySelectorAll(`.lyr-line[data-i="${active}"]`).forEach(node=>{
+    node.classList.add("active");
+    const near=node.previousElementSibling;if(near?.classList?.contains("lyr-line"))near.classList.add("near");
+    const panel=node.closest(".ep-panel,.lyrics-body,#lyrics-body");
+    if(panel)node.scrollIntoView({block:"center",behavior:"smooth"});
+  });
+});
 
-// video
+/* ── video ─────────────────────────────────────── */
 state.videoIds={"pushpa pushpa":"wQksDYahKZs","abbani tiyyani":"Z-Xd8fMrfDk","kala sivunte kaladi":"65hYeLm4NcU","adiga adiga":"zrGs4AkqNyk","kaanunna kalyanam":"nj0iqDA3mZw","mass raja":"IW0NuTp4sUY"};
 const videoKey=song=>song.name.toLowerCase().replace(/\s+/g," ").replace(/\s*\(.*?\)\s*/g,"").replace(/from|quot|amp;/g,"").replace(/[^a-z\u0C00-\u0C7F ]/g,"").trim();
 let yt=null,ytReady=false,ytApiLoading=false;
 function ensureYT(){if(ytReady||ytApiLoading)return;ytApiLoading=true;const s=document.createElement("script");s.src="https://www.youtube.com/iframe_api";document.head.appendChild(s)}
-function enterVideo(){const song=state.current;if(!song)return;const vid=state.videoIds[videoKey(song)];if(!vid){alert("No video mapped for this song in the prototype.");return}ensureYT();const t=audio.currentTime;audio.pause();el("video-stage").hidden=false;const whenReady=()=>{yt=new YT.Player("video-mount",{videoId:vid,playerVars:{autoplay:1,playsinline:1,start:Math.max(0,Math.floor(t)),rel:0,modestbranding:1},events:{onReady:()=>{yt.playVideo()},onStateChange:e=>{if(e.data===YT.PlayerState.ENDED)exitVideo(true)}}})};if(ytReady)whenReady();else window.onYouTubeIframeAPIReady=()=>{ytReady=true;whenReady()};el("p-mode-video").classList.add("active");state.mode="video"}
-function exitVideo(finished=false){const t=yt?.getCurrentTime?.()||0;try{yt?.destroy?.()}catch(_){}yt=null;const mount=el("video-mount");mount.innerHTML="";mount.id="video-mount";el("video-stage").hidden=true;el("p-mode-video").classList.remove("active");state.mode="audio";if(!finished&&t>0){AudioCtl.seek(t);AudioCtl.play()}}
-el("p-mode-video").addEventListener("click",enterVideo);el("video-close").addEventListener("click",()=>exitVideo());
-function loadVideoFor(song){const has=!!state.videoIds[videoKey(song)];el("p-mode-video").disabled=!has;el("p-mode-video").title=has?"Watch video":"No video mapped (prototype)"}
+function enterVideo(){const song=state.current;if(!song)return;const vid=state.videoIds[videoKey(song)];if(!vid){alert("No video mapped for this song in the prototype.");return}ensureYT();const t=audio.currentTime;audio.pause();$("video-stage").hidden=false;const whenReady=()=>{yt=new YT.Player("video-mount",{videoId:vid,playerVars:{autoplay:1,playsinline:1,start:Math.max(0,Math.floor(t)),rel:0,modestbranding:1},events:{onReady:()=>{yt.playVideo()},onStateChange:e=>{if(e.data===YT.PlayerState.ENDED)exitVideo(true)}}})};if(ytReady)whenReady();else window.onYouTubeIframeAPIReady=()=>{ytReady=true;whenReady()};$("p-mode-video").classList.add("active");state.mode="video"}
+function exitVideo(finished=false){const t=yt?.getCurrentTime?.()||0;try{yt?.destroy?.()}catch(_){}yt=null;const mount=$("video-mount");mount.innerHTML="";mount.id="video-mount";$("video-stage").hidden=true;$("p-mode-video").classList.remove("active");state.mode="audio";if(!finished&&t>0){AudioCtl.seek(t);AudioCtl.play()}}
+$("p-mode-video").addEventListener("click",enterVideo);
+$("video-close").addEventListener("click",()=>exitVideo());
+function loadVideoFor(song){const has=!!state.videoIds[videoKey(song)];$("p-mode-video").disabled=!has;$("p-mode-video").title=has?"Watch video":"No video mapped (prototype)"}
 
-document.addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;if(e.code==="Space"&&state.current){e.preventDefault();AudioCtl.toggle()}if(e.key==="ArrowRight")nextSong();if(e.key==="ArrowLeft")prevSong();if(e.key.toLowerCase()==="l"&&state.current)toggleLyricsPanel();if(e.key==="Escape"&&state.mode==="video")exitVideo()});
+/* ── keyboard ──────────────────────────────────── */
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;
+  if(e.code==="Space"&&state.current){e.preventDefault();AudioCtl.toggle()}
+  if(e.key==="ArrowRight")nextSong();
+  if(e.key==="ArrowLeft")prevSong();
+  if(e.key.toLowerCase()==="l"&&state.current)toggleLyricsPanel();
+  if(e.key==="Escape"){if(!$("ep-overlay").hidden)closeExpanded();else if(state.mode==="video")exitVideo()}
+});
+
+/* ── expanded player (YTM) ─────────────────────── */
+const EP={
+  get open(){return !$("ep-overlay").hidden},
+  syncTimer:null
+};
+function openExpanded(){
+  if(!$("player").hidden){$("ep-overlay").hidden=false;document.body.style.overflow="hidden";syncExpandedControls();buildQueuePanel()}
+}
+function closeExpanded(){$("ep-overlay").hidden=true;document.body.style.overflow=""}
+$("ep-minimize").addEventListener("click",closeExpanded);
+
+function updateExpandedPlayer(song){
+  $("ep-art").src=song.image;
+  $("ep-bg-img").src=song.image;
+  $("ep-title").textContent=song.name;
+  $("ep-artist").textContent=song.artist;
+  $("ep-dur").textContent=fmtTime(song.duration);
+  $("ep-like").textContent=state.liked.has(song.id)?"♥":"♡";
+  $("ep-like").classList.toggle("liked",state.liked.has(song.id));
+  syncExpandedControls();
+  if(EP.open)buildQueuePanel();
+}
+function syncExpandedControls(){
+  if(!state.current)return;
+  $("ep-play").classList.toggle("playing",!audio.paused);
+  $("ep-shuffle").classList.toggle("active",state.shuffleOn);
+  $("ep-repeat").classList.toggle("active",state.repeatOn);
+}
+audio.addEventListener("play",syncExpandedControls);
+audio.addEventListener("pause",syncExpandedControls);
+audio.addEventListener("timeupdate",()=>{
+  if(!$("ep-overlay").hidden){
+    $("ep-seek").max=audio.duration||state.current?.duration||0;
+    $("ep-seek").value=audio.currentTime;
+    $("ep-cur").textContent=fmtTime(audio.currentTime);
+  }
+});
+audio.addEventListener("loadedmetadata",()=>{$("ep-dur").textContent=fmtTime(audio.duration)});
+
+$("ep-play").addEventListener("click",()=>{if(state.current)AudioCtl.toggle()});
+$("ep-next").addEventListener("click",nextSong);
+$("ep-prev").addEventListener("click",prevSong);
+$("ep-seek").addEventListener("input",()=>{$("ep-cur").textContent=fmtTime(+$("ep-seek").value)});
+$("ep-seek").addEventListener("change",()=>{AudioCtl.seek(+$("ep-seek").value)});
+$("ep-like").addEventListener("click",()=>{
+  if(!state.current)return;
+  if(state.liked.has(state.current.id)){state.liked.delete(state.current.id);$("ep-like").textContent="♡";$("ep-like").classList.remove("liked");$("p-like").textContent="♡";$("p-like").style.color=""}
+  else{state.liked.add(state.current.id);$("ep-like").textContent="♥";$("ep-like").classList.add("liked");$("p-like").textContent="♥";$("p-like").style.color="#ff0000"}
+});
+
+$("ep-shuffle").addEventListener("click",()=>{state.shuffleOn=!state.shuffleOn;$("ep-shuffle").classList.toggle("active",state.shuffleOn);$("p-shuffle").classList.toggle("active",state.shuffleOn)});
+$("ep-repeat").addEventListener("click",()=>{state.repeatOn=!state.repeatOn;$("ep-repeat").classList.toggle("active",state.repeatOn);$("p-repeat").classList.toggle("active",state.repeatOn)});
+
+$("ep-lyrics-btn").addEventListener("click",()=>{$("ep-tabs").querySelectorAll(".ep-tab").forEach(t=>t.classList.remove("active"));$("ep-tabs").querySelector('[data-tab="lyrics"]').classList.add("active");$("ep-panels").querySelectorAll(".ep-panel").forEach(p=>p.classList.remove("active"));$("ep-panels").querySelector('[data-panel="lyrics"]').classList.add("active")});
+$("ep-video-btn").addEventListener("click",()=>{if(state.current)enterVideo()});
+$("ep-download").addEventListener("click",()=>{if(state.current){const url=SaavnAPI.bestUrl(state.current);const a=document.createElement("a");a.href=url;a.download=state.current.name+".mp4";a.click()}});
+$("ep-share").addEventListener("click",()=>{if(state.current&&navigator.share)navigator.share({title:state.current.name,text:state.current.artist}).catch(()=>{})});
+
+document.querySelectorAll(".ep-tab").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    document.querySelectorAll(".ep-tab").forEach(t=>t.classList.remove("active"));tab.classList.add("active");
+    document.querySelectorAll(".ep-panel").forEach(p=>p.classList.remove("active"));
+    document.querySelector(`.ep-panel[data-panel="${tab.dataset.tab}"]`).classList.add("active");
+  });
+});
+
+function buildQueuePanel(){
+  const list=$("ep-queue-list");list.innerHTML="";
+  if(!state.queue.length){list.innerHTML='<div class="lyr-none">No songs in queue.</div>';return}
+  state.queue.forEach((s,i)=>{
+    const el=document.createElement("div");
+    el.className="ep-queue-item"+(i===state.qIndex?" playing":"");
+    el.innerHTML=`<img class="ep-queue-art" src="${esc(s.image)}" alt="" loading="lazy" onerror="this.style.background='#272727'"><div class="ep-queue-meta"><div class="ep-queue-title">${esc(s.name)}</div><div class="ep-queue-sub">${esc(s.artist)}</div></div><span class="ep-queue-drag">⠿</span>`;
+    el.addEventListener("click",()=>playSong(s,state.queue));
+    list.appendChild(el);
+  });
+  const playingEl=list.querySelector(".playing");
+  if(playingEl)playingEl.scrollIntoView({block:"center",behavior:"smooth"});
+}
+
+/* miniplayer click → open expanded */
+$("player").addEventListener("click",e=>{
+  if(e.target.closest("button")||e.target.closest("input")||e.target.closest(".p-controls"))return;
+  openExpanded();
+});
+/* miniplayer art click → open expanded */
+$("p-art").addEventListener("click",e=>{e.stopPropagation();openExpanded()});
 
 loadHome();
 })();

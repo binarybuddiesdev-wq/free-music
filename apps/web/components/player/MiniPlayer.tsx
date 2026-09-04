@@ -26,6 +26,9 @@ export function MiniPlayer() {
 
   const liked = currentSong ? isLiked(currentSong.id) : false
 
+  // Don't render at all until a song is selected (YTM behavior)
+  if (!currentSong) return null
+
   return (
     <div style={{
       position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40,
