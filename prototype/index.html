@@ -6,15 +6,15 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Sangeet — Telugu Music</title>
+<title>Music</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0f0f0f; --bg-2:#181818; --surface:#272727; --surface-2:#3a3a3a;
   --text:#fff; --text-2:#aaaaaa; --text-3:#717171;
-  --accent:#ff0033; --accent-2:#ff4081;
+  --accent:#ff0000; --accent-2:#ff4081;
   --grad:linear-gradient(135deg,#ff0033 0%,#ff4081 100%);
   --radius:12px; --radius-sm:8px;
   --sidebar-w:240px;
@@ -35,6 +35,7 @@ body{
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#444;border:3px solid var(--bg);border-radius:6px}
 ::-webkit-scrollbar-thumb:hover{background:#555}
+button{font-family:var(--font)}
 
 /* ── layout shell ─────────────────────────────────── */
 .shell{display:flex;min-height:100vh}
@@ -44,45 +45,94 @@ body{
   position:fixed;left:0;top:0;bottom:var(--player-h);
   width:var(--sidebar-w);background:#000;
   display:flex;flex-direction:column;
-  padding:12px 0;z-index:20;
+  padding:8px 0;z-index:20;
   overflow-y:auto;
 }
-.sidebar-logo{
-  display:flex;align-items:center;gap:10px;
-  padding:14px 20px 18px;
+.sb-top{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px 14px 16px;
 }
-.logo-mark{
-  width:36px;height:36px;border-radius:8px;
-  background:var(--grad);
+.sb-hamburger{
+  width:40px;height:40px;border-radius:50%;
+  background:transparent;border:0;color:#fff;
   display:flex;align-items:center;justify-content:center;
-  font-size:20px;color:#fff;
+  cursor:pointer;font-size:20px;flex-shrink:0;
+  transition:background .15s;
 }
-.logo-text{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.sb-hamburger:hover{background:rgba(255,255,255,.1)}
+.sb-logo{
+  display:flex;align-items:center;gap:6px;cursor:pointer;
+  font-size:20px;font-weight:700;letter-spacing:-.5px;
+}
+.sb-logo-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:50%;
+  background:#ff0000;
+  position:relative;flex-shrink:0;
+}
+.sb-logo-icon::before{
+  content:"";display:block;
+  width:0;height:0;
+  border-left:10px solid #fff;
+  border-top:6px solid transparent;
+  border-bottom:6px solid transparent;
+  margin-left:3px;
+}
+.sb-logo-text{color:#fff;font-weight:700}
 .nav-section{padding:8px 12px 4px}
 .nav-item{
-  display:flex;align-items:center;gap:20px;
-  padding:10px 12px;border-radius:8px;
+  display:flex;align-items:center;gap:24px;
+  padding:10px 12px;border-radius:10px;
   cursor:pointer;color:var(--text);
   font-size:14px;font-weight:400;
   transition:background .15s;
+  user-select:none;
 }
 .nav-item:hover{background:rgba(255,255,255,.06)}
 .nav-item.active{background:rgba(255,255,255,.1);font-weight:700}
 .nav-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.nav-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 20px}
-.nav-header{padding:10px 20px 4px;color:var(--text-2);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase}
-.nav-playlist{
-  display:flex;align-items:center;gap:12px;
-  padding:8px 20px;cursor:pointer;font-size:14px;color:var(--text);
+.sb-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 20px}
+.new-playlist-btn{
+  display:flex;align-items:center;gap:18px;
+  padding:10px 16px;margin:8px 12px;
+  border-radius:10px;background:rgba(255,255,255,.06);
+  color:#fff;cursor:pointer;font-size:14px;font-weight:500;
+  border:0;width:calc(100% - 24px);text-align:left;
+  transition:background .15s;
+}
+.new-playlist-btn:hover{background:rgba(255,255,255,.12)}
+.new-playlist-icon{
+  width:24px;height:24px;border-radius:4px;
+  background:#fff;color:#000;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:300;line-height:1;
+}
+.sb-section{padding:8px 20px 4px}
+.sb-section-title{
+  display:flex;align-items:center;justify-content:space-between;
+  color:var(--text-2);font-size:12px;font-weight:500;
+  text-transform:uppercase;letter-spacing:1px;
+  padding:14px 8px 8px;
+}
+.sb-section-title .see{color:var(--text-2);font-size:12px;cursor:pointer;text-transform:none;letter-spacing:0}
+.sb-section-title .see:hover{color:var(--text)}
+.sb-list-item{
+  display:flex;align-items:center;gap:14px;
+  padding:8px 4px;border-radius:6px;cursor:pointer;
+  color:var(--text);font-size:14px;
   transition:color .15s;
 }
-.nav-playlist:hover{color:var(--text-2)}
-.nav-playlist-icon{
-  width:32px;height:32px;border-radius:6px;flex-shrink:0;
+.sb-list-item:hover{color:var(--text-2)}
+.sb-list-cover{
+  width:40px;height:40px;border-radius:6px;flex-shrink:0;
   background:linear-gradient(135deg,#3a1f5e,#5e2e8e);
   display:flex;align-items:center;justify-content:center;
-  font-size:14px;
+  font-size:14px;object-fit:cover;overflow:hidden;
 }
+.sb-list-cover img{width:100%;height:100%;object-fit:cover}
+.sb-list-meta{min-width:0;flex:1;line-height:1.3}
+.sb-list-title{font-size:14px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-list-sub{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 
 /* ── main content ────────────────────────────────── */
 .main{
@@ -90,132 +140,198 @@ body{
   flex:1;min-width:0;
   padding:0 32px 40px;
 }
-.header{
+.topbar{
   position:sticky;top:0;z-index:15;
   display:flex;align-items:center;gap:16px;
-  padding:14px 0;
-  background:rgba(15,15,15,.92);
+  padding:10px 0;
+  background:rgba(15,15,15,.94);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  margin:0 -32px;padding:14px 32px;
+  margin:0 -32px;padding:10px 32px;
 }
-.chips{display:flex;gap:10px;flex:1;overflow-x:auto;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
+.search-wrap{
+  flex:1;max-width:640px;margin:0 auto;position:relative;
+}
+#search-input{
+  width:100%;padding:12px 16px 12px 44px;
+  border-radius:10px;border:0;
+  background:rgba(255,255,255,.08);color:#fff;
+  font-size:15px;font-family:var(--font);outline:none;
+  transition:background .15s, box-shadow .15s;
+}
+#search-input::placeholder{color:var(--text-2)}
+#search-input:focus{background:rgba(255,255,255,.12);box-shadow:0 0 0 2px rgba(255,255,255,.18)}
+.search-icon{
+  position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  color:var(--text-2);font-size:18px;pointer-events:none;
+}
+.topbar-actions{display:flex;align-items:center;gap:6px}
+.icon-btn{
+  width:40px;height:40px;border-radius:50%;
+  background:transparent;border:0;color:#fff;
+  cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.icon-btn:hover{background:rgba(255,255,255,.1)}
+.avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:#7c4dff;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;
+  margin-left:6px;
+}
+
+/* mood chips row */
+.chips-row{
+  display:flex;gap:10px;overflow-x:auto;padding:18px 0 22px;
+  scrollbar-width:none;margin:0 -32px;padding-left:32px;padding-right:32px;
+}
+.chips-row::-webkit-scrollbar{display:none}
 .chip{
-  padding:8px 16px;border-radius:10px;
-  background:rgba(255,255,255,.08);color:var(--text);
-  font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
-  transition:.15s;border:0;font-family:var(--font);
+  padding:9px 18px;border-radius:10px;
+  background:rgba(255,255,255,.08);color:#fff;
+  font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;
+  transition:.15s;border:0;
 }
 .chip:hover{background:rgba(255,255,255,.15)}
 .chip.active{background:#fff;color:#000}
-.header-actions{display:flex;gap:8px;align-items:center}
-.icon-btn{
-  width:38px;height:38px;border-radius:50%;
-  background:rgba(255,255,255,.08);border:0;color:var(--text);
-  cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
-  transition:.15s;
-}
-.icon-btn:hover{background:rgba(255,255,255,.15)}
-.avatar{
-  width:34px;height:34px;border-radius:50%;
-  background:var(--grad);
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;font-weight:700;cursor:pointer;
-}
 
-/* hero greeting */
-.greet{margin:20px 0 28px}
-.greet h1{font-size:36px;font-weight:700;margin-bottom:4px}
-.greet p{color:var(--text-2);font-size:15px}
-
-/* quick picks - YTM's grid of "Listen again" cards */
-.quickpicks{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:12px;margin-bottom:48px;
-}
-.quick{
-  display:flex;align-items:center;gap:14px;
-  background:var(--surface);border-radius:8px;
-  padding:8px;cursor:pointer;overflow:hidden;
-  transition:background .15s;
-}
-.quick:hover{background:var(--surface-2)}
-.quick:hover .quick-play{opacity:1;transform:translateY(0)}
-.quick-art{
-  width:64px;height:64px;border-radius:6px;
-  background:linear-gradient(135deg,#2a1b4d,#3d2352);
-  object-fit:cover;flex-shrink:0;
-}
-.quick-title{
-  flex:1;min-width:0;
-  font-size:15px;font-weight:500;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.quick-play{
-  width:44px;height:44px;border-radius:50%;
-  background:var(--grad);border:0;color:#fff;
-  font-size:14px;cursor:pointer;flex-shrink:0;
-  opacity:0;transform:translateY(8px);
-  transition:.2s;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 16px rgba(0,0,0,.4);
-  margin-right:6px;
-}
-.quick-play:hover{transform:scale(1.05)!important;filter:brightness(1.1)}
+/* greeting (YTM doesn't have one but adds personality) */
+.greet{margin:14px 0 8px}
+.greet h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.greet p{color:var(--text-2);font-size:14px}
 
 /* section */
-.section{margin-bottom:48px}
-.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:18px}
-.section-title{font-size:24px;font-weight:700}
-.section-see{color:var(--text-2);font-size:13px;cursor:pointer;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
-.section-see:hover{color:var(--text)}
+.section{margin-bottom:48px;position:relative}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;
+}
+.section-title{font-size:24px;font-weight:700;letter-spacing:-.3px}
+.section-actions{display:flex;align-items:center;gap:8px}
+.section-more{
+  padding:8px 16px;border-radius:999px;
+  background:rgba(255,255,255,.08);color:#fff;
+  font-size:13px;font-weight:500;cursor:pointer;
+  border:0;transition:background .15s;
+}
+.section-more:hover{background:rgba(255,255,255,.15)}
+.nav-arrow{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(40,40,40,.9);border:0;color:#fff;
+  cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.nav-arrow:hover{background:rgba(70,70,70,.9)}
+.nav-arrow:disabled{opacity:.3;cursor:not-allowed}
+
+/* carousels (TALL RECTANGULAR cards like YTM) */
 .carousel{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-  gap:18px;
+  gap:16px;
+  scroll-snap-type:x proximity;
 }
-.card{
-  display:flex;flex-direction:column;gap:10px;
-  padding:8px;border-radius:8px;cursor:pointer;
-  transition:background .15s;
+.track{
+  display:flex;gap:16px;overflow-x:auto;
+  scroll-behavior:smooth;scroll-snap-type:x mandatory;
+  padding-bottom:8px;margin:0 -32px;padding-left:32px;padding-right:32px;
+  scrollbar-width:none;
 }
-.card:hover{background:var(--surface)}
-.card:hover .card-play{opacity:1;transform:translateY(0)}
-.card-art-wrap{
-  position:relative;width:100%;aspect-ratio:1/1;
+.track::-webkit-scrollbar{display:none}
+
+/* tall rectangular card (YTM poster style) */
+.tcard{
+  flex:0 0 200px;scroll-snap-align:start;
+  display:flex;flex-direction:column;gap:12px;
+  padding:6px;border-radius:8px;cursor:pointer;
+  transition:background .15s;background:transparent;
+}
+.tcard:hover{background:var(--surface)}
+.tcard:hover .tcard-art-wrap{transform:scale(1.02)}
+.tcard:hover .tcard-play{opacity:1;transform:translateY(0)}
+.tcard-art-wrap{
+  position:relative;width:100%;aspect-ratio:2/3;
   border-radius:var(--radius-sm);overflow:hidden;
   background:linear-gradient(135deg,#2a1b4d,#3d2352);
-  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+  transition:.25s;
 }
-.card-art{width:100%;height:100%;object-fit:cover;display:block}
-.card-play{
+.tcard-art{width:100%;height:100%;object-fit:cover;display:block}
+.tcard-play{
   position:absolute;right:8px;bottom:8px;
   width:48px;height:48px;border-radius:50%;
-  background:var(--grad);color:#fff;border:0;
+  background:rgba(255,255,255,.95);color:#000;border:0;
   font-size:16px;cursor:pointer;
   opacity:0;transform:translateY(8px);
   transition:.2s;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 20px rgba(0,0,0,.5);
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
 }
-.card-play:hover{transform:scale(1.06)!important;filter:brightness(1.1)}
-.card-title{
-  font-size:14px;font-weight:500;color:var(--text);
-  line-height:1.3;
+.tcard-play::before{
+  content:"";display:block;width:0;height:0;
+  border-left:14px solid #000;border-top:9px solid transparent;
+  border-bottom:9px solid transparent;margin-left:3px;
+}
+.tcard-title{
+  font-size:15px;font-weight:500;color:#fff;line-height:1.3;
   overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  min-height:36px;
+  min-height:39px;
 }
-.card-sub{font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card-skel{
-  display:flex;flex-direction:column;gap:10px;padding:8px;
+.tcard-sub{font-size:13px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tcard-skel{
+  flex:0 0 200px;display:flex;flex-direction:column;gap:12px;padding:6px;
 }
-.card-skel-art{width:100%;aspect-ratio:1/1;border-radius:var(--radius-sm);background:var(--surface);animation:p 1.4s infinite}
-.card-skel-line{height:14px;border-radius:4px;background:var(--surface);animation:p 1.4s infinite}
-.card-skel-line.s{width:60%}
+.tcard-skel-art{width:100%;aspect-ratio:2/3;border-radius:var(--radius-sm);background:var(--surface);animation:p 1.4s infinite}
+.tcard-skel-line{height:14px;border-radius:4px;background:var(--surface);animation:p 1.4s infinite}
+.tcard-skel-line.s{width:60%}
+
+/* mood circular card */
+.mood-card{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:8px;cursor:pointer;border-radius:8px;transition:background .15s;
+  flex-shrink:0;width:120px;
+}
+.mood-card:hover{background:var(--surface)}
+.mood-circle{
+  width:96px;height:96px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;color:#fff;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+.mood-name{font-size:13px;font-weight:500;color:#fff;text-align:center}
+
+/* charts numbered list */
+.chart-list{display:flex;flex-direction:column;gap:0}
+.chart-row{
+  display:flex;align-items:center;gap:16px;
+  padding:8px;border-radius:8px;cursor:pointer;
+  transition:background .15s;
+}
+.chart-row:hover{background:var(--surface)}
+.chart-rank{font-size:18px;font-weight:700;color:var(--text-2);width:28px;text-align:center;flex-shrink:0}
+.chart-art{
+  width:56px;height:56px;border-radius:6px;
+  background:linear-gradient(135deg,#2a1b4d,#3d2352);
+  object-fit:cover;flex-shrink:0;
+}
+.chart-meta{flex:1;min-width:0;line-height:1.3}
+.chart-title{font-size:15px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-sub{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.chart-meta-info{color:var(--text-3);font-size:12px;margin-left:6px}
+.chart-play{
+  width:40px;height:40px;border-radius:50%;
+  background:transparent;border:0;color:#fff;
+  cursor:pointer;font-size:18px;flex-shrink:0;
+  opacity:0;transition:.15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.chart-row:hover .chart-play{opacity:1}
+.chart-play:hover{background:rgba(255,255,255,.1)}
+
 @keyframes p{0%,100%{opacity:.55}50%{opacity:.95}}
 
-/* large cards (16:9 hero banners within carousels) */
-.large-card .card-art-wrap{aspect-ratio:16/9}
-
-/* ── player bar ──────────────────────────────────── */
+/* ── player bar (YTM style) ──────────────────────── */
 #player{
   position:fixed;left:0;right:0;bottom:0;z-index:40;
   height:var(--player-h);
@@ -247,10 +363,19 @@ body{
   transition:transform .1s;
 }
 .p-btn:hover{transform:scale(1.08)}
-.p-btn.active{color:var(--accent)}
 #p-play{
   width:40px;height:40px;border-radius:50%;
   background:#fff;color:#000;font-size:14px;
+}
+#p-play::before{
+  content:"";display:block;width:0;height:0;
+  border-left:13px solid #000;border-top:8px solid transparent;
+  border-bottom:8px solid transparent;margin-left:2px;
+}
+#p-play.playing::before{
+  border:none;width:14px;height:14px;
+  background:linear-gradient(to right,#000 0%,#000 35%,transparent 35%,transparent 65%,#000 65%,#000 100%);
+  margin-left:0;
 }
 #p-play:hover{transform:scale(1.08);background:#fff}
 .p-timeline{display:flex;align-items:center;gap:10px;width:100%;font-size:11px;color:var(--text-2)}
@@ -271,8 +396,14 @@ body{
 .mode-btn:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .mode-btn.active{color:var(--text);background:rgba(255,255,255,.12)}
 .mode-btn:disabled{opacity:.3;cursor:not-allowed}
+#p-vol{
+  appearance:none;-webkit-appearance:none;width:80px;height:3px;border-radius:2px;
+  background:#404040;outline:none;
+}
+#p-vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;cursor:pointer}
+#p-vol::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:0;cursor:pointer}
 
-/* lyrics panel - side drawer */
+/* lyrics panel */
 #lyrics-panel{
   position:fixed;right:0;top:0;bottom:var(--player-h);
   width:min(420px,100vw);z-index:35;
@@ -317,80 +448,132 @@ body{
 }
 #video-close:hover{background:rgba(40,40,40,.9)}
 
-/* responsive */
-@media(max-width:1100px){
+@media(max-width:1200px){
   .sidebar{width:72px}
-  .nav-item span,.logo-text,.nav-header,.nav-playlist span{display:none}
-  .nav-item,.nav-playlist{justify-content:center;padding:12px 0}
-  .main{margin-left:72px;padding:0 20px 40px}
-  .header{margin:0 -20px;padding:14px 20px}
+  .sb-logo,.nav-item span,.sb-divider,.sb-section,.new-playlist-btn,.sb-list-item span{display:none}
+  .nav-item,.new-playlist-btn{justify-content:center;padding:12px 0;width:auto;margin:4px 0}
+  .main{margin-left:72px;padding:0 24px 40px}
+  .topbar{margin:0 -24px;padding:10px 24px}
+  .chips-row{margin:0 -24px;padding-left:24px;padding-right:24px}
+  .track{margin:0 -24px;padding-left:24px;padding-right:24px}
+}
+@media(max-width:700px){
+  .topbar{padding:8px 14px}
+  .search-wrap{max-width:none}
+  .greet h1{font-size:22px}
   .p-left{width:auto;min-width:0}
   .p-info{display:none}
   .p-right{min-width:0;width:auto}
-}
-@media(max-width:700px){
-  .quickpicks{grid-template-columns:1fr}
-  .carousel{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
   .p-center{order:3;flex-basis:100%;max-width:none}
   #player{flex-wrap:wrap;height:auto;padding:8px 12px;gap:10px}
-  .p-left{order:1;width:auto}
-  .p-right{order:2;width:auto}
 }
 </style>
 </head>
 <body>
 <div class="shell">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">♪</div>
-      <div class="logo-text">Sangeet</div>
+    <div class="sb-top">
+      <button class="sb-hamburger" aria-label="Menu">≡</button>
+      <div class="sb-logo">
+        <span class="sb-logo-icon"></span>
+        <span class="sb-logo-text">Music</span>
+      </div>
     </div>
-    <div class="nav-section">
+    <nav class="nav-section">
       <div class="nav-item active" data-section="home"><div class="nav-icon">⌂</div><span>Home</span></div>
       <div class="nav-item" data-section="explore"><div class="nav-icon">◎</div><span>Explore</span></div>
       <div class="nav-item" data-section="library"><div class="nav-icon">▦</div><span>Library</span></div>
+      <div class="nav-item" data-section="upgrade"><div class="nav-icon">▶</div><span>Upgrade</span></div>
+    </nav>
+    <button class="new-playlist-btn" id="new-playlist">
+      <span class="new-playlist-icon">+</span>
+      <span>New playlist</span>
+    </button>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+      <div class="sb-list-item" data-list="liked">
+        <div class="sb-list-cover" style="background:linear-gradient(135deg,#5e2e8e,#b937f2)">♡</div>
+        <div class="sb-list-meta">
+          <div class="sb-list-title">Liked songs</div>
+          <div class="sb-list-sub">Auto playlist</div>
+        </div>
+      </div>
     </div>
-    <div class="nav-divider"></div>
-    <div class="nav-section">
-      <div class="nav-item" data-section="liked"><div class="nav-icon">♡</div><span>Liked songs</span></div>
-      <div class="nav-item" data-section="history"><div class="nav-icon">↻</div><span>History</span></div>
+    <div class="sb-section">
+      <div class="sb-list-item" data-list="history">
+        <div class="sb-list-cover" style="background:linear-gradient(135deg,#2d4a8a,#4a7fc4)">↻</div>
+        <div class="sb-list-meta">
+          <div class="sb-list-title">Recent</div>
+          <div class="sb-list-sub">Auto playlist</div>
+        </div>
+      </div>
     </div>
-    <div class="nav-divider"></div>
-    <div class="nav-header">Playlists</div>
-    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Telugu Hits</span></div>
-    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Old Classics</span></div>
-    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Romantic</span></div>
-    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Mass Hits</span></div>
-    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Devotional</span></div>
-    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Workout</span></div>
+    <div class="sb-section" id="sb-playlists">
+      <div class="sb-list-item" data-pl="Top Hits">
+        <div class="sb-list-cover" style="background:linear-gradient(135deg,#c026d3,#ff5e62)">♪</div>
+        <div class="sb-list-meta">
+          <div class="sb-list-title">Top Hits</div>
+          <div class="sb-list-sub">Your playlist</div>
+        </div>
+      </div>
+      <div class="sb-list-item" data-pl="Classics">
+        <div class="sb-list-cover" style="background:linear-gradient(135deg,#8a5a2d,#c4a44a)">♬</div>
+        <div class="sb-list-meta">
+          <div class="sb-list-title">Timeless Classics</div>
+          <div class="sb-list-sub">Your playlist</div>
+        </div>
+      </div>
+      <div class="sb-list-item" data-pl="Romantic">
+        <div class="sb-list-cover" style="background:linear-gradient(135deg,#c42d6b,#ff4a8a)">♥</div>
+        <div class="sb-list-meta">
+          <div class="sb-list-title">Romantic</div>
+          <div class="sb-list-sub">Your playlist</div>
+        </div>
+      </div>
+      <div class="sb-list-item" data-pl="Mass Hits">
+        <div class="sb-list-cover" style="background:linear-gradient(135deg,#d32d2d,#ff6b35)">⚡</div>
+        <div class="sb-list-meta">
+          <div class="sb-list-title">Mass Hits</div>
+          <div class="sb-list-sub">Your playlist</div>
+        </div>
+      </div>
+      <div class="sb-list-item" data-pl="Workout">
+        <div class="sb-list-cover" style="background:linear-gradient(135deg,#2d8a4a,#4ac46b)">🏋</div>
+        <div class="sb-list-meta">
+          <div class="sb-list-title">Workout</div>
+          <div class="sb-list-sub">Your playlist</div>
+        </div>
+      </div>
+    </div>
   </aside>
 
   <main class="main">
-    <div class="header">
-      <div class="chips" id="chips">
-        <button class="chip active" data-lang="telugu">Telugu</button>
-        <button class="chip" data-lang="hindi">Hindi</button>
-        <button class="chip" data-lang="tamil">Tamil</button>
-        <button class="chip" data-lang="kannada">Kannada</button>
-        <button class="chip" data-lang="malayalam">Malayalam</button>
-        <button class="chip" data-lang="punjabi">Punjabi</button>
-        <button class="chip" data-lang="english">English</button>
+    <div class="topbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="search-input" type="search" placeholder="Search songs, albums, artists, podcasts" autocomplete="off">
       </div>
-      <div class="header-actions">
-        <div class="search-input-wrap" style="position:relative;width:280px">
-          <input id="search-input" type="search" placeholder="Search" autocomplete="off"
-            style="width:100%;padding:9px 14px 9px 36px;border-radius:999px;border:0;background:rgba(255,255,255,.08);color:#fff;font-size:13px;outline:none;font-family:var(--font)">
-        </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" aria-label="Cast">▣</button>
         <div class="avatar">B</div>
       </div>
     </div>
 
-    <div class="greet">
-      <h1>Good evening</h1>
-      <p>Telugu music picked for you</p>
+    <div class="chips-row" id="chips">
+      <button class="chip active" data-lang="telugu">All</button>
+      <button class="chip" data-lang="telugu">Telugu</button>
+      <button class="chip" data-lang="hindi">Hindi</button>
+      <button class="chip" data-lang="tamil">Tamil</button>
+      <button class="chip" data-lang="kannada">Kannada</button>
+      <button class="chip" data-lang="malayalam">Malayalam</button>
+      <button class="chip" data-lang="punjabi">Punjabi</button>
+      <button class="chip" data-lang="english">English</button>
     </div>
 
-    <div class="quickpicks" id="quickpicks"></div>
+    <div class="greet">
+      <h1>Good evening</h1>
+      <p>Music picked for you</p>
+    </div>
 
     <div id="sections"></div>
   </main>
@@ -411,13 +594,13 @@ body{
       <div id="p-title"></div>
       <div id="p-artist"></div>
     </div>
-    <button class="p-like" aria-label="Like">♡</button>
+    <button class="p-like" id="p-like" aria-label="Like">♡</button>
   </div>
   <div class="p-center">
     <div class="p-controls">
       <button id="p-shuffle" class="p-btn" aria-label="Shuffle">⤮</button>
       <button id="p-prev" class="p-btn" aria-label="Previous">⏮</button>
-      <button id="p-play" class="p-btn" aria-label="Play/Pause">▶</button>
+      <button id="p-play" class="p-btn" aria-label="Play/Pause"></button>
       <button id="p-next" class="p-btn" aria-label="Next">⏭</button>
       <button id="p-repeat" class="p-btn" aria-label="Repeat">⟳</button>
     </div>
@@ -430,10 +613,8 @@ body{
   <div class="p-right">
     <button id="p-mode-video" class="mode-btn" aria-label="Video" title="Video">▣</button>
     <button id="p-lyrics" class="mode-btn" aria-label="Lyrics" title="Lyrics">≡</button>
-    <button class="mode-btn" aria-label="Queue" title="Queue">≡</button>
     <span id="p-vol-icon" style="color:var(--text-2);font-size:14px;margin:0 4px">♪</span>
-    <input id="p-vol" type="range" min="0" max="100" value="80" step="1" aria-label="Volume"
-      style="width:80px;appearance:none;-webkit-appearance:none;height:3px;border-radius:2px;background:#404040;outline:none">
+    <input id="p-vol" type="range" min="0" max="100" value="80" step="1" aria-label="Volume">
   </div>
   <audio id="audio-el" preload="none"></audio>
 </footer>
@@ -451,13 +632,14 @@ const state = {
   query:"", lang:"telugu", page:1, results:[],
   queue:[], qIndex:-1, current:null,
   mode:"audio", lyrics:null, videoIds:{},
-  lists:new Map() // sectionId -> songs[]
+  lists:new Map(),
+  liked:new Set()
 };
 
 const SAAVN="https://saavn.sumit.co/api";
 const SaavnAPI={
   async search(query, language, page=1){
-    const url=`${SAAVN}/search/songs?query=${encodeURIComponent(query)}&limit=30&page=${page}`;
+    const url=`${SAAVN}/search/songs?query=${encodeURIComponent(query)}&limit=40&page=${page}`;
     const res=await fetch(url);
     if(!res.ok) throw new Error(`Saavn ${res.status}`);
     const json=await res.json();
@@ -481,41 +663,43 @@ function normalize(r){
 }
 function pickImage(images){
   if(!images?.length) return "";
-  // JioSaavn returns images ascending by size (50x50, 150x150, 500x500);
-  // pick the last = largest for maximum clarity.
   return images[images.length-1].url || images[0].url || "";
 }
 function decodeHTML(s){const t=document.createElement("textarea");t.innerHTML=s||"";return t.value.trim()}
 function esc(s){const d=document.createElement("div");d.textContent=s??"";return d.innerHTML}
 const el=id=>document.getElementById(id);
 const fmtTime=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+const fmtPlays=n=>n>=1e7?(n/1e7).toFixed(1)+"B plays":n>=1e6?(n/1e6).toFixed(1)+"M plays":n>=1e3?(n/1e3).toFixed(0)+"K plays":(n||0)+" plays";
 
-// Per-language query maps — each section picks the right query for the active language.
-// This is what makes the language switcher actually feel different per language.
 const SECTION_QUERIES={
-  trending:{telugu:"telugu",            hindi:"hindi",            tamil:"tamil",          kannada:"kannada",         malayalam:"malayalam",     punjabi:"punjabi",         english:"english"},
-  new:     {telugu:"telugu 2026",       hindi:"hindi 2026",       tamil:"tamil 2026",     kannada:"kannada 2026",    malayalam:"malayalam 2026",punjabi:"punjabi 2026",    english:"english 2026"},
-  charts:  {telugu:"telugu top",        hindi:"hindi top",        tamil:"tamil top",      kannada:"kannada top",     malayalam:"malayalam top", punjabi:"punjabi top",     english:"english top"},
-  classics:{telugu:"ghantasala spb ilaiyaraaja telugu",hindi:"mukesh lata mangeshkar",tamil:"msv ilaiyaraaja tamil",kannada:"dr rajkumar kannada",malayalam:"k j yesudas malayalam",punjabi:"old punjabi classics",english:"classic english"},
-  mass:    {telugu:"telugu mass",       hindi:"hindi party",      tamil:"tamil mass",     kannada:"kannada mass",    malayalam:"malayalam hit", punjabi:"punjabi bhangra",english:"english party"},
-  romance: {telugu:"telugu love melody",hindi:"hindi romantic",   tamil:"tamil melody",   kannada:"kannada love",    malayalam:"malayalam melody",punjabi:"punjabi love",  english:"english love songs"}
+  listenAgain:{telugu:"telugu",hindi:"hindi",tamil:"tamil",kannada:"kannada",malayalam:"malayalam",punjabi:"punjabi",english:"english"},
+  new:        {telugu:"telugu 2026",hindi:"hindi 2026",tamil:"tamil 2026",kannada:"kannada 2026",malayalam:"malayalam 2026",punjabi:"punjabi 2026",english:"english 2026"},
+  trending:   {telugu:"telugu top",hindi:"hindi top",tamil:"tamil top",kannada:"kannada top",malayalam:"malayalam top",punjabi:"punjabi top",english:"english top"},
+  charts:     {telugu:"telugu chart",hindi:"hindi chart",tamil:"tamil chart",kannada:"kannada chart",malayalam:"malayalam chart",punjabi:"punjabi chart",english:"english chart"},
+  classics:   {telugu:"ghantasala spb ilaiyaraaja telugu",hindi:"mukesh lata mangeshkar",tamil:"msv ilaiyaraaja tamil",kannada:"dr rajkumar kannada",malayalam:"k j yesudas malayalam",punjabi:"old punjabi classics",english:"classic english"},
+  mass:       {telugu:"telugu mass",hindi:"hindi party",tamil:"tamil mass",kannada:"kannada mass",malayalam:"malayalam hit",punjabi:"punjabi bhangra",english:"english party"},
+  romance:    {telugu:"telugu love melody",hindi:"hindi romantic",tamil:"tamil melody",kannada:"kannada love",malayalam:"malayalam melody",punjabi:"punjabi love",english:"english love songs"},
+  workout:    {telugu:"telugu dj",hindi:"hindi workout",tamil:"tamil workout",kannada:"kannada workout",malayalam:"malayalam workout",punjabi:"punjabi workout",english:"english workout"},
+  devotional: {telugu:"telugu devotional",hindi:"hindi bhajan",tamil:"tamil devotional",kannada:"kannada devotional",malayalam:"malayalam devotional",punjabi:"punjabi devotional",english:"english gospel"},
+  sad:        {telugu:"telugu sad",hindi:"hindi sad",tamil:"tamil sad",kannada:"kannada sad",malayalam:"malayalam sad",punjabi:"punjabi sad",english:"english sad"}
 };
 const SECTIONS=[
-  {id:"trending", title:"Trending now",   emoji:"🔥"},
-  {id:"new",      title:"New releases",   emoji:"✨"},
-  {id:"charts",   title:"Top charts",     emoji:"📈"},
-  {id:"classics", title:"Timeless classics",emoji:"🏛️"},
-  {id:"mass",     title:"Mass hits",      emoji:"💥"},
-  {id:"romance",  title:"Romantic",       emoji:"💕"}
+  {id:"listenAgain",title:"Listen again",emoji:""},
+  {id:"new",        title:"New releases",emoji:""},
+  {id:"trending",   title:"Trending",emoji:""},
+  {id:"charts",     title:"Top charts",emoji:"",layout:"chart"},
+  {id:"moods",      title:"Moods & genres",emoji:"",layout:"mood"},
+  {id:"classics",   title:"Timeless classics",emoji:""},
+  {id:"mass",       title:"Mass hits",emoji:""},
+  {id:"romance",    title:"Romantic",emoji:""}
 ];
 function queryFor(sectionId, lang){
   const m=SECTION_QUERIES[sectionId];
-  return (m && m[lang]) || lang;   // fallback: search the language name itself (returns that language)
+  return (m && m[lang]) || lang;
 }
 
-// Global dedup so the same song doesn't appear across multiple sections.
 let _seenIds=new Set();
-function resetDedup(){ _seenIds=new Set(); }
+function resetDedup(){_seenIds=new Set()}
 function filterUnique(songs){
   const out=[];
   for(const s of songs){
@@ -526,18 +710,17 @@ function filterUnique(songs){
   return out;
 }
 
-function createCard(s){
+function createTallCard(s){
   const c=document.createElement("div");
-  c.className="card";
+  c.className="tcard";
   c.innerHTML=`
-    <div class="card-art-wrap">
-      <img class="card-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-      <button class="card-play" aria-label="Play">▶</button>
+    <div class="tcard-art-wrap">
+      <img class="tcard-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <button class="tcard-play" aria-label="Play"></button>
     </div>
-    <div class="card-title">${esc(s.name)}</div>
-    <div class="card-sub">${esc(s.artist)}</div>`;
-  c.addEventListener("click",e=>{
-    e.stopPropagation();
+    <div class="tcard-title">${esc(s.name)}</div>
+    <div class="tcard-sub">${esc(s.artist)}</div>`;
+  c.addEventListener("click",()=>{
     const sec=c.closest("[data-section-id]");
     const list=sec?state.lists.get(sec.dataset.sectionId):state.results;
     playSong(s, list&&list.length?list:[s]);
@@ -545,57 +728,128 @@ function createCard(s){
   return c;
 }
 
-function createQuickPick(s){
+function createTallSkeleton(){
   const c=document.createElement("div");
-  c.className="quick";
+  c.className="tcard-skel";
   c.innerHTML=`
-    <img class="quick-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-    <div class="quick-title">${esc(s.name)}</div>
-    <button class="quick-play" aria-label="Play">▶</button>`;
-  c.addEventListener("click",e=>{
-    e.stopPropagation();
-    const list=Array.from(document.querySelectorAll("#quickpicks .quick")).map(q=>q._song).filter(Boolean);
-    playSong(s, list.length?list:[s]);
-  });
-  c._song=s;
+    <div class="tcard-skel-art"></div>
+    <div class="tcard-skel-line"></div>
+    <div class="tcard-skel-line s"></div>`;
   return c;
 }
 
-function createSectionSkeleton(sec){
-  const el=document.createElement("div");
-  el.className="section";
-  el.dataset.sectionId=sec.id;
-  el.innerHTML=`
-    <div class="section-head">
-      <div class="section-title">${sec.emoji} ${esc(sec.title)}</div>
-      <div class="section-see">Show all</div>
+function createChartRow(s, rank){
+  const r=document.createElement("div");
+  r.className="chart-row";
+  r.innerHTML=`
+    <div class="chart-rank">${rank}</div>
+    <img class="chart-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+    <div class="chart-meta">
+      <div class="chart-title">${esc(s.name)}</div>
+      <div class="chart-sub">${esc(s.artist)}<span class="chart-meta-info">· ${fmtPlays(s.playCount)}</span></div>
     </div>
-    <div class="carousel" data-carousel>
-      ${Array.from({length:6}).map(()=>`
-        <div class="card-skel">
-          <div class="card-skel-art"></div>
-          <div class="card-skel-line"></div>
-          <div class="card-skel-line s"></div>
-        </div>`).join("")}
-    </div>`;
-  return el;
+    <button class="chart-play" aria-label="Play">▶</button>`;
+  r.addEventListener("click",()=>{
+    const sec=r.closest("[data-section-id]");
+    const list=sec?state.lists.get(sec.dataset.sectionId):state.results;
+    playSong(s, list&&list.length?list:[s]);
+  });
+  return r;
+}
+
+const MOODS=[
+  {id:"workout",   name:"Workout",   emoji:"🏋", color:"linear-gradient(135deg,#d32d2d,#ff6b35)"},
+  {id:"romance",   name:"Romance",   emoji:"♥",  color:"linear-gradient(135deg,#c42d6b,#ff4a8a)"},
+  {id:"mass",      name:"Energize",  emoji:"⚡", color:"linear-gradient(135deg,#ff8c00,#ffba00)"},
+  {id:"devotional",name:"Devotional",emoji:"🪔", color:"linear-gradient(135deg,#8a4a1a,#c4a44a)"},
+  {id:"classics",  name:"Relax",     emoji:"☁",  color:"linear-gradient(135deg,#2d6e8a,#5fb4d4)"},
+  {id:"sad",       name:"Sad",       emoji:"💧", color:"linear-gradient(135deg,#2d4a8a,#4a7fc4)"},
+  {id:"new",       name:"Feel good", emoji:"😊", color:"linear-gradient(135deg,#2d8a4a,#4ac46b)"},
+  {id:"trending",  name:"Party",     emoji:"🎉", color:"linear-gradient(135deg,#c026d3,#ff5e62)"}
+];
+function createMoodCard(m){
+  const c=document.createElement("div");
+  c.className="mood-card";
+  c.innerHTML=`
+    <div class="mood-circle" style="background:${m.color}">${m.emoji}</div>
+    <div class="mood-name">${m.name}</div>`;
+  c.addEventListener("click",()=>loadMood(m));
+  return c;
+}
+
+function loadMood(m){
+  document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+  resetDedup();
+  el("sections").innerHTML=`<div style="text-align:center;color:var(--text-2);padding:60px 20px">Loading ${esc(m.name)}…</div>`;
+  (async()=>{
+    try{
+      const songs=await SaavnAPI.search(queryFor(m.id, state.lang), state.lang, 1);
+      if(!songs.length){
+        el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">No ${esc(state.lang)} songs for ${esc(m.name)}.</div>`;
+        return;
+      }
+      const sec={id:"mood_"+m.id, title:m.name, emoji:m.emoji};
+      const secEl=document.createElement("div");
+      secEl.className="section";
+      secEl.dataset.sectionId=sec.id;
+      secEl.innerHTML=`
+        <div class="section-head"><div class="section-title">${m.emoji} ${esc(sec.title)}</div></div>
+        <div class="track"></div>`;
+      el("sections").innerHTML="";
+      el("sections").appendChild(secEl);
+      state.lists.set(sec.id, songs);
+      songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
+      window.scrollTo({top:0,behavior:"smooth"});
+    }catch(e){
+      el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">Failed: ${esc(e.message)}</div>`;
+    }
+  })();
+}
+
+function createSectionSkeleton(sec){
+  const el2=document.createElement("div");
+  el2.className="section";
+  el2.dataset.sectionId=sec.id;
+  const layout=sec.layout||"track";
+  const skel=layout==="chart" ? "" : Array.from({length:8}).map(()=>`<div class="tcard-skel"><div class="tcard-skel-art"></div><div class="tcard-skel-line"></div><div class="tcard-skel-line s"></div></div>`).join("");
+  el2.innerHTML=`
+    <div class="section-head">
+      <div class="section-title">${sec.emoji?sec.emoji+" ":""}${esc(sec.title)}</div>
+      <div class="section-actions">
+        <button class="section-more">More</button>
+      </div>
+    </div>
+    ${layout==="mood" ? `<div class="track" data-track></div>` : layout==="chart" ? `<div class="chart-list" data-chart></div>` : `<div class="track" data-track></div>`}`;
+  if(layout!=="chart" && layout!=="mood"){
+    el2.querySelector("[data-track]").innerHTML=skel;
+  } else if(layout==="mood"){
+    MOODS.forEach(m=>el2.querySelector("[data-track]").appendChild(createMoodCard(m)));
+  }
+  return el2;
 }
 
 function fillSection(secEl, sec, songs){
-  const carousel=secEl.querySelector("[data-carousel]");
-  carousel.innerHTML="";
-  songs.slice(0,12).forEach(s=>carousel.appendChild(createCard(s)));
+  if(sec.layout==="chart"){
+    const list=secEl.querySelector("[data-chart]");
+    list.innerHTML="";
+    songs.slice(0,10).forEach((s,i)=>list.appendChild(createChartRow(s, i+1)));
+  } else {
+    const track=secEl.querySelector("[data-track]");
+    track.innerHTML="";
+    songs.slice(0,15).forEach(s=>track.appendChild(createTallCard(s)));
+  }
 }
 
 async function loadSection(sec){
   const secEl=createSectionSkeleton(sec);
   el("sections").appendChild(secEl);
+  if(sec.layout==="mood") return;
   const q=queryFor(sec.id, state.lang);
   try{
     const songs=await SaavnAPI.search(q, state.lang, 1);
-    if(!songs.length){ secEl.remove(); return; }
+    if(!songs.length){secEl.remove();return}
     const unique=filterUnique(songs);
-    if(!unique.length){ secEl.remove(); return; }
+    if(!unique.length){secEl.remove();return}
     state.lists.set(sec.id, unique);
     fillSection(secEl, sec, unique);
   }catch(e){
@@ -603,22 +857,10 @@ async function loadSection(sec){
   }
 }
 
-async function loadQuickPicks(){
-  try{
-    const songs=await SaavnAPI.search(queryFor("trending", state.lang), state.lang, 1);
-    const top=songs.slice().sort((a,b)=>b.playCount-a.playCount).slice(0,6);
-    const box=el("quickpicks");
-    box.innerHTML="";
-    top.forEach(s=>{ _seenIds.add(s.id); box.appendChild(createQuickPick(s)); });
-    state.lists.set("quickpicks", top);
-  }catch(e){}
-}
-
 function loadHome(){
   el("sections").innerHTML="";
   state.lists.clear();
   resetDedup();
-  loadQuickPicks();
   SECTIONS.forEach(s=>loadSection(s));
 }
 
@@ -637,37 +879,68 @@ const LANG_LABELS={telugu:"Telugu",hindi:"Hindi",tamil:"Tamil",kannada:"Kannada"
 function updateGreet(){
   const h=document.querySelector(".greet h1");
   const p=document.querySelector(".greet p");
-  if(h) h.textContent=`${LANG_LABELS[state.lang]||state.lang} music for you`;
-  if(p) p.textContent=`Hand-picked ${LANG_LABELS[state.lang]||state.lang} songs · free · no ads`;
+  if(h) h.textContent=`Good evening`;
+  if(p) p.textContent=`${LANG_LABELS[state.lang]||state.lang} music picked for you`;
 }
 
-// sidebar nav — each item triggers a real behavior
+// sidebar nav
 document.querySelectorAll(".nav-item").forEach(item=>{
   item.addEventListener("click",()=>{
     document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
     item.classList.add("active");
     const sec=item.dataset.section;
-    if(sec==="home"){ loadHome(); return; }
-    if(sec==="explore"){ loadExplore(); return; }
-    if(sec==="library"){ loadLibrary(); return; }
-    if(sec==="liked"){ showEmpty("Liked songs", "Songs you like will appear here. Tap the ♡ on the player to like a song."); return; }
-    if(sec==="history"){ showEmpty("History", "Songs you have played will appear here."); return; }
+    if(sec==="home"){loadHome();return}
+    if(sec==="explore"){loadExplore();return}
+    if(sec==="library"){loadLibrary();return}
+    if(sec==="upgrade"){showEmpty("Music Premium","Get ad-free music, offline playback, and more.");return}
   });
 });
 
-// sidebar playlists — each loads a curated query into the main view
+// liked / recent (in sidebar)
+document.querySelectorAll(".sb-list-item[data-list]").forEach(item=>{
+  item.addEventListener("click",()=>{
+    document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+    const which=item.dataset.list;
+    if(which==="liked"){
+      if(!state.liked.size){
+        showEmpty("Liked songs","Songs you like will appear here. Tap the ♡ on the player bar to like the current song.");
+      } else {
+        showLiked();
+      }
+    } else if(which==="history"){
+      showEmpty("Recent","Songs you play will appear here.");
+    }
+  });
+});
+
+function showLiked(){
+  const songs=Array.from(state.liked);
+  el("sections").innerHTML="";
+  const sec={id:"liked", title:"Liked songs", layout:"track"};
+  const secEl=document.createElement("div");
+  secEl.className="section";
+  secEl.dataset.sectionId="liked";
+  secEl.innerHTML=`
+    <div class="section-head"><div class="section-title">♡ Liked songs</div></div>
+    <div class="track"></div>`;
+  el("sections").appendChild(secEl);
+  state.lists.set("liked", songs);
+  songs.forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// sidebar playlists (language-aware)
 const PLAYLIST_QUERIES={
-  "Telugu Hits":   {query:"telugu hits", emoji:"🎵"},
-  "Old Classics":  {query:"ghantasala spb ilaiyaraaja telugu", emoji:"🏛️"},
-  "Romantic":      {query:"telugu love melody", emoji:"💕"},
-  "Mass Hits":     {query:"pushpa devara rrr", emoji:"💥"},
-  "Devotional":    {query:"telugu devotional", emoji:"🪔"},
-  "Workout":       {query:"telugu mass dj", emoji:"🏋️"}
+  "Top Hits":  {telugu:"telugu hits",hindi:"hindi hits",tamil:"tamil hits",kannada:"kannada hits",malayalam:"malayalam hits",punjabi:"punjabi hits",english:"english hits",emoji:"🎵"},
+  "Romantic":  {telugu:"telugu love melody",hindi:"hindi romantic",tamil:"tamil melody",kannada:"kannada love",malayalam:"malayalam melody",punjabi:"punjabi love",english:"english love",emoji:"♥"},
+  "Mass Hits": {telugu:"telugu mass",hindi:"hindi party",tamil:"tamil mass",kannada:"kannada mass",malayalam:"malayalam hit",punjabi:"punjabi bhangra",english:"english party",emoji:"⚡"},
+  "Devotional":{telugu:"telugu devotional",hindi:"hindi bhajan",tamil:"tamil devotional",kannada:"kannada devotional",malayalam:"malayalam devotional",punjabi:"punjabi devotional",english:"english gospel",emoji:"🪔"},
+  "Workout":   {telugu:"telugu dj",hindi:"hindi workout",tamil:"tamil workout",kannada:"kannada workout",malayalam:"malayalam workout",punjabi:"punjabi workout",english:"english workout",emoji:"🏋"},
+  "Classics":  {telugu:"ghantasala spb ilaiyaraaja",hindi:"mukesh lata mangeshkar",tamil:"msv ilaiyaraaja",kannada:"dr rajkumar",malayalam:"k j yesudas",punjabi:"old punjabi",english:"classic english",emoji:"♬"}
 };
-document.querySelectorAll(".nav-playlist").forEach(pl=>{
-  pl.style.cursor="pointer";
-  pl.addEventListener("click",()=>{
-    const name=pl.querySelector("span")?.textContent?.trim();
+document.querySelectorAll(".sb-list-item[data-pl]").forEach(item=>{
+  item.addEventListener("click",()=>{
+    const name=item.dataset.pl;
     const cfg=PLAYLIST_QUERIES[name];
     if(!cfg) return;
     document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
@@ -685,12 +958,12 @@ document.querySelectorAll(".nav-playlist").forEach(pl=>{
         secEl.className="section";
         secEl.dataset.sectionId=sec.id;
         secEl.innerHTML=`
-          <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div></div>
-          <div class="carousel" data-carousel></div>`;
+          <div class="section-head"><div class="section-title">${cfg.emoji} ${esc(sec.title)}</div></div>
+          <div class="track"></div>`;
         el("sections").innerHTML="";
         el("sections").appendChild(secEl);
         state.lists.set(sec.id, songs);
-        fillSection(secEl, sec, songs);
+        songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
         window.scrollTo({top:0,behavior:"smooth"});
       }catch(e){
         el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">Failed: ${esc(e.message)}</div>`;
@@ -714,10 +987,14 @@ function loadExplore(){
   resetDedup();
   (async()=>{
     const explore=[
-      {id:"explore_trending", title:"Trending this week", emoji:"🔥",  sectionKey:"trending"},
-      {id:"explore_new",      title:"Fresh finds",         emoji:"✨", sectionKey:"new"},
-      {id:"explore_charts",   title:"Top charts",          emoji:"📈", sectionKey:"charts"},
-      {id:"explore_mood",     title:"Feel-good",           emoji:"😊", sectionKey:"romance"}
+      {id:"explore_new",   title:"Fresh finds",     emoji:"✨", sectionKey:"new"},
+      {id:"explore_trend", title:"Trending now",    emoji:"🔥", sectionKey:"trending"},
+      {id:"explore_chart", title:"Top charts",      emoji:"📈", sectionKey:"charts"},
+      {id:"explore_class", title:"Timeless",        emoji:"🏛️", sectionKey:"classics"},
+      {id:"explore_rom",   title:"Romantic",        emoji:"💕", sectionKey:"romance"},
+      {id:"explore_work",  title:"Workout",         emoji:"🏋", sectionKey:"workout"},
+      {id:"explore_dev",   title:"Devotional",      emoji:"🪔", sectionKey:"devotional"},
+      {id:"explore_sad",   title:"Sad songs",       emoji:"💧", sectionKey:"sad"}
     ];
     el("sections").innerHTML="";
     for(const sec of explore){
@@ -731,11 +1008,11 @@ function loadExplore(){
         secEl.className="section";
         secEl.dataset.sectionId=sec.id;
         secEl.innerHTML=`
-          <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div></div>
-          <div class="carousel" data-carousel></div>`;
+          <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div><div class="section-actions"><button class="section-more">More</button></div></div>
+          <div class="track"></div>`;
         el("sections").appendChild(secEl);
         state.lists.set(sec.id, unique);
-        fillSection(secEl, sec, unique);
+        unique.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
       }catch(_){}
     }
     window.scrollTo({top:0,behavior:"smooth"});
@@ -743,25 +1020,11 @@ function loadExplore(){
 }
 
 function loadLibrary(){
-  // Library = all songs from every loaded section, de-duplicated
-  const all=new Map();
-  for(const songs of state.lists.values()){
-    for(const s of songs){ if(!all.has(s.id)) all.set(s.id, s); }
+  if(!state.liked.size){
+    showEmpty("Your library","Play a few songs and tap the ♡ to start building your library.");
+    return;
   }
-  const songs=Array.from(all.values());
-  if(!songs.length){ showEmpty("Library", "Play a few songs to start building your library."); return; }
-  const sec={id:"library", title:"Your library", emoji:"📚"};
-  const secEl=document.createElement("div");
-  secEl.className="section";
-  secEl.dataset.sectionId=sec.id;
-  secEl.innerHTML=`
-    <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)} · ${songs.length} songs</div></div>
-    <div class="carousel" data-carousel></div>`;
-  el("sections").innerHTML="";
-  el("sections").appendChild(secEl);
-  state.lists.set("library", songs);
-  fillSection(secEl, sec, songs);
-  window.scrollTo({top:0,behavior:"smooth"});
+  showLiked();
 }
 
 // search
@@ -771,6 +1034,7 @@ el("search-input").addEventListener("keydown",e=>{
   if(!q) return;
   state.query=q;
   el("sections").innerHTML=`<div style="text-align:center;color:var(--text-2);padding:60px 20px">Searching…</div>`;
+  resetDedup();
   (async()=>{
     try{
       const songs=await SaavnAPI.search(q, state.lang, 1);
@@ -785,11 +1049,11 @@ el("search-input").addEventListener("keydown",e=>{
       secEl.dataset.sectionId="search";
       secEl.innerHTML=`
         <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div></div>
-        <div class="carousel" data-carousel></div>`;
+        <div class="track"></div>`;
       el("sections").innerHTML="";
       el("sections").appendChild(secEl);
       state.lists.set("search", songs);
-      fillSection(secEl, sec, songs);
+      songs.slice(0,15).forEach(s=>secEl.querySelector(".track").appendChild(createTallCard(s)));
       window.scrollTo({top:0,behavior:"smooth"});
     }catch(e){
       el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">Search failed: ${esc(e.message)}</div>`;
@@ -812,15 +1076,16 @@ const AudioCtl={
 function playSong(song, queue=[song]){
   state.queue=[...queue]; state.qIndex=state.queue.findIndex(q=>q.id===song.id);
   state.current=song;
-  const url=SaavnAPI.bestUrl(song);
-  audio.src=url; AudioCtl.play();
+  audio.src=SaavnAPI.bestUrl(song); AudioCtl.play();
   el("player").hidden=false;
   el("p-art").src=song.image;
   el("p-title").textContent=song.name;
   el("p-artist").textContent=song.artist;
-  el("p-play").textContent="⏸";
+  el("p-play").classList.add("playing");
   el("p-dur").textContent=fmtTime(song.duration);
   el("p-seek").value=0;
+  el("p-like").textContent=state.liked.has(song.id)?"♥":"♡";
+  el("p-like").style.color=state.liked.has(song.id)?"#ff4081":"";
   if(typeof loadLyrics==="function") loadLyrics(song);
   if(typeof loadVideoFor==="function") loadVideoFor(song);
 }
@@ -830,8 +1095,8 @@ function prevSong(){if(audio.currentTime>3||state.qIndex<=0){audio.currentTime=0
 el("p-play").addEventListener("click",()=>{if(state.current)AudioCtl.toggle()});
 el("p-next").addEventListener("click",nextSong);
 el("p-prev").addEventListener("click",prevSong);
-audio.addEventListener("play",()=>el("p-play").textContent="⏸");
-audio.addEventListener("pause",()=>el("p-play").textContent="▶");
+audio.addEventListener("play",()=>el("p-play").classList.add("playing"));
+audio.addEventListener("pause",()=>el("p-play").classList.remove("playing"));
 let seeking=false;
 el("p-seek").addEventListener("input",()=>{seeking=true;el("p-cur").textContent=fmtTime(el("p-seek").value)});
 el("p-seek").addEventListener("change",()=>{AudioCtl.seek(+el("p-seek").value);seeking=false});
@@ -843,9 +1108,22 @@ audio.addEventListener("timeupdate",()=>{
 });
 audio.addEventListener("loadedmetadata",()=>{el("p-dur").textContent=fmtTime(audio.duration)});
 audio.addEventListener("ended",nextSong);
-
-// volume
 el("p-vol").addEventListener("input",e=>{audio.volume=+e.target.value/100});
+el("p-like").addEventListener("click",()=>{
+  if(!state.current) return;
+  if(state.liked.has(state.current.id)){
+    state.liked.delete(state.current.id);
+    el("p-like").textContent="♡";
+    el("p-like").style.color="";
+  } else {
+    state.liked.add(state.current.id);
+    // store the actual song object
+    state.liked.song=state.liked.song||new Map();
+    state.liked.song.set(state.current.id, state.current);
+    el("p-like").textContent="♥";
+    el("p-like").style.color="#ff4081";
+  }
+});
 
 // ── lyrics ──────────────────────────────────────────
 const LRC="https://lrclib.net/api";
