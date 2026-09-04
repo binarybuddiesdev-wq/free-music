@@ -5,7 +5,6 @@ import { usePlayerStore } from '@/stores/player.store'
 import { useLibraryStore } from '@/stores/library.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
 import type { Song } from '@/types/music'
-import { truncate } from '@/lib/utils'
 
 interface SongCardProps {
   song: Song
@@ -24,116 +23,108 @@ export function SongCard({ song, queue, index }: SongCardProps) {
   const isCurrent = currentSong?.id === song.id
   const liked = isLiked(song.id)
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setCtx({ x: e.clientX, y: e.clientY })
-  }
-
   return (
     <>
       <div
-        style={{ width: 160, flexShrink: 0, cursor: 'pointer' }}
+        className="tcard"
+        style={{
+          width: 160, flexShrink: 0, scrollSnapAlign: 'start',
+          display: 'flex', flexDirection: 'column',
+          padding: 8, borderRadius: 8, cursor: 'pointer',
+          transition: 'background .15s',
+          background: hovered ? '#272727' : 'transparent',
+        }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onContextMenu={handleContextMenu}
+        onContextMenu={(e) => { e.preventDefault(); setCtx({ x: e.clientX, y: e.clientY }) }}
         onClick={() => playSong(song, queue, index)}
       >
-        {/* Art */}
-        <div
-          style={{
-            position: 'relative',
-            width: 160,
-            height: 240,
-            borderRadius: 6,
-            overflow: 'hidden',
-            background: 'var(--bg-elevated)',
-            marginBottom: 8,
-          }}
-        >
-          {song.image && (
+        {/* Art — 160x160 square */}
+        <div style={{
+          position: 'relative', width: 160, height: 160,
+          borderRadius: 8, overflow: 'hidden', background: '#272727', flexShrink: 0,
+          transition: 'transform .15s',
+          transform: hovered ? 'scale(1.03)' : 'scale(1)',
+        }}>
+          {song.image ? (
             <Image
               src={song.image}
               alt={song.title}
               fill
               sizes="160px"
-              style={{ objectFit: 'cover', transition: 'transform 0.3s' }}
-              className={hovered ? 'scale-105' : ''}
+              style={{ objectFit: 'cover', display: 'block' }}
+              unoptimized
             />
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🎵</div>
           )}
-          {/* Overlay on hover */}
-          {hovered && (
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0,0,0,0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: '50%',
-                  background: 'var(--accent)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {isCurrent && isPlaying ? (
-                  <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </div>
-            </div>
-          )}
+
+          {/* Play button — bottom right on hover */}
+          <button
+            style={{
+              position: 'absolute', right: 8, bottom: 8,
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'rgba(30,30,30,.9)', color: '#fff', border: 0,
+              fontSize: 14, cursor: 'pointer',
+              opacity: hovered ? 1 : 0,
+              transform: hovered ? 'translateY(0)' : 'translateY(8px)',
+              transition: '.2s', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,.5)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1.06)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(30,30,30,.9)'; e.currentTarget.style.transform = 'translateY(0)' }}
+            onClick={(e) => { e.stopPropagation(); playSong(song, queue, index) }}
+          >
+            {isCurrent && isPlaying ? (
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              </svg>
+            ) : (
+              <div style={{ width: 0, height: 0, borderLeft: '12px solid currentColor', borderTop: '7px solid transparent', borderBottom: '7px solid transparent', marginLeft: 2 }} />
+            )}
+          </button>
+
           {/* Now playing indicator */}
           {isCurrent && !hovered && (
             <div style={{ position: 'absolute', bottom: 8, right: 8 }}>
               <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end', height: 16 }}>
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: 3,
-                      background: 'var(--accent)',
-                      borderRadius: 1,
-                      height: isPlaying ? `${8 + i * 4}px` : 6,
-                      animation: isPlaying ? `bounce${i} 0.8s ease-in-out infinite alternate` : 'none',
-                    }}
-                  />
+                {[4, 8, 6].map((h, i) => (
+                  <div key={i} style={{
+                    width: 3, height: isPlaying ? h + 4 : 4,
+                    background: '#ff0000', borderRadius: 1,
+                    transition: 'height .3s',
+                  }} />
                 ))}
               </div>
             </div>
           )}
+
+          {/* Liked indicator */}
           {liked && (
             <div style={{ position: 'absolute', top: 8, right: 8 }}>
-              <svg viewBox="0 0 24 24" fill="var(--accent)" className="w-4 h-4">
+              <svg viewBox="0 0 24 24" fill="#ff0000" width="14" height="14">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </div>
           )}
         </div>
 
-        <div style={{ fontSize: 13, fontWeight: isCurrent ? 600 : 400, color: isCurrent ? 'var(--accent)' : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {truncate(song.title, 20)}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>
-          {truncate(song.artist, 22)}
+        {/* Text */}
+        <div style={{ height: 48, marginTop: 8, overflow: 'hidden' }}>
+          <div style={{
+            fontSize: 14, fontWeight: isCurrent ? 600 : 500,
+            color: isCurrent ? '#ff0000' : '#fff', lineHeight: 1.3,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+          }}>
+            {song.title}
+          </div>
+          <div style={{ fontSize: 12, color: '#aaa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>
+            {song.artist}
+          </div>
         </div>
       </div>
 
-      {ctx && (
-        <ContextMenu song={song} x={ctx.x} y={ctx.y} onClose={() => setCtx(null)} />
-      )}
+      {ctx && <ContextMenu song={song} x={ctx.x} y={ctx.y} onClose={() => setCtx(null)} />}
     </>
   )
 }

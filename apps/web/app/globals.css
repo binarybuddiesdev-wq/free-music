@@ -1,97 +1,40 @@
 @import "tailwindcss";
 
-:root {
-  --bg-base: #0f0f0f;
-  --bg-surface: #1a1a1a;
-  --bg-elevated: #212121;
-  --bg-hover: #2a2a2a;
-  --bg-active: #3d3d3d;
-  --text-primary: #e8eaed;
-  --text-secondary: #aaa;
-  --text-tertiary: #717171;
-  --accent: #ff0000;
-  --accent-hover: #cc0000;
-  --border: #3d3d3d;
-  --player-bg: #1a1a1a;
-  --sidebar-width: 220px;
-  --player-height: 72px;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  background: var(--bg-base);
-  color: var(--text-primary);
-  font-family: "Roboto", "YouTube Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-  margin: 0;
-  padding: 0;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; background: #0f0f0f; }
+body {
   height: 100%;
+  background: #0f0f0f;
+  color: #fff;
+  font-family: Roboto, system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
-/* Hide scrollbar but keep scroll */
+::selection { background: rgba(255, 0, 0, .3); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.35); }
+*:focus-visible { outline: 2px solid rgba(255,0,0,.6); outline-offset: 2px; }
+
+/* Hide scrollbar track for carousels */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Thin scrollbar for content areas */
-.thin-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-.thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.thin-scrollbar::-webkit-scrollbar-thumb { background: var(--bg-active); border-radius: 2px; }
+/* Card hover */
+.tcard:hover .tcard-art-inner { transform: scale(1.03); }
+.tcard:hover .tcard-play { opacity: 1 !important; transform: translateY(0) !important; }
 
-/* Progress bar reset */
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-}
-input[type="range"]::-webkit-slider-track {
-  background: var(--bg-active);
-  height: 3px;
-  border-radius: 2px;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--text-primary);
-  margin-top: -4.5px;
-}
-input[type="range"]:hover::-webkit-slider-thumb {
-  background: #fff;
-}
+/* Animations */
+@keyframes pulse-skel { 0%,100%{opacity:.55} 50%{opacity:.95} }
+@keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes fadeIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
 
-/* YTM-style marquee for long titles */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.marquee-text {
-  display: inline-block;
-  white-space: nowrap;
-  animation: marquee 12s linear infinite;
-  animation-play-state: paused;
-}
-.marquee-container:hover .marquee-text {
-  animation-play-state: running;
-}
+.slide-up { animation: slideUp .3s cubic-bezier(.4,0,.2,1); }
+.fade-in { animation: fadeIn .1s ease-out; }
 
-/* Expanded player slide-up */
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-.slide-up {
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Context menu fade-in */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-.fade-in {
-  animation: fadeIn 0.1s ease-out;
-}
+/* Range input */
+input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }
+input[type="range"]::-webkit-slider-track { background: #555; height: 2px; border-radius: 2px; transition: height .1s; }
+input[type="range"]:hover::-webkit-slider-track { height: 4px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; margin-top: -5px; cursor: pointer; box-shadow: 0 0 4px rgba(0,0,0,.3); }

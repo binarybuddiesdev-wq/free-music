@@ -1,24 +1,9 @@
 export function SkeletonCard() {
   return (
-    <div style={{ width: 160, flexShrink: 0 }}>
-      <div
-        style={{
-          width: 160,
-          height: 240,
-          borderRadius: 6,
-          background: 'var(--bg-elevated)',
-          marginBottom: 8,
-          animation: 'pulse 1.5s ease-in-out infinite',
-        }}
-      />
-      <div style={{ height: 13, background: 'var(--bg-elevated)', borderRadius: 3, marginBottom: 6, width: '80%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-      <div style={{ height: 12, background: 'var(--bg-elevated)', borderRadius: 3, width: '60%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 1; }
-        }
-      `}</style>
+    <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', padding: 8, width: 160 }}>
+      <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: 8, background: '#272727', animation: 'pulse-skel 1.4s infinite' }} />
+      <div style={{ height: 14, borderRadius: 4, background: '#272727', animation: 'pulse-skel 1.4s infinite', marginTop: 8 }} />
+      <div style={{ height: 12, borderRadius: 4, background: '#272727', animation: 'pulse-skel 1.4s infinite', marginTop: 6, width: '60%' }} />
     </div>
   )
 }

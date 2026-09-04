@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useUIStore } from '@/stores/ui.store'
 import { useSettingsStore } from '@/stores/settings.store'
+import { useLibraryStore } from '@/stores/library.store'
 import { LANGUAGES } from '@/lib/languages'
 
 const NAV = [
@@ -10,7 +11,7 @@ const NAV = [
     href: '/',
     label: 'Home',
     icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
       </svg>
     ),
@@ -19,8 +20,8 @@ const NAV = [
     href: '/explore',
     label: 'Explore',
     icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
       </svg>
     ),
   },
@@ -28,7 +29,7 @@ const NAV = [
     href: '/library',
     label: 'Library',
     icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
         <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z" />
       </svg>
     ),
@@ -38,104 +39,155 @@ const NAV = [
 export function Sidebar() {
   const pathname = usePathname()
   const { language, setLanguage } = useSettingsStore()
-  const [collapsed, setCollapsed] = useState(false)
+  const collapsed = useUIStore((s) => s.sidebarCollapsed)
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar)
+  const likedSongs = useLibraryStore((s) => s.likedSongs)
+  const history = useLibraryStore((s) => s.history)
+
+  const likedCount = Object.keys(likedSongs).length
 
   return (
-    <aside
-      style={{
-        width: collapsed ? 72 : 220,
-        background: 'var(--bg-surface)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        flexShrink: 0,
-        transition: 'width 0.2s',
-        overflow: 'hidden',
-        zIndex: 30,
-      }}
-    >
-      {/* Header: hamburger + logo */}
-      <div className="flex items-center gap-3 px-4 h-14">
+    <aside style={{
+      position: 'fixed', left: 0, top: 0, bottom: 56, width: collapsed ? 72 : 220,
+      background: '#030303', display: 'flex', flexDirection: 'column', zIndex: 20,
+      overflowY: 'auto', overflowX: 'hidden', transition: 'width .2s', flexShrink: 0,
+      borderRight: '1px solid rgba(255,255,255,.06)',
+    }}>
+      {/* Logo row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px 12px', minHeight: 56 }}>
         <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] text-[var(--text-primary)]"
-          aria-label="Toggle sidebar"
+          onClick={toggleSidebar}
+          style={{ width: 40, height: 40, borderRadius: '50%', background: 'transparent', border: 0, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.1)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          title="Menu"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
           </svg>
         </button>
+
         {!collapsed && (
-          <Link href="/" className="flex items-center gap-1 select-none">
-            <svg viewBox="0 0 90 20" fill="currentColor" className="h-4 text-[var(--text-primary)]">
-              <text x="0" y="16" fontSize="18" fontWeight="700" fontFamily="sans-serif">Music</text>
-            </svg>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', flexShrink: 0 }}>
+            {/* YouTube Music logo: red rounded-rect with white triangle + "Music" */}
+            <div style={{ position: 'relative', width: 28, height: 20, flexShrink: 0 }}>
+              <div style={{ width: 28, height: 20, borderRadius: 6, background: '#ff0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 0, height: 0, borderLeft: '9px solid #fff', borderTop: '5.5px solid transparent', borderBottom: '5.5px solid transparent', marginLeft: 2 }} />
+              </div>
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: '-.2px', whiteSpace: 'nowrap', fontFamily: 'Roboto, sans-serif' }}>
+              Music
+            </span>
           </Link>
         )}
       </div>
 
-      {/* Nav links */}
-      <nav className="flex flex-col gap-0.5 px-2 mt-1">
+      {/* Nav items */}
+      <nav style={{ display: 'flex', flexDirection: 'column', paddingTop: 4 }}>
         {NAV.map(({ href, label, icon }) => {
           const active = pathname === href
           return (
             <Link
               key={href}
               href={href}
+              title={collapsed ? label : undefined}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 16,
-                padding: collapsed ? '10px 16px' : '10px 16px',
-                borderRadius: 6,
-                background: active ? 'var(--bg-active)' : 'transparent',
-                color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
-                fontSize: 14,
-                fontWeight: active ? 600 : 400,
-                whiteSpace: 'nowrap',
-                textDecoration: 'none',
-                transition: 'background 0.15s',
+                display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 20,
+                padding: collapsed ? '12px 0' : '10px 24px',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                borderRadius: 0,
+                background: active ? 'rgba(255,255,255,.12)' : 'transparent',
+                color: '#fff', fontSize: 14, fontWeight: active ? 600 : 400,
+                textDecoration: 'none', transition: 'background .12s', userSelect: 'none',
               }}
-              className="hover:bg-[var(--bg-hover)]"
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.08)' }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
             >
-              <span className="shrink-0">{icon}</span>
+              <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: active ? '#fff' : 'rgba(255,255,255,.8)' }}>{icon}</span>
               {!collapsed && <span>{label}</span>}
             </Link>
           )
         })}
       </nav>
 
-      {/* Spacer */}
-      <div className="flex-1" />
+      {/* Divider */}
+      <div style={{ height: 1, background: 'rgba(255,255,255,.08)', margin: '8px 0' }} />
 
-      {/* Language selector */}
+      {/* Playlists section */}
       {!collapsed && (
-        <div className="px-4 pb-4">
-          <label className="text-xs text-[var(--text-tertiary)] mb-1 block uppercase tracking-wider">
-            Language
-          </label>
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            style={{
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              padding: '6px 10px',
-              fontSize: 13,
-              width: '100%',
-              cursor: 'pointer',
-            }}
-          >
-            {LANGUAGES.map((l) => (
-              <option key={l.value} value={l.value}>
-                {l.label} — {l.english}
-              </option>
-            ))}
-          </select>
+        <>
+          <SidebarPlaylist
+            label="Liked songs"
+            sub="Auto playlist"
+            gradient="linear-gradient(135deg,#5e2e8e,#b937f2)"
+            icon="♥"
+            count={likedCount}
+            href="/library"
+          />
+          <SidebarPlaylist
+            label="Recently played"
+            sub="Auto playlist"
+            gradient="linear-gradient(135deg,#1a4a8a,#4a7fc4)"
+            icon="↻"
+            count={history.length}
+            href="/library"
+          />
+        </>
+      )}
+
+      <div style={{ flex: 1 }} />
+
+      {/* Language selector at bottom */}
+      {!collapsed && (
+        <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+          <div style={{ position: 'relative' }}>
+            <button style={{
+              width: '100%', padding: '7px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,.15)',
+              background: 'transparent', color: 'rgba(255,255,255,.7)', fontSize: 12,
+              fontFamily: 'inherit', cursor: 'pointer', display: 'flex',
+              alignItems: 'center', justifyContent: 'space-between', gap: 4,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                </svg>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {LANGUAGES.find(l => l.value === language)?.label ?? language}
+                </span>
+              </div>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M7 10l5 5 5-5z"/></svg>
+            </button>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%' }}
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.value} value={l.value}>{l.label} — {l.english}</option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
     </aside>
+  )
+}
+
+function SidebarPlaylist({ label, sub, gradient, icon, count, href }: {
+  label: string; sub: string; gradient: string; icon: string; count?: number; href: string
+}) {
+  return (
+    <Link
+      href={href}
+      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', textDecoration: 'none', transition: 'background .12s' }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.08)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
+      <div style={{ width: 40, height: 40, borderRadius: 4, background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#fff', flexShrink: 0 }}>{icon}</div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ fontSize: 13, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 1 }}>{sub}{count ? ` · ${count}` : ''}</div>
+      </div>
+    </Link>
   )
 }

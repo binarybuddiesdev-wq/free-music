@@ -24,12 +24,18 @@ export function SectionRow({ id, title }: SectionRowProps) {
 
   return (
     <section style={{ marginBottom: 32 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, padding: '0 4px' }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{title}</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-.2px' }}>{title}</h2>
         {songs.length > 0 && (
           <button
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}
-            className="hover:text-[var(--text-primary)]"
+            style={{
+              padding: '6px 16px', borderRadius: 20,
+              background: 'rgba(255,255,255,.1)', color: '#fff',
+              fontSize: 12, fontWeight: 500, cursor: 'pointer', border: 0,
+              transition: 'background .15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.2)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,.1)')}
           >
             See all
           </button>
@@ -38,13 +44,20 @@ export function SectionRow({ id, title }: SectionRowProps) {
 
       <div
         className="no-scrollbar"
-        style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}
+        style={{
+          display: 'flex', gap: 12, overflowX: 'auto',
+          scrollBehavior: 'smooth', scrollSnapType: 'x mandatory',
+          paddingBottom: 8, margin: '0 -24px',
+          paddingLeft: 24, paddingRight: 24,
+        }}
       >
         {isLoading
           ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-          : songs.map((song, i) => (
-              <SongCard key={song.id} song={song} queue={songs} index={i} />
-            ))}
+          : songs.length === 0
+            ? <p style={{ color: '#aaa', fontSize: 13, padding: '8px 0' }}>No songs found</p>
+            : songs.map((song, i) => (
+                <SongCard key={song.id} song={song} queue={songs} index={i} />
+              ))}
       </div>
     </section>
   )
