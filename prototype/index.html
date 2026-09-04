@@ -6,316 +6,442 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Sangeet — Telugu Music, Ad-Free</title>
+<title>Sangeet — Telugu Music</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0a0a; --bg-2:#141414; --surface:#1a1a1a; --surface-2:#222;
-  --glass:rgba(255,255,255,.06); --glass-brd:rgba(255,255,255,.08);
-  --text:#fff; --text-2:#b3b3b3; --text-3:#777;
-  --accent:#ff3b5c; --accent-2:#c026d3; --teal:#2dd4bf;
-  --grad:linear-gradient(135deg,#ff5e62 0%,#c026d3 100%);
+  --bg:#0f0f0f; --bg-2:#181818; --surface:#272727; --surface-2:#3a3a3a;
+  --text:#fff; --text-2:#aaaaaa; --text-3:#717171;
+  --accent:#ff0033; --accent-2:#ff4081;
+  --grad:linear-gradient(135deg,#ff0033 0%,#ff4081 100%);
   --radius:12px; --radius-sm:8px;
-  --font-ui:'Outfit',system-ui,sans-serif;
-  --font-te:'Noto Sans Telugu','Outfit',sans-serif;
+  --sidebar-w:240px;
+  --player-h:80px;
+  --font:'Roboto',system-ui,sans-serif;
+  --font-te:'Noto Sans Telugu','Roboto',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
-html{scroll-behavior:smooth;background:#0a0a0a}
+html{background:#0f0f0f}
 body{
-  background:#0a0a0a;
-  color:var(--text);
-  font-family:var(--font-ui);
-  min-height:100vh;
-  padding-bottom:96px;
-  overflow-x:hidden;
+  background:#0f0f0f;color:var(--text);
+  font-family:var(--font);
+  min-height:100vh;overflow-x:hidden;
+  padding-bottom:var(--player-h);
 }
-::-webkit-scrollbar{height:8px;width:8px}
-::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
-::-webkit-scrollbar-thumb:hover{background:#555}
+::-webkit-scrollbar{width:12px;height:12px}
 ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#444;border:3px solid var(--bg);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#555}
 
-/* topbar */
-.topbar{
-  position:sticky;top:0;z-index:30;
-  display:flex;align-items:center;gap:24px;
-  padding:12px 32px;
-  background:rgba(10,10,10,.85);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--glass-brd);
+/* ── layout shell ─────────────────────────────────── */
+.shell{display:flex;min-height:100vh}
+
+/* ── sidebar ─────────────────────────────────────── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:var(--player-h);
+  width:var(--sidebar-w);background:#000;
+  display:flex;flex-direction:column;
+  padding:12px 0;z-index:20;
+  overflow-y:auto;
 }
-.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
-.brand-mark{
-  width:36px;height:36px;border-radius:10px;
+.sidebar-logo{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px 18px;
+}
+.logo-mark{
+  width:36px;height:36px;border-radius:8px;
   background:var(--grad);
   display:flex;align-items:center;justify-content:center;
-  font-size:20px;color:#fff;font-weight:700;
-  box-shadow:0 4px 20px rgba(192,38,211,.4);
+  font-size:20px;color:#fff;
 }
-.brand-name{font-size:20px;font-weight:700;letter-spacing:-.3px}
-.search-wrap{display:flex;gap:8px;flex:1;max-width:640px;margin:0 auto}
-.search-input-wrap{position:relative;flex:1;min-width:0}
-.search-icon{
-  position:absolute;left:14px;top:50%;transform:translateY(-50%);
-  color:var(--text-3);pointer-events:none;font-size:14px;
+.logo-text{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.nav-section{padding:8px 12px 4px}
+.nav-item{
+  display:flex;align-items:center;gap:20px;
+  padding:10px 12px;border-radius:8px;
+  cursor:pointer;color:var(--text);
+  font-size:14px;font-weight:400;
+  transition:background .15s;
 }
-#search-input{
-  width:100%;padding:11px 16px 11px 40px;
-  border-radius:999px;border:1px solid var(--glass-brd);
-  background:#1a1a1a;color:var(--text);
-  font-size:14px;font-family:var(--font-ui);outline:none;transition:.2s;
+.nav-item:hover{background:rgba(255,255,255,.06)}
+.nav-item.active{background:rgba(255,255,255,.1);font-weight:700}
+.nav-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.nav-divider{height:1px;background:rgba(255,255,255,.08);margin:8px 20px}
+.nav-header{padding:10px 20px 4px;color:var(--text-2);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase}
+.nav-playlist{
+  display:flex;align-items:center;gap:12px;
+  padding:8px 20px;cursor:pointer;font-size:14px;color:var(--text);
+  transition:color .15s;
 }
-#search-input::placeholder{color:var(--text-3)}
-#search-input:focus{border-color:var(--accent-2);background:#222;box-shadow:0 0 0 3px rgba(192,38,211,.18)}
-#lang-select{
-  padding:11px 12px;border-radius:999px;border:1px solid var(--glass-brd);
-  background:#1a1a1a;color:var(--text);cursor:pointer;font-size:13px;
-  font-family:var(--font-ui);outline:none;
+.nav-playlist:hover{color:var(--text-2)}
+.nav-playlist-icon{
+  width:32px;height:32px;border-radius:6px;flex-shrink:0;
+  background:linear-gradient(135deg,#3a1f5e,#5e2e8e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
 }
-#lang-select:hover{background:#222}
 
-/* main content */
-main{padding:24px 0 60px}
-.row{padding:0 32px;margin-bottom:36px}
-.row-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
-.row-title{font-size:22px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
-.row-emoji{font-size:22px}
-.row-see{color:var(--text-2);font-size:13px;cursor:pointer;transition:.15s}
-.row-see:hover{color:var(--text)}
-.row-track{
-  display:flex;gap:18px;overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  padding-bottom:8px;margin:0 -32px;padding-left:32px;padding-right:32px;
-  scrollbar-width:thin;
+/* ── main content ────────────────────────────────── */
+.main{
+  margin-left:var(--sidebar-w);
+  flex:1;min-width:0;
+  padding:0 32px 40px;
 }
-.row-track::-webkit-scrollbar{height:6px}
+.header{
+  position:sticky;top:0;z-index:15;
+  display:flex;align-items:center;gap:16px;
+  padding:14px 0;
+  background:rgba(15,15,15,.92);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  margin:0 -32px;padding:14px 32px;
+}
+.chips{display:flex;gap:10px;flex:1;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  padding:8px 16px;border-radius:10px;
+  background:rgba(255,255,255,.08);color:var(--text);
+  font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
+  transition:.15s;border:0;font-family:var(--font);
+}
+.chip:hover{background:rgba(255,255,255,.15)}
+.chip.active{background:#fff;color:#000}
+.header-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:0;color:var(--text);
+  cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+  transition:.15s;
+}
+.icon-btn:hover{background:rgba(255,255,255,.15)}
+.avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;cursor:pointer;
+}
+
+/* hero greeting */
+.greet{margin:20px 0 28px}
+.greet h1{font-size:36px;font-weight:700;margin-bottom:4px}
+.greet p{color:var(--text-2);font-size:15px}
+
+/* quick picks - YTM's grid of "Listen again" cards */
+.quickpicks{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:12px;margin-bottom:48px;
+}
+.quick{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border-radius:8px;
+  padding:8px;cursor:pointer;overflow:hidden;
+  transition:background .15s;
+}
+.quick:hover{background:var(--surface-2)}
+.quick:hover .quick-play{opacity:1;transform:translateY(0)}
+.quick-art{
+  width:64px;height:64px;border-radius:6px;
+  background:linear-gradient(135deg,#2a1b4d,#3d2352);
+  object-fit:cover;flex-shrink:0;
+}
+.quick-title{
+  flex:1;min-width:0;
+  font-size:15px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.quick-play{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--grad);border:0;color:#fff;
+  font-size:14px;cursor:pointer;flex-shrink:0;
+  opacity:0;transform:translateY(8px);
+  transition:.2s;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+  margin-right:6px;
+}
+.quick-play:hover{transform:scale(1.05)!important;filter:brightness(1.1)}
+
+/* section */
+.section{margin-bottom:48px}
+.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:18px}
+.section-title{font-size:24px;font-weight:700}
+.section-see{color:var(--text-2);font-size:13px;cursor:pointer;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.section-see:hover{color:var(--text)}
+.carousel{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:18px;
+}
 .card{
-  flex:0 0 180px;scroll-snap-align:start;
   display:flex;flex-direction:column;gap:10px;
-  cursor:pointer;border-radius:var(--radius);padding:8px;
-  transition:.2s;background:transparent;
+  padding:8px;border-radius:8px;cursor:pointer;
+  transition:background .15s;
 }
 .card:hover{background:var(--surface)}
-.card:hover .card-art-wrap{transform:scale(1.03)}
 .card:hover .card-play{opacity:1;transform:translateY(0)}
 .card-art-wrap{
-  position:relative;width:100%;aspect-ratio:1/1;border-radius:var(--radius-sm);
-  overflow:hidden;background:linear-gradient(135deg,#2a1b4d,#3d2352);
-  transition:.25s;box-shadow:0 8px 24px rgba(0,0,0,.5);
+  position:relative;width:100%;aspect-ratio:1/1;
+  border-radius:var(--radius-sm);overflow:hidden;
+  background:linear-gradient(135deg,#2a1b4d,#3d2352);
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
 }
 .card-art{width:100%;height:100%;object-fit:cover;display:block}
 .card-play{
-  position:absolute;right:10px;bottom:10px;
-  width:46px;height:46px;border-radius:50%;
+  position:absolute;right:8px;bottom:8px;
+  width:48px;height:48px;border-radius:50%;
   background:var(--grad);color:#fff;border:0;
   font-size:16px;cursor:pointer;
   opacity:0;transform:translateY(8px);
-  transition:.2s;
+  transition:.2s;display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 20px rgba(0,0,0,.5);
-  display:flex;align-items:center;justify-content:center;
 }
-.card-play:hover{filter:brightness(1.15);transform:scale(1.06) translateY(0)!important}
+.card-play:hover{transform:scale(1.06)!important;filter:brightness(1.1)}
 .card-title{
-  font-size:14px;font-weight:600;color:var(--text);
+  font-size:14px;font-weight:500;color:var(--text);
+  line-height:1.3;
   overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  line-height:1.3;min-height:36px;
+  min-height:36px;
 }
 .card-sub{font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card-skel{
-  flex:0 0 180px;display:flex;flex-direction:column;gap:10px;padding:8px;
+  display:flex;flex-direction:column;gap:10px;padding:8px;
 }
-.card-skel-art{width:100%;aspect-ratio:1/1;border-radius:var(--radius-sm);background:#1a1a1a;animation:pulse 1.5s infinite}
-.card-skel-line{height:14px;border-radius:4px;background:#1a1a1a;animation:pulse 1.5s infinite}
-.card-skel-line.short{width:60%}
-@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.card-skel-art{width:100%;aspect-ratio:1/1;border-radius:var(--radius-sm);background:var(--surface);animation:p 1.4s infinite}
+.card-skel-line{height:14px;border-radius:4px;background:var(--surface);animation:p 1.4s infinite}
+.card-skel-line.s{width:60%}
+@keyframes p{0%,100%{opacity:.55}50%{opacity:.95}}
 
-/* hero */
-.hero{
-  position:relative;margin:0 32px 40px;border-radius:16px;overflow:hidden;
-  aspect-ratio:21/9;max-height:280px;
-  background:linear-gradient(135deg,#3d1f7a 0%,#c026d3 50%,#ff5e62 100%);
-  display:flex;align-items:flex-end;padding:28px;
-  box-shadow:0 12px 40px rgba(0,0,0,.5);
-}
-.hero::before{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.18) 0%,transparent 60%);
-}
-.hero-content{position:relative;z-index:1;max-width:600px}
-.hero-tag{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:10px}
-.hero-title{font-family:var(--font-te);font-size:42px;font-weight:700;color:#fff;line-height:1.1;margin-bottom:10px;text-shadow:0 2px 12px rgba(0,0,0,.4)}
-.hero-sub{color:rgba(255,255,255,.9);font-size:15px;margin-bottom:18px;font-weight:300}
-.hero-cta{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:11px 24px;border-radius:999px;border:0;
-  background:#fff;color:#000;font-weight:600;cursor:pointer;font-size:14px;
-  transition:.15s;font-family:var(--font-ui);
-}
-.hero-cta:hover{transform:scale(1.04);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+/* large cards (16:9 hero banners within carousels) */
+.large-card .card-art-wrap{aspect-ratio:16/9}
 
-/* player bar */
+/* ── player bar ──────────────────────────────────── */
 #player{
   position:fixed;left:0;right:0;bottom:0;z-index:40;
-  display:flex;align-items:center;gap:20px;
-  padding:10px 24px;
-  background:rgba(20,20,20,.95);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-top:1px solid var(--glass-brd);
-  height:80px;
+  height:var(--player-h);
+  display:flex;align-items:center;
+  background:#000;border-top:1px solid rgba(255,255,255,.06);
+  padding:0 20px;gap:24px;
 }
 #player[hidden]{display:none}
+.p-left{display:flex;align-items:center;gap:14px;width:30%;min-width:200px;max-width:340px}
 #p-art{
-  width:56px;height:56px;border-radius:var(--radius-sm);
-  background:linear-gradient(135deg,#2a1b4d,#3d2352);object-fit:cover;flex-shrink:0;
+  width:56px;height:56px;border-radius:6px;
+  background:linear-gradient(135deg,#2a1b4d,#3d2352);object-fit:cover;
 }
-.p-meta{min-width:160px;max-width:220px}
-#p-title{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#p-artist{color:var(--text-2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.p-controls{display:flex;gap:6px;align-items:center}
+.p-info{min-width:0;flex:1}
+#p-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#p-artist{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.p-like{
+  width:36px;height:36px;border-radius:50%;background:transparent;border:0;
+  color:var(--text-2);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.p-like:hover{color:var(--text)}
+.p-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;max-width:660px;margin:0 auto}
+.p-controls{display:flex;align-items:center;gap:18px}
 .p-btn{
-  width:38px;height:38px;border-radius:50%;
   background:transparent;border:0;color:var(--text);
-  cursor:pointer;font-size:16px;transition:.15s;
+  cursor:pointer;font-size:18px;padding:6px;
   display:flex;align-items:center;justify-content:center;
+  transition:transform .1s;
 }
-.p-btn:hover{background:rgba(255,255,255,.08)}
+.p-btn:hover{transform:scale(1.08)}
+.p-btn.active{color:var(--accent)}
 #p-play{
-  width:42px;height:42px;
-  background:#fff;color:#000;font-size:15px;
+  width:40px;height:40px;border-radius:50%;
+  background:#fff;color:#000;font-size:14px;
 }
-#p-play:hover{background:#fff;transform:scale(1.06)}
-.p-timeline{flex:1;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text-2);min-width:0}
+#p-play:hover{transform:scale(1.08);background:#fff}
+.p-timeline{display:flex;align-items:center;gap:10px;width:100%;font-size:11px;color:var(--text-2)}
 #p-seek{
-  flex:1;appearance:none;-webkit-appearance:none;height:4px;border-radius:2px;
-  background:#333;outline:none;cursor:pointer;min-width:0;
+  flex:1;appearance:none;-webkit-appearance:none;height:3px;border-radius:2px;
+  background:#404040;outline:none;cursor:pointer;min-width:0;
 }
-#p-seek::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-#p-seek::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:0;cursor:pointer}
-.p-modes{display:flex;gap:4px}
+#p-seek::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;cursor:pointer}
+#p-seek::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:0;cursor:pointer}
+.p-right{display:flex;align-items:center;gap:8px;width:30%;justify-content:flex-end;min-width:180px;max-width:280px}
 .mode-btn{
-  padding:7px 13px;border-radius:999px;
-  border:1px solid var(--glass-brd);
-  background:transparent;color:var(--text-2);
-  cursor:pointer;font-size:11px;font-weight:600;
-  transition:.15s;font-family:var(--font-ui);
+  width:36px;height:36px;border-radius:50%;
+  background:transparent;border:0;color:var(--text-2);
+  cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  transition:.15s;
 }
-.mode-btn:hover{color:var(--text);border-color:#444}
-.mode-btn.active{background:#fff;color:#000;border-color:#fff}
-.mode-btn:disabled{cursor:not-allowed;opacity:.4}
+.mode-btn:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.mode-btn.active{color:var(--text);background:rgba(255,255,255,.12)}
+.mode-btn:disabled{opacity:.3;cursor:not-allowed}
 
-/* lyrics */
+/* lyrics panel - side drawer */
 #lyrics-panel{
-  position:fixed;right:0;top:0;bottom:80px;width:min(420px,100vw);z-index:35;
-  background:rgba(10,10,10,.97);
+  position:fixed;right:0;top:0;bottom:var(--player-h);
+  width:min(420px,100vw);z-index:35;
+  background:rgba(15,15,15,.98);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-left:1px solid var(--glass-brd);
-  transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  border-left:1px solid rgba(255,255,255,.08);
+  transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1);
   display:flex;flex-direction:column;
 }
 #lyrics-panel.open{transform:none}
-.lyrics-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--glass-brd);font-weight:600;font-size:14px}
-#lyrics-close{background:none;border:0;color:var(--text-2);font-size:18px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.lyrics-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.08);
+  font-weight:500;font-size:14px;
+}
+#lyrics-close{
+  background:none;border:0;color:var(--text-2);font-size:18px;cursor:pointer;
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
 #lyrics-close:hover{background:rgba(255,255,255,.08);color:var(--text)}
-#lyrics-body{flex:1;overflow-y:auto;padding:24px 22px;font-family:var(--font-te);font-size:17px;line-height:2.3;text-align:center;scrollbar-width:thin}
-.lyr-line{color:#555;transition:.25s;cursor:default;padding:2px 0}
-.lyr-line.active{color:#fff;font-weight:700;transform:scale(1.04)}
+#lyrics-body{
+  flex:1;overflow-y:auto;padding:30px 22px;
+  font-family:var(--font-te);font-size:17px;line-height:2.4;text-align:center;
+}
+.lyr-line{color:#555;transition:.25s;padding:2px 0}
+.lyr-line.active{color:#fff;font-weight:700;transform:scale(1.05)}
 .lyr-line.near{color:var(--text-2)}
-.lyr-none{color:var(--text-2);font-family:var(--font-ui);font-size:13px;padding:40px 20px}
+.lyr-none{color:var(--text-2);font-family:var(--font);font-size:13px;padding:40px 20px;text-align:center}
 
-/* video stage */
-#video-stage{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center}
+/* video fullscreen */
+#video-stage{
+  position:fixed;inset:0;z-index:50;
+  background:#000;display:flex;align-items:center;justify-content:center;
+}
 #video-stage[hidden]{display:none}
-#video-mount{width:min(94vw,1400px);aspect-ratio:16/9;border-radius:8px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.7)}
-#video-close{position:absolute;top:24px;right:28px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+#video-mount{width:min(95vw,1400px);aspect-ratio:16/9;border-radius:8px;overflow:hidden}
+#video-close{
+  position:absolute;top:24px;right:28px;width:44px;height:44px;border-radius:50%;
+  background:rgba(0,0,0,.7);color:#fff;font-size:18px;cursor:pointer;border:0;
+  display:flex;align-items:center;justify-content:center;
+}
 #video-close:hover{background:rgba(40,40,40,.9)}
 
-@media(max-width:760px){
-  .topbar{padding:10px 14px;gap:10px}
-  .brand-name{display:none}
-  .row{padding:0 14px}
-  .row-track{margin:0 -14px;padding-left:14px;padding-right:14px;gap:14px}
-  .card{flex:0 0 140px}
-  .card-skel{flex:0 0 140px}
-  .hero{margin:0 14px 32px;padding:20px}
-  .hero-title{font-size:28px}
-  .hero-sub{font-size:13px}
-  .p-meta{display:none}
-  #p-lyrics,#p-mode-video{display:none}
-  #player{padding:8px 14px;gap:10px;height:72px}
+/* responsive */
+@media(max-width:1100px){
+  .sidebar{width:72px}
+  .nav-item span,.logo-text,.nav-header,.nav-playlist span{display:none}
+  .nav-item,.nav-playlist{justify-content:center;padding:12px 0}
+  .main{margin-left:72px;padding:0 20px 40px}
+  .header{margin:0 -20px;padding:14px 20px}
+  .p-left{width:auto;min-width:0}
+  .p-info{display:none}
+  .p-right{min-width:0;width:auto}
+}
+@media(max-width:700px){
+  .quickpicks{grid-template-columns:1fr}
+  .carousel{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+  .p-center{order:3;flex-basis:100%;max-width:none}
+  #player{flex-wrap:wrap;height:auto;padding:8px 12px;gap:10px}
+  .p-left{order:1;width:auto}
+  .p-right{order:2;width:auto}
 }
 </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark">♪</div>
-      <div class="brand-name">Sangeet</div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">♪</div>
+      <div class="logo-text">Sangeet</div>
     </div>
-    <div class="search-wrap">
-      <div class="search-input-wrap">
-        <span class="search-icon">⌕</span>
-        <input id="search-input" type="search" placeholder="Search Telugu songs, movies, artists…" autocomplete="off">
-      </div>
-      <select id="lang-select" title="Language">
-        <option value="telugu" selected>Telugu</option>
-        <option value="hindi">Hindi</option>
-        <option value="tamil">Tamil</option>
-        <option value="kannada">Kannada</option>
-        <option value="malayalam">Malayalam</option>
-        <option value="punjabi">Punjabi</option>
-        <option value="marathi">Marathi</option>
-        <option value="bengali">Bengali</option>
-        <option value="english">English</option>
-      </select>
+    <div class="nav-section">
+      <div class="nav-item active" data-section="home"><div class="nav-icon">⌂</div><span>Home</span></div>
+      <div class="nav-item" data-section="explore"><div class="nav-icon">◎</div><span>Explore</span></div>
+      <div class="nav-item" data-section="library"><div class="nav-icon">▦</div><span>Library</span></div>
     </div>
-  </header>
-
-  <main id="main">
-    <section class="hero" id="hero">
-      <div class="hero-content">
-        <div class="hero-tag">Free · No Ads · With Lyrics</div>
-        <h1 class="hero-title">సంగీతం</h1>
-        <p class="hero-sub">Every Telugu song ever — from Ghantasala to today. The music that moves you.</p>
-        <button class="hero-cta" id="hero-cta">▶ Start Listening</button>
-      </div>
-    </section>
-    <div id="rows"></div>
-  </main>
-
-  <aside id="lyrics-panel">
-    <div class="lyrics-head">
-      <span id="lyrics-title">Lyrics</span>
-      <button id="lyrics-close" aria-label="Close">✕</button>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="nav-item" data-section="liked"><div class="nav-icon">♡</div><span>Liked songs</span></div>
+      <div class="nav-item" data-section="history"><div class="nav-icon">↻</div><span>History</span></div>
     </div>
-    <div id="lyrics-body"><div class="lyr-none">Play a song to see lyrics.</div></div>
+    <div class="nav-divider"></div>
+    <div class="nav-header">Playlists</div>
+    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Telugu Hits</span></div>
+    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Old Classics</span></div>
+    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Romantic</span></div>
+    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Mass Hits</span></div>
+    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Devotional</span></div>
+    <div class="nav-playlist"><div class="nav-playlist-icon">♪</div><span>Workout</span></div>
   </aside>
 
-  <footer id="player" hidden>
+  <main class="main">
+    <div class="header">
+      <div class="chips" id="chips">
+        <button class="chip active" data-lang="telugu">Telugu</button>
+        <button class="chip" data-lang="hindi">Hindi</button>
+        <button class="chip" data-lang="tamil">Tamil</button>
+        <button class="chip" data-lang="kannada">Kannada</button>
+        <button class="chip" data-lang="malayalam">Malayalam</button>
+        <button class="chip" data-lang="punjabi">Punjabi</button>
+        <button class="chip" data-lang="english">English</button>
+      </div>
+      <div class="header-actions">
+        <div class="search-input-wrap" style="position:relative;width:280px">
+          <input id="search-input" type="search" placeholder="Search" autocomplete="off"
+            style="width:100%;padding:9px 14px 9px 36px;border-radius:999px;border:0;background:rgba(255,255,255,.08);color:#fff;font-size:13px;outline:none;font-family:var(--font)">
+        </div>
+        <div class="avatar">B</div>
+      </div>
+    </div>
+
+    <div class="greet">
+      <h1>Good evening</h1>
+      <p>Telugu music picked for you</p>
+    </div>
+
+    <div class="quickpicks" id="quickpicks"></div>
+
+    <div id="sections"></div>
+  </main>
+</div>
+
+<aside id="lyrics-panel">
+  <div class="lyrics-head">
+    <span id="lyrics-title">Lyrics</span>
+    <button id="lyrics-close" aria-label="Close">✕</button>
+  </div>
+  <div id="lyrics-body"><div class="lyr-none">Play a song to see lyrics here.</div></div>
+</aside>
+
+<footer id="player" hidden>
+  <div class="p-left">
     <img id="p-art" alt="" width="56" height="56">
-    <div class="p-meta">
+    <div class="p-info">
       <div id="p-title"></div>
       <div id="p-artist"></div>
     </div>
+    <button class="p-like" aria-label="Like">♡</button>
+  </div>
+  <div class="p-center">
     <div class="p-controls">
+      <button id="p-shuffle" class="p-btn" aria-label="Shuffle">⤮</button>
       <button id="p-prev" class="p-btn" aria-label="Previous">⏮</button>
       <button id="p-play" class="p-btn" aria-label="Play/Pause">▶</button>
       <button id="p-next" class="p-btn" aria-label="Next">⏭</button>
+      <button id="p-repeat" class="p-btn" aria-label="Repeat">⟳</button>
     </div>
     <div class="p-timeline">
       <span id="p-cur">0:00</span>
       <input id="p-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek">
       <span id="p-dur">0:00</span>
     </div>
-    <div class="p-modes">
-      <button id="p-mode-audio" class="mode-btn active">Audio</button>
-      <button id="p-mode-video" class="mode-btn">Video</button>
-      <button id="p-lyrics" class="mode-btn">Lyrics</button>
-    </div>
-    <audio id="audio-el" preload="none"></audio>
-  </footer>
+  </div>
+  <div class="p-right">
+    <button id="p-mode-video" class="mode-btn" aria-label="Video" title="Video">▣</button>
+    <button id="p-lyrics" class="mode-btn" aria-label="Lyrics" title="Lyrics">≡</button>
+    <button class="mode-btn" aria-label="Queue" title="Queue">≡</button>
+    <span id="p-vol-icon" style="color:var(--text-2);font-size:14px;margin:0 4px">♪</span>
+    <input id="p-vol" type="range" min="0" max="100" value="80" step="1" aria-label="Volume"
+      style="width:80px;appearance:none;-webkit-appearance:none;height:3px;border-radius:2px;background:#404040;outline:none">
+  </div>
+  <audio id="audio-el" preload="none"></audio>
+</footer>
+
+<section id="video-stage" hidden>
+  <div id="video-mount"></div>
+  <button id="video-close" aria-label="Close">✕</button>
+</section>
 
 <script>
 (() => {
@@ -324,16 +450,17 @@ main{padding:24px 0 60px}
 const state = {
   query:"", lang:"telugu", page:1, results:[],
   queue:[], qIndex:-1, current:null,
-  mode:"audio", lyrics:null, videoIds:{}
+  mode:"audio", lyrics:null, videoIds:{},
+  lists:new Map() // sectionId -> songs[]
 };
 
-const SAAVN = "https://saavn.sumit.co/api";
-const SaavnAPI = {
+const SAAVN="https://saavn.sumit.co/api";
+const SaavnAPI={
   async search(query, language, page=1){
-    const url = `${SAAVN}/search/songs?query=${encodeURIComponent(query)}&limit=30&page=${page}`;
-    const res = await fetch(url);
+    const url=`${SAAVN}/search/songs?query=${encodeURIComponent(query)}&limit=30&page=${page}`;
+    const res=await fetch(url);
     if(!res.ok) throw new Error(`Saavn ${res.status}`);
-    const json = await res.json();
+    const json=await res.json();
     return (json.data?.results||[]).map(normalize).filter(s=>s.language===language);
   },
   bestUrl(song){
@@ -349,54 +476,54 @@ function normalize(r){
     album:decodeHTML(r.album?.name||""),
     year:r.year||"", duration:r.duration||0,
     language:r.language||"", image:pickImage(r.image),
-    downloadUrl:r.downloadUrl||[],
-    playCount:r.playCount||0
+    downloadUrl:r.downloadUrl||[], playCount:r.playCount||0
   };
 }
 function pickImage(images){
   if(!images?.length) return "";
-  return [...images].sort((a,b)=>parseInt(b.width)-parseInt(a.width))[0]?.url||images[images.length-1].url;
+  // JioSaavn returns images ascending by size (50x50, 150x150, 500x500);
+  // pick the last = largest for maximum clarity.
+  return images[images.length-1].url || images[0].url || "";
 }
 function decodeHTML(s){const t=document.createElement("textarea");t.innerHTML=s||"";return t.value.trim()}
 function esc(s){const d=document.createElement("div");d.textContent=s??"";return d.innerHTML}
 const el=id=>document.getElementById(id);
 const fmtTime=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
 
-// ── rows (YTM-style horizontal carousels) ─────────────
-const ROWS = [
-  { id:"trending", title:"Trending Now", emoji:"🔥", query:"telugu" },
-  { id:"new", title:"New Releases", emoji:"✨", query:"telugu 2026" },
-  { id:"charts", title:"Telugu Charts", emoji:"📈", query:"telugu top hits" },
-  { id:"classics", title:"Timeless Classics", emoji:"🏛️", query:"ghantasala spb ilaiyaraaja telugu" },
-  { id:"mass", title:"Mass Hits", emoji:"💥", query:"pushpa devara rrr" },
-  { id:"romance", title:"Romantic Telugu", emoji:"💕", query:"telugu love melody" }
+// Per-language query maps — each section picks the right query for the active language.
+// This is what makes the language switcher actually feel different per language.
+const SECTION_QUERIES={
+  trending:{telugu:"telugu",            hindi:"hindi",            tamil:"tamil",          kannada:"kannada",         malayalam:"malayalam",     punjabi:"punjabi",         english:"english"},
+  new:     {telugu:"telugu 2026",       hindi:"hindi 2026",       tamil:"tamil 2026",     kannada:"kannada 2026",    malayalam:"malayalam 2026",punjabi:"punjabi 2026",    english:"english 2026"},
+  charts:  {telugu:"telugu top",        hindi:"hindi top",        tamil:"tamil top",      kannada:"kannada top",     malayalam:"malayalam top", punjabi:"punjabi top",     english:"english top"},
+  classics:{telugu:"ghantasala spb ilaiyaraaja telugu",hindi:"mukesh lata mangeshkar",tamil:"msv ilaiyaraaja tamil",kannada:"dr rajkumar kannada",malayalam:"k j yesudas malayalam",punjabi:"old punjabi classics",english:"classic english"},
+  mass:    {telugu:"telugu mass",       hindi:"hindi party",      tamil:"tamil mass",     kannada:"kannada mass",    malayalam:"malayalam hit", punjabi:"punjabi bhangra",english:"english party"},
+  romance: {telugu:"telugu love melody",hindi:"hindi romantic",   tamil:"tamil melody",   kannada:"kannada love",    malayalam:"malayalam melody",punjabi:"punjabi love",  english:"english love songs"}
+};
+const SECTIONS=[
+  {id:"trending", title:"Trending now",   emoji:"🔥"},
+  {id:"new",      title:"New releases",   emoji:"✨"},
+  {id:"charts",   title:"Top charts",     emoji:"📈"},
+  {id:"classics", title:"Timeless classics",emoji:"🏛️"},
+  {id:"mass",     title:"Mass hits",      emoji:"💥"},
+  {id:"romance",  title:"Romantic",       emoji:"💕"}
 ];
-
-function createRowSkeleton(row){
-  const sec=document.createElement("section");
-  sec.className="row"; sec.dataset.rowId=row.id;
-  sec.innerHTML=`
-    <div class="row-head">
-      <div class="row-title"><span class="row-emoji">${row.emoji}</span>${esc(row.title)}</div>
-    </div>
-    <div class="row-track">
-      ${Array.from({length:8}).map(()=>`
-        <div class="card-skel">
-          <div class="card-skel-art"></div>
-          <div class="card-skel-line"></div>
-          <div class="card-skel-line short"></div>
-        </div>`).join("")}
-    </div>`;
-  return sec;
+function queryFor(sectionId, lang){
+  const m=SECTION_QUERIES[sectionId];
+  return (m && m[lang]) || lang;   // fallback: search the language name itself (returns that language)
 }
 
-function fillRow(sec, songs, row){
-  const track=sec.querySelector(".row-track");
-  track.innerHTML="";
-  songs.slice(0,15).forEach(s=>track.appendChild(createCard(s)));
-  sec.querySelector(".row-head").innerHTML=`
-    <div class="row-title"><span class="row-emoji">${row.emoji}</span>${esc(row.title)}</div>
-    <div class="row-see">See all</div>`;
+// Global dedup so the same song doesn't appear across multiple sections.
+let _seenIds=new Set();
+function resetDedup(){ _seenIds=new Set(); }
+function filterUnique(songs){
+  const out=[];
+  for(const s of songs){
+    if(_seenIds.has(s.id)) continue;
+    _seenIds.add(s.id);
+    out.push(s);
+  }
+  return out;
 }
 
 function createCard(s){
@@ -405,47 +532,274 @@ function createCard(s){
   c.innerHTML=`
     <div class="card-art-wrap">
       <img class="card-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-      <button class="card-play" aria-label="Play ${esc(s.name)}">▶</button>
+      <button class="card-play" aria-label="Play">▶</button>
     </div>
     <div class="card-title">${esc(s.name)}</div>
     <div class="card-sub">${esc(s.artist)}</div>`;
   c.addEventListener("click",e=>{
     e.stopPropagation();
-    playSong(s, currentListFromCard(c));
+    const sec=c.closest("[data-section-id]");
+    const list=sec?state.lists.get(sec.dataset.sectionId):state.results;
+    playSong(s, list&&list.length?list:[s]);
   });
   return c;
 }
 
-// track which row a card belongs to for queue purposes
-let _cardLists=new WeakMap();
-function currentListFromCard(cardEl){
-  const sec=cardEl.closest(".row");
-  if(!sec) return [state.current].filter(Boolean);
-  const id=sec.dataset.rowId;
-  const cached=_cardLists.get(sec);
-  if(cached) return cached;
-  return state.results;
+function createQuickPick(s){
+  const c=document.createElement("div");
+  c.className="quick";
+  c.innerHTML=`
+    <img class="quick-art" src="${s.image}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+    <div class="quick-title">${esc(s.name)}</div>
+    <button class="quick-play" aria-label="Play">▶</button>`;
+  c.addEventListener("click",e=>{
+    e.stopPropagation();
+    const list=Array.from(document.querySelectorAll("#quickpicks .quick")).map(q=>q._song).filter(Boolean);
+    playSong(s, list.length?list:[s]);
+  });
+  c._song=s;
+  return c;
 }
 
-async function loadRow(row){
-  const sec=createRowSkeleton(row);
-  el("rows").appendChild(sec);
+function createSectionSkeleton(sec){
+  const el=document.createElement("div");
+  el.className="section";
+  el.dataset.sectionId=sec.id;
+  el.innerHTML=`
+    <div class="section-head">
+      <div class="section-title">${sec.emoji} ${esc(sec.title)}</div>
+      <div class="section-see">Show all</div>
+    </div>
+    <div class="carousel" data-carousel>
+      ${Array.from({length:6}).map(()=>`
+        <div class="card-skel">
+          <div class="card-skel-art"></div>
+          <div class="card-skel-line"></div>
+          <div class="card-skel-line s"></div>
+        </div>`).join("")}
+    </div>`;
+  return el;
+}
+
+function fillSection(secEl, sec, songs){
+  const carousel=secEl.querySelector("[data-carousel]");
+  carousel.innerHTML="";
+  songs.slice(0,12).forEach(s=>carousel.appendChild(createCard(s)));
+}
+
+async function loadSection(sec){
+  const secEl=createSectionSkeleton(sec);
+  el("sections").appendChild(secEl);
+  const q=queryFor(sec.id, state.lang);
   try{
-    const songs=await SaavnAPI.search(row.query, state.lang, 1);
-    if(!songs.length){ sec.remove(); return; }
-    _cardLists.set(sec, songs);
-    fillRow(sec, songs, row);
+    const songs=await SaavnAPI.search(q, state.lang, 1);
+    if(!songs.length){ secEl.remove(); return; }
+    const unique=filterUnique(songs);
+    if(!unique.length){ secEl.remove(); return; }
+    state.lists.set(sec.id, unique);
+    fillSection(secEl, sec, unique);
   }catch(e){
-    sec.remove();
+    secEl.remove();
   }
 }
 
-function loadHome(){
-  ROWS.forEach(r=>loadRow(r));
+async function loadQuickPicks(){
+  try{
+    const songs=await SaavnAPI.search(queryFor("trending", state.lang), state.lang, 1);
+    const top=songs.slice().sort((a,b)=>b.playCount-a.playCount).slice(0,6);
+    const box=el("quickpicks");
+    box.innerHTML="";
+    top.forEach(s=>{ _seenIds.add(s.id); box.appendChild(createQuickPick(s)); });
+    state.lists.set("quickpicks", top);
+  }catch(e){}
 }
 
-// ── player: audio ─────────────────────────────────────
+function loadHome(){
+  el("sections").innerHTML="";
+  state.lists.clear();
+  resetDedup();
+  loadQuickPicks();
+  SECTIONS.forEach(s=>loadSection(s));
+}
+
+// language chips
+document.getElementById("chips").addEventListener("click",e=>{
+  const chip=e.target.closest(".chip");
+  if(!chip) return;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  chip.classList.add("active");
+  state.lang=chip.dataset.lang;
+  updateGreet();
+  loadHome();
+});
+
+const LANG_LABELS={telugu:"Telugu",hindi:"Hindi",tamil:"Tamil",kannada:"Kannada",malayalam:"Malayalam",punjabi:"Punjabi",marathi:"Marathi",bengali:"Bengali",english:"English"};
+function updateGreet(){
+  const h=document.querySelector(".greet h1");
+  const p=document.querySelector(".greet p");
+  if(h) h.textContent=`${LANG_LABELS[state.lang]||state.lang} music for you`;
+  if(p) p.textContent=`Hand-picked ${LANG_LABELS[state.lang]||state.lang]} songs · free · no ads`;
+}
+
+// sidebar nav — each item triggers a real behavior
+document.querySelectorAll(".nav-item").forEach(item=>{
+  item.addEventListener("click",()=>{
+    document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+    item.classList.add("active");
+    const sec=item.dataset.section;
+    if(sec==="home"){ loadHome(); return; }
+    if(sec==="explore"){ loadExplore(); return; }
+    if(sec==="library"){ loadLibrary(); return; }
+    if(sec==="liked"){ showEmpty("Liked songs", "Songs you like will appear here. Tap the ♡ on the player to like a song."); return; }
+    if(sec==="history"){ showEmpty("History", "Songs you have played will appear here."); return; }
+  });
+});
+
+// sidebar playlists — each loads a curated query into the main view
+const PLAYLIST_QUERIES={
+  "Telugu Hits":   {query:"telugu hits", emoji:"🎵"},
+  "Old Classics":  {query:"ghantasala spb ilaiyaraaja telugu", emoji:"🏛️"},
+  "Romantic":      {query:"telugu love melody", emoji:"💕"},
+  "Mass Hits":     {query:"pushpa devara rrr", emoji:"💥"},
+  "Devotional":    {query:"telugu devotional", emoji:"🪔"},
+  "Workout":       {query:"telugu mass dj", emoji:"🏋️"}
+};
+document.querySelectorAll(".nav-playlist").forEach(pl=>{
+  pl.style.cursor="pointer";
+  pl.addEventListener("click",()=>{
+    const name=pl.querySelector("span")?.textContent?.trim();
+    const cfg=PLAYLIST_QUERIES[name];
+    if(!cfg) return;
+    document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+    resetDedup();
+    el("sections").innerHTML=`<div style="text-align:center;color:var(--text-2);padding:60px 20px">Loading ${esc(name)}…</div>`;
+    (async()=>{
+      try{
+        const songs=await SaavnAPI.search(cfg.query, state.lang, 1);
+        if(!songs.length){
+          el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">No ${esc(state.lang)} songs in ${esc(name)}.</div>`;
+          return;
+        }
+        const sec={id:"pl_"+name, title:name, emoji:cfg.emoji};
+        const secEl=document.createElement("div");
+        secEl.className="section";
+        secEl.dataset.sectionId=sec.id;
+        secEl.innerHTML=`
+          <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div></div>
+          <div class="carousel" data-carousel></div>`;
+        el("sections").innerHTML="";
+        el("sections").appendChild(secEl);
+        state.lists.set(sec.id, songs);
+        fillSection(secEl, sec, songs);
+        window.scrollTo({top:0,behavior:"smooth"});
+      }catch(e){
+        el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">Failed: ${esc(e.message)}</div>`;
+      }
+    })();
+  });
+});
+
+function showEmpty(title, msg){
+  el("sections").innerHTML=`
+    <div style="text-align:center;padding:100px 20px">
+      <div style="font-size:48px;margin-bottom:16px">📭</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:8px">${esc(title)}</div>
+      <div style="color:var(--text-2);font-size:14px;max-width:400px;margin:0 auto">${esc(msg)}</div>
+    </div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function loadExplore(){
+  el("sections").innerHTML=`<div style="text-align:center;color:var(--text-2);padding:60px 20px">Loading explore…</div>`;
+  resetDedup();
+  (async()=>{
+    const explore=[
+      {id:"explore_trending", title:"Trending this week", emoji:"🔥",  sectionKey:"trending"},
+      {id:"explore_new",      title:"Fresh finds",         emoji:"✨", sectionKey:"new"},
+      {id:"explore_charts",   title:"Top charts",          emoji:"📈", sectionKey:"charts"},
+      {id:"explore_mood",     title:"Feel-good",           emoji:"😊", sectionKey:"romance"}
+    ];
+    el("sections").innerHTML="";
+    for(const sec of explore){
+      try{
+        const q=queryFor(sec.sectionKey, state.lang);
+        const songs=await SaavnAPI.search(q, state.lang, 1);
+        if(!songs.length) continue;
+        const unique=filterUnique(songs);
+        if(!unique.length) continue;
+        const secEl=document.createElement("div");
+        secEl.className="section";
+        secEl.dataset.sectionId=sec.id;
+        secEl.innerHTML=`
+          <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div></div>
+          <div class="carousel" data-carousel></div>`;
+        el("sections").appendChild(secEl);
+        state.lists.set(sec.id, unique);
+        fillSection(secEl, sec, unique);
+      }catch(_){}
+    }
+    window.scrollTo({top:0,behavior:"smooth"});
+  })();
+}
+
+function loadLibrary(){
+  // Library = all songs from every loaded section, de-duplicated
+  const all=new Map();
+  for(const songs of state.lists.values()){
+    for(const s of songs){ if(!all.has(s.id)) all.set(s.id, s); }
+  }
+  const songs=Array.from(all.values());
+  if(!songs.length){ showEmpty("Library", "Play a few songs to start building your library."); return; }
+  const sec={id:"library", title:"Your library", emoji:"📚"};
+  const secEl=document.createElement("div");
+  secEl.className="section";
+  secEl.dataset.sectionId=sec.id;
+  secEl.innerHTML=`
+    <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)} · ${songs.length} songs</div></div>
+    <div class="carousel" data-carousel></div>`;
+  el("sections").innerHTML="";
+  el("sections").appendChild(secEl);
+  state.lists.set("library", songs);
+  fillSection(secEl, sec, songs);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// search
+el("search-input").addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+  const q=e.target.value.trim();
+  if(!q) return;
+  state.query=q;
+  el("sections").innerHTML=`<div style="text-align:center;color:var(--text-2);padding:60px 20px">Searching…</div>`;
+  (async()=>{
+    try{
+      const songs=await SaavnAPI.search(q, state.lang, 1);
+      if(!songs.length){
+        el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">No ${esc(state.lang)} results for "${esc(q)}"</div>`;
+        return;
+      }
+      state.results=songs;
+      const sec={id:"search", title:`Results for "${q}"`, emoji:"🔎"};
+      const secEl=document.createElement("div");
+      secEl.className="section";
+      secEl.dataset.sectionId="search";
+      secEl.innerHTML=`
+        <div class="section-head"><div class="section-title">${sec.emoji} ${esc(sec.title)}</div></div>
+        <div class="carousel" data-carousel></div>`;
+      el("sections").innerHTML="";
+      el("sections").appendChild(secEl);
+      state.lists.set("search", songs);
+      fillSection(secEl, sec, songs);
+      window.scrollTo({top:0,behavior:"smooth"});
+    }catch(e){
+      el("sections").innerHTML=`<div class="lyr-none" style="padding:60px 20px">Search failed: ${esc(e.message)}</div>`;
+    }
+  })();
+});
+
+// ── audio player ───────────────────────────────────
 const audio=el("audio-el");
+audio.volume=0.8;
 const AudioCtl={
   play(){return audio.play().catch(err=>console.warn("audio play blocked:",err))},
   pause(){audio.pause()},
@@ -490,44 +844,10 @@ audio.addEventListener("timeupdate",()=>{
 audio.addEventListener("loadedmetadata",()=>{el("p-dur").textContent=fmtTime(audio.duration)});
 audio.addEventListener("ended",nextSong);
 
-// ── search ────────────────────────────────────────────
-async function doSearch(){
-  const q=el("search-input").value.trim();
-  if(!q) return;
-  state.query=q; state.page=1;
-  // build a single search row at the top of the rows list
-  el("rows").innerHTML=`<div class="loading" style="color:var(--text-2);padding:40px;text-align:center">Searching…</div>`;
-  try{
-    state.results=await SaavnAPI.search(q, state.lang, 1);
-    if(!state.results.length){
-      el("rows").innerHTML=`<div class="lyr-none" style="padding:60px 20px">No ${esc(state.lang)} songs found for "${esc(q)}".</div>`;
-      return;
-    }
-    const row={id:"search", title:`Results for "${q}"`, emoji:"🔎", query:q};
-    const sec=createRowSkeleton(row);
-    el("rows").innerHTML="";
-    el("rows").appendChild(sec);
-    _cardLists.set(sec, state.results);
-    fillRow(sec, state.results, row);
-    window.scrollTo({top:0, behavior:"smooth"});
-  }catch(e){
-    el("rows").innerHTML=`<div class="lyr-none" style="padding:60px 20px">Search failed: ${esc(e.message)}</div>`;
-  }
-}
-el("search-btn")?.remove?.(); // legacy safety
-el("search-input").addEventListener("keydown",e=>{if(e.key==="Enter")doSearch()});
-el("lang-select").addEventListener("change",e=>{
-  state.lang=e.target.value;
-  if(state.query) doSearch();
-  else loadHome();
-});
-el("hero-cta").addEventListener("click",()=>{
-  // play the first available song from the first loaded row
-  const firstCard=document.querySelector(".card");
-  if(firstCard) firstCard.click();
-});
+// volume
+el("p-vol").addEventListener("input",e=>{audio.volume=+e.target.value/100});
 
-// ── api: lrclib ───────────────────────────────────────
+// ── lyrics ──────────────────────────────────────────
 const LRC="https://lrclib.net/api";
 const LyricsAPI={
   async find(song){
@@ -567,7 +887,7 @@ function parseLRC(lrc){
 
 async function loadLyrics(song){
   state.lyrics=null;
-  el("lyrics-title").textContent=`${song.name}`;
+  el("lyrics-title").textContent=song.name;
   el("lyrics-body").innerHTML=`<div class="lyr-none">Loading lyrics…</div>`;
   const found=await LyricsAPI.find(song);
   if(state.current?.id!==song.id) return;
@@ -577,10 +897,10 @@ async function loadLyrics(song){
   }
   if(found.synced){
     const lines=parseLRC(found.synced);
-    state.lyrics={lines, plainOnly:false};
+    state.lyrics={lines,plainOnly:false};
     el("lyrics-body").innerHTML=lines.map((l,i)=>`<div class="lyr-line" data-i="${i}">${l.text?esc(l.text):"♪"}</div>`).join("");
   }else{
-    state.lyrics={lines:found.plain.split("\n").map(t=>({t:0,text:t})), plainOnly:true};
+    state.lyrics={lines:found.plain.split("\n").map(t=>({t:0,text:t})),plainOnly:true};
     el("lyrics-body").innerHTML=found.plain.split("\n").map(t=>`<div class="lyr-line">${t?esc(t):"♪"}</div>`).join("");
   }
 }
@@ -606,7 +926,7 @@ AudioCtl.onTime(()=>{
   }
 });
 
-// ── video ─────────────────────────────────────────────
+// ── video ──────────────────────────────────────────
 state.videoIds={
   "pushpa pushpa":"wQksDYahKZs",
   "abbani tiyyani":"Z-Xd8fMrfDk",
@@ -629,7 +949,7 @@ function ensureYT(){
 function enterVideo(){
   const song=state.current; if(!song) return;
   const vid=state.videoIds[videoKey(song)];
-  if(!vid){alert("No video mapped for this song in the prototype — the React app will auto-find it server-side.");return}
+  if(!vid){alert("No video mapped for this song in the prototype.");return}
   ensureYT();
   const t=audio.currentTime;
   audio.pause();
@@ -645,7 +965,6 @@ function enterVideo(){
     });
   };
   if(ytReady) whenReady(); else window.onYouTubeIframeAPIReady=()=>{ytReady=true;whenReady()};
-  el("p-mode-audio").classList.remove("active");
   el("p-mode-video").classList.add("active");
   state.mode="video";
 }
@@ -657,23 +976,20 @@ function exitVideo(finished=false){
   const mount=el("video-mount");
   mount.innerHTML=""; mount.id="video-mount";
   el("video-stage").hidden=true;
-  el("p-mode-audio").classList.add("active");
   el("p-mode-video").classList.remove("active");
   state.mode="audio";
   if(!finished&&t>0){AudioCtl.seek(t);AudioCtl.play()}
 }
 el("p-mode-video").addEventListener("click",enterVideo);
-el("p-mode-audio").addEventListener("click",()=>{if(state.mode==="video")exitVideo()});
 el("video-close").addEventListener("click",()=>exitVideo());
 
 function loadVideoFor(song){
   const has=!!state.videoIds[videoKey(song)];
   el("p-mode-video").disabled=!has;
-  el("p-mode-video").style.opacity=has?"1":".4";
-  el("p-mode-video").title=has?"Watch official video":"No video mapped for this song (prototype)";
+  el("p-mode-video").title=has?"Watch video":"No video mapped (prototype)";
 }
 
-// ── keyboard ──────────────────────────────────────────
+// ── keyboard ───────────────────────────────────────
 document.addEventListener("keydown",e=>{
   if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT") return;
   if(e.code==="Space"&&state.current){e.preventDefault();AudioCtl.toggle()}
@@ -683,9 +999,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"&&state.mode==="video") exitVideo();
 });
 
-// ── bootstrap ─────────────────────────────────────────
 loadHome();
-
 })();
 </script>
 </body>
