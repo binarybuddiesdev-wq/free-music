@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  --bg-base: #0f0f0f;
+  --bg-surface: #1a1a1a;
+  --bg-elevated: #212121;
+  --bg-hover: #2a2a2a;
+  --bg-active: #3d3d3d;
+  --text-primary: #e8eaed;
+  --text-secondary: #aaa;
+  --text-tertiary: #717171;
+  --accent: #ff0000;
+  --accent-hover: #cc0000;
+  --border: #3d3d3d;
+  --player-bg: #1a1a1a;
+  --sidebar-width: 220px;
+  --player-height: 72px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: "Roboto", "YouTube Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Hide scrollbar but keep scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Thin scrollbar for content areas */
+.thin-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+.thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.thin-scrollbar::-webkit-scrollbar-thumb { background: var(--bg-active); border-radius: 2px; }
+
+/* Progress bar reset */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-track {
+  background: var(--bg-active);
+  height: 3px;
+  border-radius: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  margin-top: -4.5px;
+}
+input[type="range"]:hover::-webkit-slider-thumb {
+  background: #fff;
+}
+
+/* YTM-style marquee for long titles */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 12s linear infinite;
+  animation-play-state: paused;
+}
+.marquee-container:hover .marquee-text {
+  animation-play-state: running;
+}
+
+/* Expanded player slide-up */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Context menu fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.fade-in {
+  animation: fadeIn 0.1s ease-out;
+}
