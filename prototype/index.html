@@ -285,6 +285,169 @@ el("lang-select").addEventListener("change", e => {
   if (state.query) doSearch();
 });
 
+// ── api: lrclib ───────────────────────────────────────
+const LRC = "https://lrclib.net/api";
+const LyricsAPI = {
+  async find(song) {
+    const primaryArtist = song.artist.split(",")[0].trim();
+    const attempts = [
+      `${LRC}/search?track_name=${encodeURIComponent(song.name)}&artist_name=${encodeURIComponent(primaryArtist)}`,
+      `${LRC}/search?track_name=${encodeURIComponent(song.name)}`,
+      `${LRC}/search?q=${encodeURIComponent(`${song.name} ${primaryArtist}`)}`
+    ];
+    for (const url of attempts) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const rows = await res.json();
+        const inDur = r => Math.abs((r.duration || 0) - song.duration) <= 2;
+        const match = rows.find(r => inDur(r) && r.syncedLyrics) || rows.find(r => inDur(r));
+        if (match) return { synced: match.syncedLyrics || null, plain: match.plainLyrics || match.syncedLyrics || null };
+      } catch (_) { /* next strategy */ }
+    }
+    return null;
+  }
+};
+
+// ── lyrics engine ─────────────────────────────────────
+function parseLRC(lrc) {
+  const lines = [];
+  for (const raw of lrc.split("\n")) {
+    const stamps = [...raw.matchAll(/\[(\d+):(\d+)(?:\.(\d+))?\]/g)];
+    if (!stamps.length) continue;
+    const text = raw.replace(/\[[^\]]*\]/g, "").trim();
+    for (const m of stamps) {
+      const frac = m[3] ? +( "0." + m[3]) : 0;
+      lines.push({ t: (+m[1]) * 60 + (+m[2]) + frac, text });
+    }
+  }
+  return lines.sort((a, b) => a.t - b.t);
+}
+
+async function loadLyrics(song) {
+  state.lyrics = null;
+  el("lyrics-title").textContent = `${song.name} — Lyrics`;
+  el("lyrics-body").innerHTML = `<div class="lyr-none">Loading lyrics…</div>`;
+  const found = await LyricsAPI.find(song);
+  if (state.current?.id !== song.id) return;
+  if (!found || !found.plain) {
+    el("lyrics-body").innerHTML = `<div class="lyr-none">Lyrics not found for this song.</div>`;
+    return;
+  }
+  if (found.synced) {
+    const lines = parseLRC(found.synced);
+    state.lyrics = { lines, plainOnly: false };
+    el("lyrics-body").innerHTML = lines.map((l, i) =>
+      `<div class="lyr-line" data-i="${i}">${l.text ? esc(l.text) : "♪"}</div>`).join("");
+  } else {
+    state.lyrics = { lines: found.plain.split("\n").map(t => ({ t: 0, text: t })), plainOnly: true };
+    el("lyrics-body").innerHTML = found.plain.split("\n").map(t =>
+      `<div class="lyr-line">${t ? esc(t) : "♪"}</div>`).join("");
+  }
+}
+
+function toggleLyricsPanel() { el("lyrics-panel").classList.toggle("open"); }
+el("p-lyrics").addEventListener("click", toggleLyricsPanel);
+el("lyrics-close").addEventListener("click", () => el("lyrics-panel").classList.remove("open"));
+
+AudioCtl.onTime(() => {
+  const L = state.lyrics;
+  if (!L || L.plainOnly) return;
+  const t = audio.currentTime;
+  let active = -1;
+  for (let i = 0; i < L.lines.length; i++) { if (L.lines[i].t <= t) active = i; else break; }
+  const prevActive = document.querySelector(".lyr-line.active");
+  if (prevActive?.dataset?.i == active) return;
+  document.querySelectorAll(".lyr-line").forEach(n => n.classList.remove("active", "near"));
+  const node = document.querySelector(`.lyr-line[data-i="${active}"]`);
+  if (node) {
+    node.classList.add("active");
+    const near = node.previousElementSibling;
+    if (near?.classList?.contains("lyr-line")) near.classList.add("near");
+    node.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+});
+
+// ── player: video ─────────────────────────────────────
+state.videoIds = {
+  "pushpa pushpa": "wQksDYahKZs",
+  "abbani tiyyani": "Z-Xd8fMrfDk",
+  "kala sivunte kaladi": "65hYeLm4NcU",
+  "adiga adiga": "zrGs4AkqNyk",
+  "kaanunna kalyanam": "nj0iqDA3mZw",
+  "mass raja": "IW0NuTp4sUY"
+};
+const videoKey = song => song.name.toLowerCase().replace(/\s+/g, " ").replace(/\s*\(.*?\)\s*/g, "").replace(/from|quot|amp;/g, "").replace(/[^a-z\u0C00-\u0C7F ]/g, "").trim();
+
+let yt = null;
+let ytReady = false;
+let ytApiLoading = false;
+
+function ensureYT() {
+  if (ytReady || ytApiLoading) return;
+  ytApiLoading = true;
+  const s = document.createElement("script");
+  s.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(s);
+}
+
+function enterVideo() {
+  const song = state.current; if (!song) return;
+  const vid = state.videoIds[videoKey(song)];
+  if (!vid) { alert("No video mapped for this song in the prototype — the React app will auto-find it via server-side search."); return; }
+  ensureYT();
+  const t = audio.currentTime;
+  audio.pause();
+  el("video-stage").hidden = false;
+  const whenReady = () => {
+    yt = new YT.Player("video-mount", {
+      videoId: vid,
+      playerVars: { autoplay: 1, playsinline: 1, start: Math.max(0, Math.floor(t)), rel: 0, modestbranding: 1 },
+      events: {
+        onReady: () => { yt.playVideo(); },
+        onStateChange: e => { if (e.data === YT.PlayerState.ENDED) exitVideo(true); }
+      }
+    });
+  };
+  if (ytReady) whenReady(); else window.onYouTubeIframeAPIReady = () => { ytReady = true; whenReady(); };
+  el("p-mode-audio").classList.remove("active");
+  el("p-mode-video").classList.add("active");
+  state.mode = "video";
+}
+
+function exitVideo(finished = false) {
+  const t = yt?.getCurrentTime?.() || 0;
+  try { yt?.destroy?.(); } catch (_) {}
+  yt = null;
+  const mount = el("video-mount");
+  mount.innerHTML = ""; mount.id = "video-mount";
+  el("video-stage").hidden = true;
+  el("p-mode-audio").classList.add("active");
+  el("p-mode-video").classList.remove("active");
+  state.mode = "audio";
+  if (!finished && t > 0) { AudioCtl.seek(t); AudioCtl.play(); }
+}
+el("p-mode-video").addEventListener("click", enterVideo);
+el("p-mode-audio").addEventListener("click", () => { if (state.mode === "video") exitVideo(); });
+el("video-close").addEventListener("click", () => exitVideo());
+
+function loadVideoFor(song) {
+  const has = !!state.videoIds[videoKey(song)];
+  el("p-mode-video").disabled = !has;
+  el("p-mode-video").style.opacity = has ? "1" : ".4";
+  el("p-mode-video").title = has ? "Watch official video" : "No video mapped for this song (prototype)";
+}
+
+// ── keyboard shortcuts ────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  if (e.code === "Space" && state.current) { e.preventDefault(); AudioCtl.toggle(); }
+  if (e.key === "ArrowRight") nextSong();
+  if (e.key === "ArrowLeft") prevSong();
+  if (e.key.toLowerCase() === "l" && state.current) toggleLyricsPanel();
+  if (e.key === "Escape" && state.mode === "video") exitVideo();
+});
+
 })();
 </script>
 </body>
