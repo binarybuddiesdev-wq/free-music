@@ -58,6 +58,7 @@ body{
 .rc-play{width:40px;height:40px;border-radius:50%;border:0;background:var(--grad);color:#fff;font-size:15px;cursor:pointer;opacity:0;transition:.2s;flex-shrink:0}
 .result-card:hover .rc-play{opacity:1}
 #player{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;align-items:center;gap:18px;padding:12px 22px;background:rgba(15,17,29,.88);backdrop-filter:blur(18px);border-top:1px solid var(--glass-brd)}
+#player[hidden]{display:none}
 #p-art{border-radius:var(--radius-sm);background:linear-gradient(135deg,#2a1b4d,#3d2352)}
 .p-meta{width:200px;min-width:120px}
 #p-title{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -84,6 +85,7 @@ body{
 .lyr-line.near{color:var(--text-dim)}
 .lyr-none{color:var(--text-dim);font-family:var(--font-ui);font-size:14px}
 #video-stage{position:fixed;inset:0;z-index:50;background:rgba(5,6,12,.92);display:flex;align-items:center;justify-content:center}
+#video-stage[hidden]{display:none}
 #video-mount{width:min(92vw,1280px);aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6)}
 #video-close{position:absolute;top:22px;right:26px;width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-brd);background:var(--glass);color:#fff;font-size:17px;cursor:pointer}
 .empty{color:var(--text-dim);text-align:center;padding:60px 0;font-size:15px}
