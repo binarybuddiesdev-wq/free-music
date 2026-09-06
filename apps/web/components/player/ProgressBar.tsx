@@ -12,93 +12,59 @@ export function ProgressBar({ compact = false }: { compact?: boolean }) {
   const [hoverX, setHoverX] = useState(0)
   const barRef = useRef<HTMLDivElement>(null)
 
-  const pct = duration ? (progress / duration) * 100 : 0
+  const pct = duration ? Math.min(100, (progress / duration) * 100) : 0
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!barRef.current || !duration) return
     const rect = barRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
-    const ratio = Math.max(0, Math.min(1, x / rect.width))
-    setHoverTime(ratio * duration)
+    setHoverTime(Math.max(0, Math.min(1, x / rect.width)) * duration)
     setHoverX(x)
   }
 
   const handleClick = (e: React.MouseEvent) => {
     if (!barRef.current || !duration) return
     const rect = barRef.current.getBoundingClientRect()
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    seek(ratio * duration)
+    seek(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * duration)
   }
 
   return (
-    <div className="flex items-center gap-2 w-full">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+      {/* Elapsed */}
       {!compact && (
-        <span style={{ color: 'var(--text-tertiary)', fontSize: 11, minWidth: 32, textAlign: 'right' }}>
+        <span style={{ color: 'rgba(255,255,255,.5)', fontSize: 11, minWidth: 34, textAlign: 'right', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
           {formatDuration(progress)}
         </span>
       )}
+
+      {/* Bar */}
       <div
         ref={barRef}
-        style={{ position: 'relative', flex: 1, height: compact ? 2 : 4, cursor: 'pointer' }}
+        style={{ position: 'relative', flex: 1, height: hovering ? 5 : 3, cursor: 'pointer', transition: 'height .1s' }}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
         onMouseMove={handleMouseMove}
         onClick={handleClick}
       >
         {/* Track */}
-        <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-active)', borderRadius: 2 }} />
-        {/* Fill */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: `${pct}%`,
-            background: hovering ? 'var(--accent)' : 'var(--text-primary)',
-            borderRadius: 2,
-            transition: hovering ? 'none' : 'width 0.1s',
-          }}
-        />
-        {/* Thumb */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,.2)', borderRadius: 3 }} />
+        {/* Fill — YouTube red */}
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`, background: '#f00', borderRadius: 3, transition: hovering ? 'none' : 'width .12s linear' }} />
+        {/* Thumb — appears on hover */}
         {hovering && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: `${pct}%`,
-              transform: 'translate(-50%, -50%)',
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              background: 'var(--text-primary)',
-              pointerEvents: 'none',
-            }}
-          />
+          <div style={{ position: 'absolute', top: '50%', left: `${pct}%`, transform: 'translate(-50%, -50%)', width: 13, height: 13, borderRadius: '50%', background: '#fff', pointerEvents: 'none', boxShadow: '0 1px 3px rgba(0,0,0,.4)' }} />
         )}
-        {/* Tooltip */}
-        {hovering && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 16,
-              left: hoverX,
-              transform: 'translateX(-50%)',
-              background: 'rgba(0,0,0,0.8)',
-              color: '#fff',
-              fontSize: 11,
-              padding: '2px 6px',
-              borderRadius: 3,
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
+        {/* Hover tooltip */}
+        {hovering && duration > 0 && (
+          <div style={{ position: 'absolute', bottom: 12, left: Math.min(Math.max(hoverX, 24), (barRef.current?.offsetWidth ?? 0) - 24), transform: 'translateX(-50%)', background: 'rgba(0,0,0,.85)', color: '#fff', fontSize: 11, padding: '2px 6px', borderRadius: 3, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
             {formatDuration(hoverTime)}
           </div>
         )}
       </div>
+
+      {/* Total duration */}
       {!compact && (
-        <span style={{ color: 'var(--text-tertiary)', fontSize: 11, minWidth: 32 }}>
+        <span style={{ color: 'rgba(255,255,255,.5)', fontSize: 11, minWidth: 34, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
           {formatDuration(duration)}
         </span>
       )}
