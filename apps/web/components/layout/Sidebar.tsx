@@ -46,7 +46,7 @@ export function Sidebar() {
   const history = useLibraryStore((s) => s.history)
 
   const likedCount = Object.keys(likedSongs).length
-  const playerHeight = currentSong ? 64 : 0
+  const playerHeight = currentSong ? 67 : 0
 
   return (
     <aside style={{
