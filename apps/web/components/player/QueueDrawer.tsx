@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useQueueStore } from '@/stores/queue.store'
 import { useUIStore } from '@/stores/ui.store'
@@ -17,6 +17,7 @@ function SortableQueueItem({
   index,
   isCurrent,
   isPlaying,
+  canRemove,
   onPlay,
   onRemove,
   onContextMenu,
@@ -25,6 +26,7 @@ function SortableQueueItem({
   index: number
   isCurrent: boolean
   isPlaying: boolean
+  canRemove: boolean
   onPlay: () => void
   onRemove: () => void
   onContextMenu: (e: React.MouseEvent, song: Song) => void
@@ -58,7 +60,6 @@ function SortableQueueItem({
         onContextMenu={e => onContextMenu(e, song)}
       >
         <button
-          {...attributes}
           style={{
             width: 28, height: 28, borderRadius: 4, border: 'none', background: 'var(--panel-bg)',
             color: 'var(--text-primary)', cursor: 'grab', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -92,15 +93,18 @@ function SortableQueueItem({
 
         <div style={{ fontSize: 12, color: 'var(--text-tertiary)', flexShrink: 0 }}>{formatDuration(song.duration)}</div>
 
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove() }}
-          style={{ width: 28, height: 28, borderRadius: '50%', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity .15s, color .15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = '#ff0000'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
-          title="Remove from queue"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
+        {canRemove && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove() }}
+            style={{ width: 28, height: 28, borderRadius: '50%', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.7, transition: 'opacity .15s, color .15s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ff0000'; e.currentTarget.style.opacity = '1' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.opacity = '0.7' }}
+            title="Remove from queue"
+            aria-label={`Remove ${song.title} from queue`}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+        )}
       </div>
     </div>
   )
@@ -111,10 +115,11 @@ export function QueueDrawer() {
   const shuffledQueue = useQueueStore((s) => s.shuffledQueue)
   const qIndex = useQueueStore((s) => s.qIndex)
   const shuffleOn = useQueueStore((s) => s.shuffleOn)
-  const playSong = usePlayerStore((s) => s.playSong)
-  const currentSong = usePlayerStore((s) => s.currentSong)
-  const isPlaying = usePlayerStore((s) => s.isPlaying)
   const setQueue = useQueueStore((s) => s.setQueue)
+  const moveItem = useQueueStore((s) => s.moveItem)
+  const removeAt = useQueueStore((s) => s.removeAt)
+  const playQueueIndex = usePlayerStore((s) => s.playQueueIndex)
+  const isPlaying = usePlayerStore((s) => s.isPlaying)
   const autoplay = useSettingsStore((s) => s.autoplay)
   const setAutoplay = useSettingsStore((s) => s.setAutoplay)
   const queueOpen = useUIStore((s) => s.queueOpen)
@@ -122,31 +127,17 @@ export function QueueDrawer() {
   const [ctx, setCtx] = useState<{ x: number; y: number; song: Song } | null>(null)
   const [mounted, setMounted] = useState(false)
 
-  const activeQueue = shuffleOn ? shuffledQueue : queue
-  const activeIndex = shuffleOn
-    ? activeQueue.findIndex(s => s.id === queue[qIndex]?.id)
-    : qIndex
+  // qIndex always indexes the active list (see lib/queue-logic.ts)
+  const activeQueue = shuffleOn && shuffledQueue.length > 0 ? shuffledQueue : queue
+  const activeIndex = qIndex
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
-
-    const oldIndex = activeQueue.findIndex(s => s.id === active.id)
-    const newIndex = activeQueue.findIndex(s => s.id === over.id)
-
-    const newActiveQueue = arrayMove(activeQueue, oldIndex, newIndex)
-
-    if (shuffleOn) {
-      const newShuffledQueue = arrayMove(shuffledQueue, oldIndex, newIndex)
-      const newQueue = [...queue]
-      newActiveQueue.forEach((song, i) => {
-        const origIdx = queue.findIndex(s => s.id === song.id)
-        if (origIdx >= 0) newQueue[origIdx] = song
-      })
-      setQueue(newQueue, qIndex)
-    } else {
-      setQueue(newActiveQueue, newIndex)
-    }
+    const oldIndex = activeQueue.findIndex((s) => s.id === active.id)
+    const newIndex = activeQueue.findIndex((s) => s.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    moveItem(oldIndex, newIndex)
   }
 
   const sensors = useSensors(
@@ -276,18 +267,9 @@ export function QueueDrawer() {
                   index={i}
                   isCurrent={i === activeIndex}
                   isPlaying={isPlaying && i === activeIndex}
-                  onPlay={() => playSong(song, activeQueue, i)}
-                  onRemove={() => {
-                    const newQueue = activeQueue.filter(s => s.id !== song.id)
-                    const newIndex = Math.min(i, newQueue.length - 1)
-                    if (shuffleOn) {
-                      const newShuffled = shuffledQueue.filter(s => s.id !== song.id)
-                      const newOriginal = [...queue].filter(s => s.id !== song.id)
-                      setQueue(newOriginal, newIndex)
-                    } else {
-                      setQueue(newQueue, newIndex)
-                    }
-                  }}
+                  canRemove={i !== activeIndex}
+                  onPlay={() => playQueueIndex(i)}
+                  onRemove={() => removeAt(i)}
                   onContextMenu={(e, s) => setCtx({ x: e.clientX, y: e.clientY, song: s })}
                 />
               ))}

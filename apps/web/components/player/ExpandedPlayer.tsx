@@ -337,11 +337,10 @@ function UpNextPanel() {
   const shuffledQueue = useQueueStore((s) => s.shuffledQueue)
   const shuffleOn = useQueueStore((s) => s.shuffleOn)
   const qIndex = useQueueStore((s) => s.qIndex)
-  const jumpTo = useQueueStore((s) => s.jumpTo)
-  const playSong = usePlayerStore((s) => s.playSong)
+  const playQueueIndex = usePlayerStore((s) => s.playQueueIndex)
   const currentSong = usePlayerStore((s) => s.currentSong)
 
-  const active = shuffleOn ? shuffledQueue : queue
+  const active = shuffleOn && shuffledQueue.length > 0 ? shuffledQueue : queue
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -401,14 +400,14 @@ function UpNextPanel() {
           <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>Queue is empty</div>
         ) : (
           active.map((song, i) => {
-            const isCurrent = song.id === currentSong?.id && i === qIndex
+            const isCurrent = i === qIndex
             return (
               <div
                 key={`${song.id}-${i}`}
                 role="button"
                 tabIndex={0}
-                onClick={() => { jumpTo(i); playSong(song, active, i) }}
-                onKeyDown={(e) => onEnterSpace(e, () => { jumpTo(i); playSong(song, active, i) })}
+                onClick={() => playQueueIndex(i)}
+                onKeyDown={(e) => onEnterSpace(e, () => playQueueIndex(i))}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
