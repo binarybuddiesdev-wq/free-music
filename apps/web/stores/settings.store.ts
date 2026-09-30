@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { dedupLocalStorage } from '@/lib/dedup-storage'
 import { DEFAULT_LANGUAGE } from '@/lib/languages'
+import { partializeSettings, mergeSettings } from '@/lib/settings-persist'
 
 export type Theme = 'dark' | 'light' | 'system'
 export type AudioQuality = 'low' | 'normal' | 'high'
@@ -141,6 +142,12 @@ export const useSettingsStore = create<SettingsState>()(
       lyricsOffset: 0,
       setLyricsOffset: (lyricsOffset) => set({ lyricsOffset }),
     }),
-    { name: 'ytm-settings', storage: createJSONStorage(() => dedupLocalStorage), skipHydration: true }
+    {
+      name: 'ytm-settings',
+      storage: createJSONStorage(() => dedupLocalStorage),
+      skipHydration: true,
+      partialize: (s) => partializeSettings(s),
+      merge: (persisted, current) => mergeSettings(persisted, current),
+    }
   )
 )

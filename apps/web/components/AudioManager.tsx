@@ -5,6 +5,7 @@ import { useQueueStore } from '@/stores/queue.store'
 import { useSettingsStore, applyTheme, applyFontSize, EQ_PRESETS } from '@/stores/settings.store'
 import { getAudioQualityUrl } from '@/lib/utils'
 import { getOfflineSong } from '@/lib/offline-storage'
+import { isSleepTimerDue } from '@/lib/settings-persist'
 import { showToast } from '@/components/ui/Toast'
 import type { Song } from '@/types/music'
 
@@ -177,18 +178,18 @@ export function AudioManager() {
     }
   }, [currentSong, audioQuality])
 
-  // 4. Handle sleep timer countdown
+  // 4. Handle sleep timer countdown — always PAUSES (never toggles, which could start playback)
   useEffect(() => {
     if (!sleepTimerEnd) return
     const interval = setInterval(() => {
-      if (Date.now() >= sleepTimerEnd) {
-        togglePlay()
+      if (isSleepTimerDue(sleepTimerEnd, Date.now())) {
+        usePlayerStore.getState().pause()
         setSleepTimer(0)
         showToast('Sleep timer ended. Playback paused.')
       }
     }, 1000)
     return () => clearInterval(interval)
-  }, [sleepTimerEnd, togglePlay, setSleepTimer])
+  }, [sleepTimerEnd, setSleepTimer])
 
   // 5. Gapless Preloading: preload the next track in queue (offline blob or CDN)
   const queue = useQueueStore((s) => s.queue)
