@@ -1,18 +1,19 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { usePlayerStore } from '@/stores/player.store'
 import { useSettingsStore } from '@/stores/settings.store'
 import { showToast } from '@/components/ui/Toast'
+import { findActiveLine } from '@/lib/lyrics-sync'
 import type { LyricLine } from '@/types/music'
+
+const EMPTY_LINES: LyricLine[] = []
 
 export function LyricsPanel() {
   const currentSong = usePlayerStore((s) => s.currentSong)
-  const progress = usePlayerStore((s) => s.progress)
   const lyricsFontSize = useSettingsStore((s) => s.lyricsFontSize)
   const lyricsOffset = useSettingsStore((s) => s.lyricsOffset)
   const setLyricsOffset = useSettingsStore((s) => s.setLyricsOffset)
-  const [activeLine, setActiveLine] = useState(-1)
   const activeRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -33,16 +34,11 @@ export function LyricsPanel() {
     staleTime: Infinity,
   })
 
-  useEffect(() => {
-    if (!data?.synced || !data.lines.length) return
-    const effectiveProgress = Math.max(0, Number((progress + lyricsOffset).toFixed(3)))
-    let idx = -1
-    for (let i = 0; i < data.lines.length; i++) {
-      if (data.lines[i].time <= effectiveProgress) idx = i
-      else break
-    }
-    setActiveLine(idx)
-  }, [progress, lyricsOffset, data])
+  // Re-renders only when the highlighted line changes (not on every ~250 ms progress tick)
+  const syncedLines = data?.synced ? data.lines : EMPTY_LINES
+  const activeLine = usePlayerStore((s) =>
+    findActiveLine(syncedLines, Math.max(0, s.progress + lyricsOffset))
+  )
 
   useEffect(() => {
     if (activeRef.current && containerRef.current) {

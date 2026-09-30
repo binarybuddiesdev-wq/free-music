@@ -17,9 +17,6 @@ export function MiniPlayer() {
   const prev = usePlayerStore((s) => s.prev)
   const setExpanded = usePlayerStore((s) => s.setExpanded)
   const isExpanded = usePlayerStore((s) => s.isExpanded)
-  const progress = usePlayerStore((s) => s.progress)
-  const duration = usePlayerStore((s) => s.duration)
-  const seek = usePlayerStore((s) => s.seek)
   const shuffleOn = useQueueStore((s) => s.shuffleOn)
   const toggleShuffle = useQueueStore((s) => s.toggleShuffle)
   const repeatMode = useQueueStore((s) => s.repeatMode)
@@ -32,44 +29,10 @@ export function MiniPlayer() {
   const liked = useLibraryStore((s) => (currentSong ? Boolean(s.likedSongs[currentSong.id]) : false))
   const toggleQueue = useUIStore((s) => s.toggleQueue)
 
-  const barRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLButtonElement>(null)
   const [ctx, setCtx] = useState<{ x: number; y: number } | null>(null)
-  const pct = duration ? Math.min(100, (progress / duration) * 100) : 0
-
-  const isDraggingRef = useRef(false)
 
   if (!currentSong) return null
-
-  function seekFromClientX(clientX: number) {
-    if (!barRef.current || !duration) return
-    const rect = barRef.current.getBoundingClientRect()
-    const fraction = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
-    seek(fraction * duration)
-  }
-
-  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (!duration) return
-    isDraggingRef.current = true
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId)
-    } catch {}
-    seekFromClientX(e.clientX)
-  }
-
-  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!isDraggingRef.current) return
-    seekFromClientX(e.clientX)
-  }
-
-  function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
-    if (isDraggingRef.current) {
-      isDraggingRef.current = false
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId)
-      } catch {}
-    }
-  }
 
   const subtitle = [currentSong.artist, currentSong.album, currentSong.year].filter(Boolean).join(' • ')
 
@@ -82,31 +45,7 @@ export function MiniPlayer() {
       paddingBottom: 'max(0px, env(safe-area-inset-bottom))',
     }}>
       {/* ── Red progress bar — sits at top edge of player ── */}
-      <div
-        ref={barRef}
-        role="slider"
-        aria-label="Playback progress"
-        aria-valuemin={0}
-        aria-valuemax={Math.round(duration || 0)}
-        aria-valuenow={Math.round(progress || 0)}
-        aria-valuetext={`${formatDuration(progress)} of ${formatDuration(duration)}`}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (!duration) return
-          if (e.key === 'ArrowRight') seek(Math.min(duration, progress + 5))
-          if (e.key === 'ArrowLeft') seek(Math.max(0, progress - 5))
-        }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        style={{ width: '100%', height: 6, padding: '1.5px 0', background: 'transparent', cursor: 'pointer', position: 'relative', touchAction: 'none' }}
-      >
-        <div style={{ width: '100%', height: 3, background: 'var(--panel-bg)', position: 'relative' }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`, background: '#f00', transition: isDraggingRef.current ? 'none' : 'width .1s linear' }} />
-          <div style={{ position: 'absolute', top: '50%', left: `${pct}%`, transform: 'translate(-50%,-50%)', width: 10, height: 10, borderRadius: '50%', background: '#f00', boxShadow: '0 0 3px rgba(255,0,0,.6)' }} />
-        </div>
-      </div>
+      <MiniProgressBar />
 
       {/* ── Main bar ── */}
       <div style={{ height: 64, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 8 }}>
@@ -133,9 +72,7 @@ export function MiniPlayer() {
           <IcoBtn onClick={next} title="Next">
             <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
           </IcoBtn>
-          <span className="mp-hide-mid" style={{ fontSize: 12, color: 'var(--text-secondary)', whiteSpace: 'nowrap', marginLeft: 6, fontVariantNumeric: 'tabular-nums', letterSpacing: .2 }}>
-            {formatDuration(progress)}&nbsp;/&nbsp;{formatDuration(duration)}
-          </span>
+          <PlaybackTime />
         </div>
 
         {/* ── CENTER: thumbnail + title + artist•album•year ── */}
@@ -233,6 +170,85 @@ export function MiniPlayer() {
       <ContextMenu song={currentSong} x={ctx.x} y={ctx.y} onClose={() => setCtx(null)} />
     )}
   </>
+  )
+}
+
+/** Owns the ~4 Hz progress subscription so the rest of the mini player doesn't re-render. */
+function MiniProgressBar() {
+  const progress = usePlayerStore((s) => s.progress)
+  const duration = usePlayerStore((s) => s.duration)
+  const seek = usePlayerStore((s) => s.seek)
+  const barRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const pct = duration ? Math.min(100, (progress / duration) * 100) : 0
+
+  function seekFromClientX(clientX: number) {
+    if (!barRef.current || !duration) return
+    const rect = barRef.current.getBoundingClientRect()
+    const fraction = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    seek(fraction * duration)
+  }
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (!duration) return
+    isDraggingRef.current = true
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {}
+    seekFromClientX(e.clientX)
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isDraggingRef.current) return
+    seekFromClientX(e.clientX)
+  }
+
+  function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId)
+      } catch {}
+    }
+  }
+
+  return (
+    <div
+      ref={barRef}
+      role="slider"
+      aria-label="Playback progress"
+      aria-valuemin={0}
+      aria-valuemax={Math.round(duration || 0)}
+      aria-valuenow={Math.round(progress || 0)}
+      aria-valuetext={`${formatDuration(progress)} of ${formatDuration(duration)}`}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (!duration) return
+        if (e.key === 'ArrowRight') seek(Math.min(duration, progress + 5))
+        if (e.key === 'ArrowLeft') seek(Math.max(0, progress - 5))
+      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={{ width: '100%', height: 6, padding: '1.5px 0', background: 'transparent', cursor: 'pointer', position: 'relative', touchAction: 'none' }}
+    >
+      <div style={{ width: '100%', height: 3, background: 'var(--panel-bg)', position: 'relative' }}>
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`, background: '#f00', transition: isDraggingRef.current ? 'none' : 'width .1s linear' }} />
+        <div style={{ position: 'absolute', top: '50%', left: `${pct}%`, transform: 'translate(-50%,-50%)', width: 10, height: 10, borderRadius: '50%', background: '#f00', boxShadow: '0 0 3px rgba(255,0,0,.6)' }} />
+      </div>
+    </div>
+  )
+}
+
+/** Re-renders once per second (whole seconds), not on every progress tick. */
+function PlaybackTime() {
+  const seconds = usePlayerStore((s) => Math.floor(s.progress))
+  const duration = usePlayerStore((s) => s.duration)
+  return (
+    <span className="mp-hide-mid" style={{ fontSize: 12, color: 'var(--text-secondary)', whiteSpace: 'nowrap', marginLeft: 6, fontVariantNumeric: 'tabular-nums', letterSpacing: .2 }}>
+      {formatDuration(seconds)}&nbsp;/&nbsp;{formatDuration(duration)}
+    </span>
   )
 }
 
