@@ -56,18 +56,6 @@ export function ExpandedPlayer() {
     }
   }
 
-  // Keep progress advancing while watching video (audio element stays paused)
-  useEffect(() => {
-    if (mode !== 'video' || !isPlaying) return
-    const id = setInterval(() => {
-      const s = usePlayerStore.getState()
-      if (!s.isPlaying) return
-      if (s.duration > 0 && s.progress >= s.duration) return
-      s.setProgress(s.duration > 0 ? Math.min(s.duration, s.progress + 1) : s.progress + 1)
-    }, 1000)
-    return () => clearInterval(id)
-  }, [mode, isPlaying])
-
   if (!isExpanded || !currentSong) return null
 
   return (

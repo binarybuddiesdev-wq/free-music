@@ -2,6 +2,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { dedupLocalStorage } from '@/lib/dedup-storage'
+import { toggleMuteState, setVolumeState } from '@/lib/player-logic'
 import type { Song } from '@/types/music'
 import { useQueueStore } from './queue.store'
 import { useLibraryStore } from './library.store'
@@ -23,6 +24,7 @@ interface PlayerState {
   /** Play an item that is already in the queue (Up Next / queue drawer). Does NOT rebuild or reshuffle the queue. */
   playQueueIndex: (index: number) => void
   togglePlay: () => void
+  pause: () => void
   seek: (seconds: number) => void
   setVolume: (v: number) => void
   toggleMute: () => void
@@ -80,7 +82,12 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       togglePlay: () => {
-        const { audioRef, isPlaying } = get()
+        const { audioRef, isPlaying, mode } = get()
+        // In video mode the audio element is intentionally paused; "play" means go back to audio
+        if (mode === 'video') {
+          get().switchToAudio()
+          return
+        }
         if (!audioRef?.current) return
         if (isPlaying) {
           audioRef.current.pause()
@@ -91,6 +98,11 @@ export const usePlayerStore = create<PlayerState>()(
         }
       },
 
+      pause: () => {
+        get().audioRef?.current?.pause()
+        set({ isPlaying: false })
+      },
+
       seek: (seconds) => {
         const { audioRef } = get()
         if (audioRef?.current) audioRef.current.currentTime = seconds
@@ -98,16 +110,24 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setVolume: (v) => {
-        const { audioRef } = get()
-        if (audioRef?.current) audioRef.current.volume = v
-        set({ volume: v, muted: v === 0 })
+        const next = setVolumeState(v)
+        const el = get().audioRef?.current
+        if (el) {
+          el.volume = next.volume
+          el.muted = next.muted
+        }
+        set(next)
       },
 
       toggleMute: () => {
-        const { audioRef, muted, volume } = get()
-        const next = !muted
-        if (audioRef?.current) audioRef.current.muted = next
-        set({ muted: next, volume: next ? 0 : volume || 0.8 })
+        const { muted, volume } = get()
+        const next = toggleMuteState({ muted, volume })
+        const el = get().audioRef?.current
+        if (el) {
+          el.muted = next.muted
+          el.volume = next.volume
+        }
+        set(next)
       },
 
       setMode: (mode) => set({ mode }),
@@ -132,7 +152,7 @@ export const usePlayerStore = create<PlayerState>()(
         const song = useQueueStore.getState().next()
         if (!song) return
         useLibraryStore.getState().addToHistory(song)
-        set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: true })
+        set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: true, mode: 'audio' })
       },
 
       prev: () => {
@@ -145,7 +165,7 @@ export const usePlayerStore = create<PlayerState>()(
         const song = useQueueStore.getState().prev()
         if (!song) return
         useLibraryStore.getState().addToHistory(song)
-        set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: true })
+        set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: true, mode: 'audio' })
       },
     }),
     {
