@@ -16,7 +16,7 @@ export function QuickPicksSection() {
   const playSong = usePlayerStore((s) => s.playSong)
   const currentSong = usePlayerStore((s) => s.currentSong)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
-  const isLiked = useLibraryStore((s) => s.isLiked)
+  const likedSongs = useLibraryStore((s) => s.likedSongs)
   const toggleLike = useLibraryStore((s) => s.toggleLike)
   const seenIds = useContext(SeenSongsContext)
   const [filteredSongs, setFilteredSongs] = useState<Song[]>([])
@@ -54,7 +54,7 @@ export function QuickPicksSection() {
                 key={song.id} song={song} songs={songs} index={i}
                 isCurrent={currentSong?.id === song.id}
                 isPlaying={isPlaying}
-                liked={isLiked(song.id)}
+                liked={Boolean(likedSongs[song.id])}
                 onPlay={() => playSong(song, songs, i)}
                 onLike={() => toggleLike(song)}
               />

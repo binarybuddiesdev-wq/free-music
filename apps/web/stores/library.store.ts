@@ -9,7 +9,6 @@ interface LibraryState {
   history: Song[]
   playlists: Record<string, Playlist>
   toggleLike: (song: Song) => void
-  isLiked: (id: string) => boolean
   addToHistory: (song: Song) => void
   createPlaylist: (name: string) => string
   addToPlaylist: (playlistId: string, song: Song) => void
@@ -34,7 +33,6 @@ export const useLibraryStore = create<LibraryState>()(
           return { likedSongs: liked }
         }),
 
-      isLiked: (id) => Boolean(get().likedSongs[id]),
 
       addToHistory: (song) =>
         set((s) => {

@@ -16,12 +16,11 @@ export function SongCard({ song, queue, index }: SongCardProps) {
   const playSong = usePlayerStore((s) => s.playSong)
   const currentSong = usePlayerStore((s) => s.currentSong)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
-  const isLiked = useLibraryStore((s) => s.isLiked)
+  const liked = useLibraryStore((s) => Boolean(s.likedSongs[song.id]))
   const [hovered, setHovered] = useState(false)
   const [ctx, setCtx] = useState<{ x: number; y: number } | null>(null)
 
   const isCurrent = currentSong?.id === song.id
-  const liked = isLiked(song.id)
 
   return (
     <>

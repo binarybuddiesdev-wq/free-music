@@ -18,7 +18,7 @@ interface ContextMenuProps {
 export function ContextMenu({ song, x, y, onClose }: ContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null)
   const toggleLike = useLibraryStore((s) => s.toggleLike)
-  const isLiked = useLibraryStore((s) => s.isLiked)
+  const liked = useLibraryStore((s) => Boolean(s.likedSongs[song.id]))
   const addToQueue = useQueueStore((s) => s.addToQueue)
   const playlists = useLibraryStore((s) => s.playlists)
   const createPlaylist = useLibraryStore((s) => s.createPlaylist)
@@ -172,8 +172,8 @@ export function ContextMenu({ song, x, y, onClose }: ContextMenuProps) {
       }}
     >
       <MenuItem
-        icon={<HeartIcon filled={isLiked(song.id)} />}
-        label={isLiked(song.id) ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+        icon={<HeartIcon filled={liked} />}
+        label={liked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
         onClick={() => { toggleLike(song); onClose() }}
       />
       <MenuItem

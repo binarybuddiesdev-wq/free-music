@@ -29,13 +29,12 @@ export function MiniPlayer() {
   const setVolume = usePlayerStore((s) => s.setVolume)
   const toggleMute = usePlayerStore((s) => s.toggleMute)
   const toggleLike = useLibraryStore((s) => s.toggleLike)
-  const isLiked = useLibraryStore((s) => s.isLiked)
+  const liked = useLibraryStore((s) => (currentSong ? Boolean(s.likedSongs[currentSong.id]) : false))
   const toggleQueue = useUIStore((s) => s.toggleQueue)
 
   const barRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLButtonElement>(null)
   const [ctx, setCtx] = useState<{ x: number; y: number } | null>(null)
-  const liked = currentSong ? isLiked(currentSong.id) : false
   const pct = duration ? Math.min(100, (progress / duration) * 100) : 0
 
   const isDraggingRef = useRef(false)
