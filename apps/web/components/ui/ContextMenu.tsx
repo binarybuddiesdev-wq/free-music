@@ -179,7 +179,11 @@ export function ContextMenu({ song, x, y, onClose }: ContextMenuProps) {
       <MenuItem
         icon={<QueueIcon />}
         label="Add to queue"
-        onClick={() => { addToQueue(song); onClose() }}
+        onClick={() => {
+          const added = addToQueue(song)
+          showToast(added ? 'Added to queue' : 'Already in queue')
+          onClose()
+        }}
       />
       <MenuItem
         icon={<RadioIcon />}

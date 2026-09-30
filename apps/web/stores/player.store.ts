@@ -20,6 +20,8 @@ interface PlayerState {
   savedTimeForVideo: number
   setAudioRef: (ref: React.RefObject<HTMLAudioElement | null>) => void
   playSong: (song: Song, queue: Song[], startIndex?: number) => void
+  /** Play an item that is already in the queue (Up Next / queue drawer). Does NOT rebuild or reshuffle the queue. */
+  playQueueIndex: (index: number) => void
   togglePlay: () => void
   seek: (seconds: number) => void
   setVolume: (v: number) => void
@@ -62,6 +64,19 @@ export const usePlayerStore = create<PlayerState>()(
           audioRef.current.play().catch(() => {})
         }
         set({ currentSong: { ...song }, isPlaying: true, isLoading: true, progress: 0, mode: 'audio' })
+      },
+
+      playQueueIndex: (index) => {
+        const song = useQueueStore.getState().jumpTo(index)
+        if (!song) return
+        const { audioRef, currentSong } = get()
+        const isSame = currentSong?.id === song.id
+        useLibraryStore.getState().addToHistory(song)
+        if (isSame && audioRef?.current) {
+          audioRef.current.currentTime = 0
+          audioRef.current.play().catch(() => {})
+        }
+        set({ currentSong: { ...song }, isPlaying: true, isLoading: !isSame, progress: 0, mode: 'audio' })
       },
 
       togglePlay: () => {

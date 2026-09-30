@@ -10,7 +10,7 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 | 0 | Branch and baseline | Done | User committed baseline; work stays on `main` |
 | 1 | Skip redundant localStorage writes (#2) | Done | 79 tests pass, lint clean, tsc 0 |
 | 2 | Accept every selectable language (#3) | Done | 82 tests pass, lint clean, tsc 0 |
-| 3 | Pure queue logic module (#5, #6, #15) | Pending | |
+| 3 | Pure queue logic module (#5, #6, #15) | Done | 98 tests pass, lint clean, tsc 0 |
 | 4 | Wire queue UIs (#5, #6) | Pending | |
 | 5 | Player store: mute, pause, video mode (#9, #10) | Pending | |
 | 6 | Sleep timer (#4) | Pending | |
@@ -32,6 +32,13 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 - Added `lib/languages.test.mjs` (3 tests), registered in the `test` script.
 - Watched RED first: `odia must not fall back to telugu`.
 - `ALLOWED_LANGUAGES` in `lib/security.ts` now matches `lib/languages.ts` (added `odia`, `assamese`, `urdu`).
+
+### Task 3 — done
+- Added `lib/queue-logic.ts` and `queue-logic.test.mjs` (16 tests), registered in the `test` script. Watched RED first (module not found), then GREEN.
+- `queue.store.ts` now uses the pure functions; new actions `moveItem` and `removeAt`, and `jumpTo` / `addToQueue` now return a value.
+- `player.store.ts` gained `playQueueIndex` (plays a queued item without rebuilding or reshuffling).
+- `ContextMenu.tsx` shows "Added to queue" or "Already in queue".
+- Known leftover: `ExpandedPlayer.tsx:556` also calls `addToQueue(song)` and ignores the new return value. It type-checks; Task 4/11 may revisit it.
 
 ## Rulings
 - Working directly on `main` rather than `fix/codebase-review`, per user instruction.

@@ -4,6 +4,13 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { dedupLocalStorage } from '@/lib/dedup-storage'
 import type { Song } from '@/types/music'
 import { fisherYates } from '@/lib/utils'
+import {
+  getActiveQueue,
+  jumpToIndex,
+  moveInQueue,
+  removeFromQueue,
+  appendUnique,
+} from '@/lib/queue-logic'
 
 interface QueueState {
   queue: Song[]
@@ -16,8 +23,14 @@ interface QueueState {
   prev: () => Song | null
   toggleShuffle: () => void
   toggleRepeat: () => void
-  jumpTo: (index: number) => void
-  addToQueue: (song: Song) => void
+  /** Point the queue at an index of the ACTIVE list; returns that song or null if out of range. */
+  jumpTo: (index: number) => Song | null
+  /** Reorder within the ACTIVE list, keeping the playing song current. */
+  moveItem: (from: number, to: number) => void
+  /** Remove an item of the ACTIVE list (never the playing one). */
+  removeAt: (index: number) => void
+  /** Append one song; returns false if it was already in the queue. */
+  addToQueue: (song: Song) => boolean
   appendSongs: (songs: Song[]) => void
   currentSong: () => Song | null
 }
@@ -32,9 +45,8 @@ export const useQueueStore = create<QueueState>()(
       repeatMode: 'none',
 
       currentSong: () => {
-        const { queue, shuffledQueue, shuffleOn, qIndex } = get()
-        const active = shuffleOn && shuffledQueue.length > 0 ? shuffledQueue : queue
-        return active[qIndex] ?? null
+        const s = get()
+        return getActiveQueue(s)[s.qIndex] ?? null
       },
 
       setQueue: (songs, startIndex, keepShuffle = false) => {
@@ -52,12 +64,12 @@ export const useQueueStore = create<QueueState>()(
       },
 
       next: () => {
-        const { queue, shuffledQueue, shuffleOn, qIndex, repeatMode } = get()
-        const active = shuffleOn && shuffledQueue.length > 0 ? shuffledQueue : queue
-        if (repeatMode === 'one') return active[qIndex] ?? null
-        const next = qIndex + 1
+        const s = get()
+        const active = getActiveQueue(s)
+        if (s.repeatMode === 'one') return active[s.qIndex] ?? null
+        const next = s.qIndex + 1
         if (next >= active.length) {
-          if (repeatMode === 'all') {
+          if (s.repeatMode === 'all') {
             set({ qIndex: 0 })
             return active[0] ?? null
           }
@@ -68,24 +80,21 @@ export const useQueueStore = create<QueueState>()(
       },
 
       prev: () => {
-        const { queue, shuffledQueue, shuffleOn, qIndex } = get()
-        const active = shuffleOn && shuffledQueue.length > 0 ? shuffledQueue : queue
-        const prev = Math.max(0, qIndex - 1)
+        const s = get()
+        const prev = Math.max(0, s.qIndex - 1)
         set({ qIndex: prev })
-        return active[prev] ?? null
+        return getActiveQueue(s)[prev] ?? null
       },
 
       toggleShuffle: () => {
-        const { shuffleOn, queue, shuffledQueue, qIndex } = get()
-        const active = shuffleOn && shuffledQueue.length > 0 ? shuffledQueue : queue
-        const currentSong = active[qIndex]
-        if (!shuffleOn) {
-          const rest = queue.filter(s => s.id !== currentSong?.id)
-          const shuffledRest = fisherYates(rest)
-          const newShuffled = currentSong ? [currentSong, ...shuffledRest] : fisherYates(queue)
+        const s = get()
+        const currentSong = getActiveQueue(s)[s.qIndex]
+        if (!s.shuffleOn) {
+          const rest = s.queue.filter((x) => x.id !== currentSong?.id)
+          const newShuffled = currentSong ? [currentSong, ...fisherYates(rest)] : fisherYates(s.queue)
           set({ shuffleOn: true, shuffledQueue: newShuffled, qIndex: 0 })
         } else {
-          const newIndex = currentSong ? queue.findIndex(s => s.id === currentSong.id) : 0
+          const newIndex = currentSong ? s.queue.findIndex((x) => x.id === currentSong.id) : 0
           set({ shuffleOn: false, qIndex: Math.max(0, newIndex) })
         }
       },
@@ -96,26 +105,27 @@ export const useQueueStore = create<QueueState>()(
         }))
       },
 
-      jumpTo: (index) => set({ qIndex: index }),
+      jumpTo: (index) => {
+        const s = get()
+        const next = jumpToIndex(s, index)
+        if (next === s) return null
+        set({ qIndex: next.qIndex })
+        return getActiveQueue(next)[next.qIndex] ?? null
+      },
+
+      moveItem: (from, to) => set((s) => moveInQueue(s, from, to)),
+
+      removeAt: (index) => set((s) => removeFromQueue(s, index)),
 
       addToQueue: (song) => {
-        set((s) => ({
-          queue: [...s.queue, song],
-          shuffledQueue: [...s.shuffledQueue, song],
-        }))
+        if (get().queue.some((x) => x.id === song.id)) return false
+        set((s) => appendUnique(s, [song]))
+        return true
       },
 
       appendSongs: (newSongs) => {
         if (!newSongs || newSongs.length === 0) return
-        set((s) => {
-          const existingIds = new Set(s.queue.map((item) => item.id))
-          const unique = newSongs.filter((song) => !existingIds.has(song.id))
-          if (unique.length === 0) return s
-          return {
-            queue: [...s.queue, ...unique],
-            shuffledQueue: [...s.shuffledQueue, ...unique],
-          }
-        })
+        set((s) => appendUnique(s, newSongs))
       },
     }),
     {
