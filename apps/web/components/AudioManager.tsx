@@ -5,6 +5,8 @@ import { useQueueStore } from '@/stores/queue.store'
 import { useSettingsStore, applyTheme, applyFontSize, EQ_PRESETS } from '@/stores/settings.store'
 import { getAudioQualityUrl } from '@/lib/utils'
 import { getOfflineSong } from '@/lib/offline-storage'
+import { getActiveQueue } from '@/lib/queue-logic'
+import { recommendationsUrl } from '@/lib/api-urls'
 import { isSleepTimerDue } from '@/lib/settings-persist'
 import { showToast } from '@/components/ui/Toast'
 import type { Song } from '@/types/music'
@@ -21,41 +23,22 @@ export function AudioManager() {
   const isFadingRef = useRef(false)
   const consecutiveErrorsRef = useRef(0)
   const currentBlobUrlRef = useRef<string | null>(null)
-  const preloadBlobUrlRef = useRef<string | null>(null)
   const isFetchingRecommendationsRef = useRef(false)
   const lastFetchedSongIdRef = useRef<string | null>(null)
   const skipTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const bufferingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const hasDowngradedForTrackRef = useRef(false)
-  const prewarmedTrackIdRef = useRef<string | null>(null)
   const currentSongRef = useRef<Song | null>(null)
 
   const currentSong = usePlayerStore((s) => s.currentSong)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
   const volume = usePlayerStore((s) => s.volume)
   const muted = usePlayerStore((s) => s.muted)
-  const progress = usePlayerStore((s) => s.progress)
-  const duration = usePlayerStore((s) => s.duration)
   const setAudioRef = usePlayerStore((s) => s.setAudioRef)
-  const setProgress = usePlayerStore((s) => s.setProgress)
-  const setDuration = usePlayerStore((s) => s.setDuration)
-  const setIsPlaying = usePlayerStore((s) => s.setIsPlaying)
-  const setIsLoading = usePlayerStore((s) => s.setIsLoading)
-  const togglePlay = usePlayerStore((s) => s.togglePlay)
-  const toggleMute = usePlayerStore((s) => s.toggleMute)
-  const setVolume = usePlayerStore((s) => s.setVolume)
-  const seek = usePlayerStore((s) => s.seek)
-  const next = usePlayerStore((s) => s.next)
-  const prev = usePlayerStore((s) => s.prev)
-  const repeatMode = useQueueStore((s) => s.repeatMode)
-  const toggleShuffle = useQueueStore((s) => s.toggleShuffle)
-  const toggleRepeat = useQueueStore((s) => s.toggleRepeat)
 
   const theme = useSettingsStore((s) => s.theme)
   const fontSize = useSettingsStore((s) => s.fontSize)
   const audioQuality = useSettingsStore((s) => s.audioQuality)
-  const autoplay = useSettingsStore((s) => s.autoplay)
-  const crossfade = useSettingsStore((s) => s.crossfade)
   const gapless = useSettingsStore((s) => s.gapless)
   const sleepTimerEnd = useSettingsStore((s) => s.sleepTimerEnd)
   const setSleepTimer = useSettingsStore((s) => s.setSleepTimer)
@@ -66,6 +49,21 @@ export function AudioManager() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const eqFiltersRef = useRef<BiquadFilterNode[]>([])
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null)
+
+  // Shared by the <audio> error handler and tracks that have no playable URL at all
+  const skipUnplayableTrack = useCallback((title: string) => {
+    const player = usePlayerStore.getState()
+    player.setIsLoading(false)
+    consecutiveErrorsRef.current += 1
+    if (consecutiveErrorsRef.current >= 3) {
+      player.setIsPlaying(false)
+      showToast('Playback stopped: Multiple tracks failed to load. Please check your connection.')
+      return
+    }
+    showToast(`Failed to play "${title}". Skipping to next track.`)
+    if (skipTimeoutRef.current) clearTimeout(skipTimeoutRef.current)
+    skipTimeoutRef.current = setTimeout(() => usePlayerStore.getState().next(), 1000)
+  }, [])
 
   // 1. Initialize Theme & Font Size
   useEffect(() => {
@@ -85,7 +83,6 @@ export function AudioManager() {
     setAudioRef(audioRef as React.RefObject<HTMLAudioElement | null>)
     return () => {
       if (currentBlobUrlRef.current) URL.revokeObjectURL(currentBlobUrlRef.current)
-      if (preloadBlobUrlRef.current) URL.revokeObjectURL(preloadBlobUrlRef.current)
     }
   }, [setAudioRef])
 
@@ -127,7 +124,6 @@ export function AudioManager() {
     }
     if (!isSameSong) {
       hasDowngradedForTrackRef.current = false
-      prewarmedTrackIdRef.current = null
     }
 
     const updateAudioSource = async () => {
@@ -154,6 +150,13 @@ export function AudioManager() {
         targetUrl = getAudioQualityUrl(currentSong.downloadUrl, audioQuality)
       }
 
+      // Decryption failed / no media URL: never leave the spinner running forever
+      if (!targetUrl) {
+        currentSongRef.current = currentSong
+        skipUnplayableTrack(currentSong.title)
+        return
+      }
+
       if (targetUrl && (!isSameSong || el.src !== targetUrl)) {
         const curTime = isSameSong ? el.currentTime : 0
         const storeState = usePlayerStore.getState()
@@ -176,7 +179,7 @@ export function AudioManager() {
     return () => {
       isSubscribed = false
     }
-  }, [currentSong, audioQuality])
+  }, [currentSong, audioQuality, skipUnplayableTrack])
 
   // 4. Handle sleep timer countdown — always PAUSES (never toggles, which could start playback)
   useEffect(() => {
@@ -191,40 +194,29 @@ export function AudioManager() {
     return () => clearInterval(interval)
   }, [sleepTimerEnd, setSleepTimer])
 
-  // 5. Gapless Preloading: preload the next track in queue (offline blob or CDN)
+  // 5. Gapless preloading: warm up the next CDN track's metadata only.
+  // (preload="metadata" — the old preload="auto" + load() downloaded every next track twice)
   const queue = useQueueStore((s) => s.queue)
   const qIndex = useQueueStore((s) => s.qIndex)
   const shuffleOn = useQueueStore((s) => s.shuffleOn)
   const shuffledQueue = useQueueStore((s) => s.shuffledQueue)
 
   useEffect(() => {
-    if (!gapless || !isPlaying) return
-    const activeQueue = shuffleOn ? shuffledQueue : queue
-    const nextIndex = qIndex + 1
-    if (nextIndex < activeQueue.length) {
-      const nextSong = activeQueue[nextIndex]
-      let isSubscribed = true
+    const preload = preloadRef.current
+    if (!gapless || !isPlaying || !preload) return
+    const nextSong = getActiveQueue({ queue, shuffledQueue, qIndex, shuffleOn })[qIndex + 1]
+    if (!nextSong) return
 
-      getOfflineSong(nextSong.id).then((offlineRecord) => {
-        if (!isSubscribed || !preloadRef.current) return
-        let nextUrl = ''
-        if (offlineRecord?.blob) {
-          if (preloadBlobUrlRef.current) {
-            URL.revokeObjectURL(preloadBlobUrlRef.current)
-          }
-          preloadBlobUrlRef.current = URL.createObjectURL(offlineRecord.blob)
-          nextUrl = preloadBlobUrlRef.current
-        } else {
-          nextUrl = getAudioQualityUrl(nextSong.downloadUrl, audioQuality)
-        }
-        if (preloadRef.current.src !== nextUrl) {
-          preloadRef.current.src = nextUrl
-        }
-      })
+    let isSubscribed = true
+    getOfflineSong(nextSong.id).then((offlineRecord) => {
+      // Downloaded tracks play from IndexedDB — nothing to warm up over the network
+      if (!isSubscribed || offlineRecord?.blob) return
+      const nextUrl = getAudioQualityUrl(nextSong.downloadUrl, audioQuality)
+      if (nextUrl && preload.src !== nextUrl) preload.src = nextUrl
+    })
 
-      return () => {
-        isSubscribed = false
-      }
+    return () => {
+      isSubscribed = false
     }
   }, [gapless, isPlaying, queue, qIndex, shuffleOn, shuffledQueue, audioQuality])
 
@@ -357,9 +349,7 @@ export function AudioManager() {
     isFetchingRecommendationsRef.current = true
     lastFetchedSongIdRef.current = seedSong.id
     try {
-      const res = await fetch(
-        `/api/search?recommendSongId=${encodeURIComponent(seedSong.id)}&artist=${encodeURIComponent(seedSong.artist)}&lang=${encodeURIComponent(seedSong.language || 'telugu')}`
-      )
+      const res = await fetch(recommendationsUrl(seedSong))
       if (res.ok) {
         const data = await res.json()
         if (data?.songs && Array.isArray(data.songs) && data.songs.length > 0) {
@@ -373,56 +363,11 @@ export function AudioManager() {
     }
   }, [])
 
-  // 8. Audio element event listeners
+  // 8. Audio element event listeners — attached ONCE; every handler reads the latest
+  // state via getState(), so volume/queue changes no longer detach and re-attach them.
   useEffect(() => {
     const el = audioRef.current
     if (!el) return
-
-    const onTimeUpdate = () => {
-      setProgress(el.currentTime)
-
-      // Autoplay prefetch when approaching end of queue
-      const activeQueue = shuffleOn ? shuffledQueue : queue
-      if (
-        autoplay &&
-        currentSong &&
-        qIndex >= activeQueue.length - 1 &&
-        el.duration > 15 &&
-        el.currentTime >= el.duration - 12
-      ) {
-        prefetchRecommendations(currentSong)
-      }
-
-      // Next-track audio pre-warming 5 seconds before song completion
-      if (el.duration > 10 && el.currentTime >= el.duration - 5) {
-        const nextIdx = qIndex + 1
-        if (nextIdx < activeQueue.length) {
-          const nextSong = activeQueue[nextIdx]
-          if (nextSong && prewarmedTrackIdRef.current !== nextSong.id) {
-            prewarmedTrackIdRef.current = nextSong.id
-            if (preloadRef.current && preloadRef.current.src) {
-              preloadRef.current.load()
-            }
-          }
-        }
-      }
-
-      // Crossfade near end of song
-      if (
-        crossfade > 0 &&
-        el.duration > crossfade + 2 &&
-        el.currentTime >= el.duration - crossfade &&
-        !isFadingRef.current
-      ) {
-        isFadingRef.current = true
-        fadeVolume(0, crossfade, () => {
-          next()
-          if (audioRef.current) audioRef.current.volume = 0
-          isFadingRef.current = false
-          fadeVolume(volume, Math.min(2, crossfade / 2))
-        })
-      }
-    }
 
     const clearBufferingTimer = () => {
       if (bufferingTimerRef.current) {
@@ -431,32 +376,73 @@ export function AudioManager() {
       }
     }
 
-    const onDuration = () => setDuration(el.duration)
+    const onTimeUpdate = () => {
+      const player = usePlayerStore.getState()
+      player.setProgress(el.currentTime)
+
+      const { autoplay, crossfade } = useSettingsStore.getState()
+      const queueState = useQueueStore.getState()
+      const song = player.currentSong
+
+      // Autoplay: prefetch recommendations when approaching the end of the queue
+      if (
+        autoplay &&
+        song &&
+        queueState.qIndex >= getActiveQueue(queueState).length - 1 &&
+        el.duration > 15 &&
+        el.currentTime >= el.duration - 12
+      ) {
+        prefetchRecommendations(song)
+      }
+
+      // Crossfade near the end of the song
+      if (
+        crossfade > 0 &&
+        el.duration > crossfade + 2 &&
+        el.currentTime >= el.duration - crossfade &&
+        !isFadingRef.current
+      ) {
+        isFadingRef.current = true
+        fadeVolume(0, crossfade, () => {
+          usePlayerStore.getState().next()
+          if (audioRef.current) audioRef.current.volume = 0
+          isFadingRef.current = false
+          fadeVolume(usePlayerStore.getState().volume, Math.min(2, crossfade / 2))
+        })
+      }
+    }
+
+    const onDuration = () => usePlayerStore.getState().setDuration(el.duration)
+
     const onWaiting = () => {
-      setIsLoading(true)
-      // CDN Bitrate Adaptive Recovery: if buffering stalls > 4 seconds on slow connections
+      const player = usePlayerStore.getState()
+      player.setIsLoading(true)
+      const song = player.currentSong
+      // CDN bitrate adaptive recovery: if buffering stalls > 4 s on a slow connection
       if (
         !bufferingTimerRef.current &&
         !hasDowngradedForTrackRef.current &&
-        currentSong &&
+        song &&
         !currentBlobUrlRef.current &&
-        audioQuality === 'high'
+        useSettingsStore.getState().audioQuality === 'high'
       ) {
         bufferingTimerRef.current = setTimeout(() => {
-          if (audioRef.current && !audioRef.current.paused) {
-            hasDowngradedForTrackRef.current = true
-            const curTime = audioRef.current.currentTime
-            const adaptedUrl = getAudioQualityUrl(currentSong.downloadUrl, 'normal')
-            if (adaptedUrl && audioRef.current.src !== adaptedUrl) {
-              audioRef.current.src = adaptedUrl
-              audioRef.current.currentTime = curTime
-              audioRef.current.play().catch(() => {})
-              showToast('Slow connection detected — adapted audio quality for smooth playback')
-            }
+          bufferingTimerRef.current = null
+          const audio = audioRef.current
+          if (!audio || audio.paused || usePlayerStore.getState().currentSong?.id !== song.id) return
+          hasDowngradedForTrackRef.current = true
+          const curTime = audio.currentTime
+          const adaptedUrl = getAudioQualityUrl(song.downloadUrl, 'normal')
+          if (adaptedUrl && audio.src !== adaptedUrl) {
+            audio.src = adaptedUrl
+            audio.currentTime = curTime
+            audio.play().catch(() => {})
+            showToast('Slow connection detected — adapted audio quality for smooth playback')
           }
         }, 4000)
       }
     }
+
     const onPlaying = () => {
       clearBufferingTimer()
       if (skipTimeoutRef.current) {
@@ -464,61 +450,52 @@ export function AudioManager() {
         skipTimeoutRef.current = null
       }
       consecutiveErrorsRef.current = 0
-      setIsLoading(false)
-      setIsPlaying(true)
+      const player = usePlayerStore.getState()
+      player.setIsLoading(false)
+      player.setIsPlaying(true)
     }
-    const onPause = () => setIsPlaying(false)
+
+    const onPause = () => usePlayerStore.getState().setIsPlaying(false)
+
     const onCanPlay = () => {
       clearBufferingTimer()
-      setIsLoading(false)
+      usePlayerStore.getState().setIsLoading(false)
     }
+
     const onError = () => {
-      setIsLoading(false)
-      consecutiveErrorsRef.current += 1
-      if (consecutiveErrorsRef.current >= 3) {
-        setIsPlaying(false)
-        showToast('Playback stopped: Multiple tracks failed to load. Please check your connection.')
-        return
-      }
-      if (currentSong) {
-        showToast(`Failed to play "${currentSong.title}". Skipping to next track.`)
-        if (skipTimeoutRef.current) clearTimeout(skipTimeoutRef.current)
-        skipTimeoutRef.current = setTimeout(() => next(), 1000)
-      }
+      const song = usePlayerStore.getState().currentSong
+      if (song) skipUnplayableTrack(song.title)
+      else usePlayerStore.getState().setIsLoading(false)
     }
+
     const onEnded = async () => {
-      if (repeatMode === 'one') {
+      const queueState = useQueueStore.getState()
+      if (queueState.repeatMode === 'one') {
         el.currentTime = 0
         el.play().catch(() => {})
         return
       }
 
-      const activeQueue = shuffleOn ? shuffledQueue : queue
-      const isAtEnd = qIndex >= activeQueue.length - 1
-
-      if (isAtEnd && repeatMode === 'none' && autoplay && currentSong) {
-        setIsLoading(true)
+      const isAtEnd = queueState.qIndex >= getActiveQueue(queueState).length - 1
+      const song = usePlayerStore.getState().currentSong
+      if (isAtEnd && queueState.repeatMode === 'none' && useSettingsStore.getState().autoplay && song) {
+        usePlayerStore.getState().setIsLoading(true)
         try {
-          const res = await fetch(
-            `/api/search?recommendSongId=${encodeURIComponent(currentSong.id)}&artist=${encodeURIComponent(currentSong.artist)}&lang=${encodeURIComponent(currentSong.language || 'telugu')}`
-          )
+          const res = await fetch(recommendationsUrl(song))
           if (res.ok) {
             const data = await res.json()
-            if (data?.songs && Array.isArray(data.songs) && data.songs.length > 0) {
+            if (Array.isArray(data?.songs) && data.songs.length > 0) {
               useQueueStore.getState().appendSongs(data.songs)
-              setIsLoading(false)
-              next()
-              return
             }
           }
         } catch {
-          // Fallback to normal next
+          // Fall through to a normal next()
         } finally {
-          setIsLoading(false)
+          usePlayerStore.getState().setIsLoading(false)
         }
       }
 
-      next()
+      usePlayerStore.getState().next()
     }
 
     el.addEventListener('timeupdate', onTimeUpdate)
@@ -531,6 +508,7 @@ export function AudioManager() {
     el.addEventListener('ended', onEnded)
 
     return () => {
+      clearBufferingTimer()
       if (skipTimeoutRef.current) {
         clearTimeout(skipTimeoutRef.current)
         skipTimeoutRef.current = null
@@ -544,30 +522,11 @@ export function AudioManager() {
       el.removeEventListener('error', onError)
       el.removeEventListener('ended', onEnded)
     }
-  }, [
-    repeatMode,
-    next,
-    setProgress,
-    setDuration,
-    setIsPlaying,
-    setIsLoading,
-    currentSong,
-    crossfade,
-    volume,
-    fadeVolume,
-    autoplay,
-    queue,
-    qIndex,
-    shuffleOn,
-    shuffledQueue,
-    prefetchRecommendations,
-    audioQuality,
-  ])
+  }, [fadeVolume, prefetchRecommendations, skipUnplayableTrack])
 
-  // 9. MediaSession API
+  // 9a. MediaSession metadata — only when the track changes
   useEffect(() => {
     if (!('mediaSession' in navigator) || !currentSong) return
-
     navigator.mediaSession.metadata = new MediaMetadata({
       title: currentSong.title,
       artist: currentSong.artist,
@@ -581,39 +540,40 @@ export function AudioManager() {
           ]
         : [],
     })
+  }, [currentSong])
 
+  // 9b. MediaSession playback state
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused'
+  }, [isPlaying])
 
-    navigator.mediaSession.setActionHandler('play', () => togglePlay())
-    navigator.mediaSession.setActionHandler('pause', () => togglePlay())
-    navigator.mediaSession.setActionHandler('previoustrack', () => prev())
-    navigator.mediaSession.setActionHandler('nexttrack', () => next())
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
-      if (details.seekTime !== undefined) seek(details.seekTime)
-    })
-    navigator.mediaSession.setActionHandler('seekforward', (details) => {
-      const offset = details.seekOffset || 10
-      seek(Math.min(duration, progress + offset))
-    })
-    navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-      const offset = details.seekOffset || 10
-      seek(Math.max(0, progress - offset))
-    })
-
+  // 9c. MediaSession action handlers — registered once, read the latest state on demand
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    const ms = navigator.mediaSession
+    const player = () => usePlayerStore.getState()
+    const currentTime = () => audioRef.current?.currentTime ?? player().progress
+    const handlers: Array<[MediaSessionAction, MediaSessionActionHandler]> = [
+      ['play', () => { if (!player().isPlaying) player().togglePlay() }],
+      ['pause', () => player().pause()],
+      ['previoustrack', () => player().prev()],
+      ['nexttrack', () => player().next()],
+      ['seekto', (d) => { if (d.seekTime !== undefined) player().seek(d.seekTime) }],
+      ['seekforward', (d) => player().seek(Math.min(player().duration, currentTime() + (d.seekOffset || 10)))],
+      ['seekbackward', (d) => player().seek(Math.max(0, currentTime() - (d.seekOffset || 10)))],
+    ]
+    for (const [action, handler] of handlers) {
+      try { ms.setActionHandler(action, handler) } catch { /* action unsupported by this browser */ }
+    }
     return () => {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', null)
-        navigator.mediaSession.setActionHandler('pause', null)
-        navigator.mediaSession.setActionHandler('previoustrack', null)
-        navigator.mediaSession.setActionHandler('nexttrack', null)
-        navigator.mediaSession.setActionHandler('seekto', null)
-        navigator.mediaSession.setActionHandler('seekforward', null)
-        navigator.mediaSession.setActionHandler('seekbackward', null)
+      for (const [action] of handlers) {
+        try { ms.setActionHandler(action, null) } catch { /* ignore */ }
       }
     }
-  }, [currentSong, isPlaying, duration, progress, togglePlay, prev, next, seek])
+  }, [])
 
-  // 10. Global Keyboard Shortcuts
+  // 10. Global keyboard shortcuts — registered once; reads the latest state per key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
@@ -631,62 +591,61 @@ export function AudioManager() {
         return
       }
 
-      if (e.code === 'Space' || e.key.toLowerCase() === 'k') {
+      const player = usePlayerStore.getState()
+      const queueStore = useQueueStore.getState()
+      const cur = audioRef.current?.currentTime ?? player.progress
+      const key = e.key.toLowerCase()
+
+      if (e.code === 'Space' || key === 'k') {
         e.preventDefault()
-        togglePlay()
-      } else if (e.key.toLowerCase() === 'j') {
+        player.togglePlay()
+      } else if (key === 'j') {
         e.preventDefault()
-        const cur = audioRef.current?.currentTime ?? progress
-        seek(Math.max(0, cur - 10))
-      } else if (e.key.toLowerCase() === 'l') {
+        player.seek(Math.max(0, cur - 10))
+      } else if (key === 'l') {
         e.preventDefault()
-        const cur = audioRef.current?.currentTime ?? progress
-        seek(Math.min(duration, cur + 10))
+        player.seek(Math.min(player.duration, cur + 10))
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault()
-        const cur = audioRef.current?.currentTime ?? progress
-        seek(Math.max(0, cur - 5))
+        player.seek(Math.max(0, cur - 5))
       } else if (e.key === 'ArrowRight') {
         e.preventDefault()
-        const cur = audioRef.current?.currentTime ?? progress
-        seek(Math.min(duration, cur + 5))
+        player.seek(Math.min(player.duration, cur + 5))
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
-        setVolume(Math.min(1, volume + 0.05))
+        player.setVolume(Math.min(1, player.volume + 0.05))
       } else if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setVolume(Math.max(0, volume - 0.05))
-      } else if (e.key.toLowerCase() === 'm') {
+        player.setVolume(Math.max(0, player.volume - 0.05))
+      } else if (key === 'm') {
         e.preventDefault()
-        toggleMute()
-      } else if (e.shiftKey && e.key.toLowerCase() === 'n') {
+        player.toggleMute()
+      } else if (e.shiftKey && key === 'n') {
         e.preventDefault()
-        next()
-      } else if (e.shiftKey && e.key.toLowerCase() === 'p') {
+        player.next()
+      } else if (e.shiftKey && key === 'p') {
         e.preventDefault()
-        prev()
-      } else if (e.key.toLowerCase() === 's') {
+        player.prev()
+      } else if (key === 's') {
         e.preventDefault()
-        toggleShuffle()
-      } else if (e.key.toLowerCase() === 'r') {
+        queueStore.toggleShuffle()
+      } else if (key === 'r') {
         e.preventDefault()
-        toggleRepeat()
-      } else if (e.key === 'Escape') {
-        if (usePlayerStore.getState().isExpanded) {
-          e.preventDefault()
-          usePlayerStore.getState().setExpanded(false)
-        }
+        queueStore.toggleRepeat()
+      } else if (e.key === 'Escape' && player.isExpanded) {
+        e.preventDefault()
+        player.setExpanded(false)
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [togglePlay, seek, setVolume, toggleMute, next, prev, toggleShuffle, toggleRepeat, progress, duration, volume])
+  }, [])
 
   return (
     <>
       <audio ref={audioRef} id="ytm-audio" preload="metadata" crossOrigin="anonymous" className="hidden" />
-      <audio ref={preloadRef} id="ytm-preload-audio" preload="auto" crossOrigin="anonymous" className="hidden" />
+      <audio ref={preloadRef} id="ytm-preload-audio" preload="metadata" crossOrigin="anonymous" className="hidden" />
     </>
   )
 }
