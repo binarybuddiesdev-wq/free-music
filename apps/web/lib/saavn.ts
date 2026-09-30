@@ -1,5 +1,7 @@
 import CryptoJS from 'crypto-js'
 import type { Song, Album, Artist, SearchPlaylist } from '@/types/music'
+import { mergeRecommendations } from './recommendations'
+import { fisherYates } from './utils'
 import { preprocessQuery, getYouTubeSuggestion, calculateRelevance, isDiscoveryQuery } from './search-engine'
 
 // Official JioSaavn API — no external mirror needed
@@ -464,51 +466,24 @@ export async function getArtistDetails(artistId: string): Promise<{ artist: Arti
   }
 }
 
+const randomPageUpTo = (max: number) => Math.floor(Math.random() * max) + 1
+
 export async function getSongRecommendations(
   songId: string,
   artist?: string,
   language = 'telugu'
 ): Promise<Song[]> {
-  try {
-    const results: Song[] = []
-    const seenIds = new Set<string>([songId])
-
-    // 1. Fetch songs by primary artist if available
-    const primaryArtist = (artist || '').split(',')[0]?.trim()
-    if (primaryArtist) {
-      const artistSongs = await jiosaavnSearch(primaryArtist, 25, 1)
-      for (const s of artistSongs) {
-        if (!seenIds.has(s.id)) {
-          seenIds.add(s.id)
-          results.push(s)
-        }
-      }
-    }
-
-    // 2. Fetch language discovery/trending songs to guarantee variety & volume
-    if (results.length < 15) {
-      const trending = await getSectionSongs('trending', language, 1)
-      for (const s of trending) {
-        if (!seenIds.has(s.id)) {
-          seenIds.add(s.id)
-          results.push(s)
-        }
-      }
-    }
-
-    // 3. Fallback to quick-picks if needed
-    if (results.length < 10) {
-      const picks = await getSectionSongs('quick-picks', language, 1)
-      for (const s of picks) {
-        if (!seenIds.has(s.id)) {
-          seenIds.add(s.id)
-          results.push(s)
-        }
-      }
-    }
-
-    return results
-  } catch {
-    return []
-  }
+  const primaryArtist = (artist || '').split(',')[0]?.trim() || ''
+  // Random pages + alternating discovery sections keep long radio sessions from running dry
+  const [artistResult, discoveryResult] = await Promise.allSettled([
+    primaryArtist ? jiosaavnSearch(primaryArtist, 40, randomPageUpTo(2)) : Promise.resolve([] as Song[]),
+    getSectionSongs(Math.random() < 0.5 ? 'trending' : 'quick-picks', language, randomPageUpTo(3)),
+  ])
+  return mergeRecommendations({
+    seedId: songId,
+    primaryArtist,
+    artistSongs: artistResult.status === 'fulfilled' ? artistResult.value : [],
+    discoverySongs: discoveryResult.status === 'fulfilled' ? discoveryResult.value : [],
+    shuffle: fisherYates,
+  })
 }

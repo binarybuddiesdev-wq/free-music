@@ -11,6 +11,7 @@ import { LyricsPanel } from '@/components/player/LyricsPanel'
 import { VisualizerCanvas } from '@/components/player/VisualizerCanvas'
 import { ContextMenu } from '@/components/ui/ContextMenu'
 import { showToast } from '@/components/ui/Toast'
+import { recommendationsUrl } from '@/lib/api-urls'
 import type { Song } from '@/types/music'
 
 type Tab = 'UP NEXT' | 'LYRICS' | 'RELATED'
@@ -343,14 +344,13 @@ function UpNextPanel() {
             onClick={async () => {
               showToast(`Starting radio for "${currentSong.title}"…`)
               try {
-                const res = await fetch(
-                  `/api/search?recommendSongId=${encodeURIComponent(currentSong.id)}&artist=${encodeURIComponent(currentSong.artist)}&lang=${encodeURIComponent(currentSong.language || 'telugu')}`
-                )
+                const res = await fetch(recommendationsUrl(currentSong))
+                if (!res.ok) throw new Error(`HTTP ${res.status}`)
                 const data = await res.json()
                 const recs: Song[] = Array.isArray(data?.songs) ? data.songs : []
                 const radioQueue = [currentSong, ...recs.filter((s) => s.id !== currentSong.id)]
-                useSettingsStore.getState().setAutoplay(true)
-                usePlayerStore.getState().playSong(currentSong, radioQueue, 0)
+                // Replace what plays next; keep the current song playing where it is
+                useQueueStore.getState().setQueue(radioQueue, 0, true)
                 showToast(`Radio playing • ${radioQueue.length} tracks queued`)
               } catch {
                 showToast('Failed to load radio recommendations')
