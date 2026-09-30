@@ -35,13 +35,17 @@ function WatchContent() {
   const videoIdParam = searchParams.get('v')
   const currentSong = usePlayerStore((s) => s.currentSong)
   const savedTime = usePlayerStore((s) => s.savedTimeForVideo)
-  const setMode = usePlayerStore((s) => s.setMode)
+  const switchToAudio = usePlayerStore((s) => s.switchToAudio)
   const playerRef = useRef<InstanceType<typeof window.YT.Player> | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [ytReady, setYtReady] = useState(false)
 
+  const audioRef = usePlayerStore((s) => s.audioRef)
+  const setMode = usePlayerStore((s) => s.setMode)
+  const setSavedTimeForVideo = usePlayerStore((s) => s.setSavedTimeForVideo)
+
   // Fetch video ID if not in URL
-  const { data: resolvedId } = useQuery<{ videoId: string | null }>({
+  const { data: resolvedId, isLoading: isResolvingVideo } = useQuery<{ videoId: string | null }>({
     queryKey: ['video-id', currentSong?.id],
     queryFn: () => {
       if (!currentSong) return Promise.resolve({ videoId: null })
@@ -65,9 +69,15 @@ function WatchContent() {
     }
   }, [])
 
-  // Initialize player
+  // Initialize player and pause background audio
   useEffect(() => {
     if (!ytReady || !videoId || !containerRef.current) return
+
+    // Pause audio playback when video player mounts
+    if (audioRef?.current) {
+      audioRef.current.pause()
+    }
+    setMode('video')
 
     playerRef.current?.destroy()
 
@@ -86,7 +96,19 @@ function WatchContent() {
       playerRef.current?.destroy()
       playerRef.current = null
     }
-  }, [ytReady, videoId, savedTime])
+  }, [ytReady, videoId, savedTime, audioRef, setMode])
+
+  const handleSwitchToAudio = () => {
+    if (playerRef.current?.getCurrentTime) {
+      try {
+        const t = playerRef.current.getCurrentTime()
+        if (t > 0) setSavedTimeForVideo(t)
+      } catch {
+        // Ignored
+      }
+    }
+    switchToAudio()
+  }
 
   if (!currentSong && !videoIdParam) {
     return (
@@ -107,7 +129,7 @@ function WatchContent() {
           </div>
         )}
         <button
-          onClick={() => setMode('audio')}
+          onClick={handleSwitchToAudio}
           style={{
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border)',
@@ -131,8 +153,8 @@ function WatchContent() {
           <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', flexDirection: 'column', gap: 8 }}>
-            <div>Loading video…</div>
-            <div style={{ fontSize: 12 }}>Requires YouTube API key</div>
+            <div>{isResolvingVideo ? 'Searching for video…' : 'Video not available for this track'}</div>
+            <div style={{ fontSize: 12 }}>You can switch back to audio playback above</div>
           </div>
         )}
       </div>

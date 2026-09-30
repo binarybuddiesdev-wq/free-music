@@ -1,0 +1,27 @@
+# Free Music (YouTube Music Clone) — AI Coding Rules
+
+You are working on the Free Music (YouTube Music Clone) repository. Always adhere to these invariants:
+
+1. Global Audio Lifecycle:
+   - Audio is controlled ONLY by apps/web/components/AudioManager.tsx.
+   - Never instantiate `<audio>` elements or `new Audio()` in UI components.
+   - Playback is triggered via `usePlayerStore.getState().playSong(song, queue, index)`.
+
+2. Theming & Styling:
+   - Tailwind CSS v4 and pure CSS variables in globals.css.
+   - Never hardcode dark colors (e.g. #030303, #0f0f0f, #212121).
+   - Use semantic variables: `var(--bg-base)`, `var(--bg-surface)`, `var(--panel-bg)`, `var(--text-primary)`, `var(--text-secondary)`, `var(--text-tertiary)`, `var(--border)`.
+
+3. Audio Quality Bitrates:
+   - Low: _48.mp4, Normal: _160.mp4, High: _320.mp4 via `getAudioQualityUrl(url, quality)`.
+
+4. Web Audio & CORS:
+   - `<audio>` elements have `crossOrigin="anonymous"`.
+   - `createMediaElementSource` is guarded to be called only once.
+   - Frequency visualizer uses `getAudioAnalyser()` in VisualizerCanvas.tsx.
+
+5. Verification Protocol:
+   - Always run:
+     1. pnpm --filter web test
+     2. pnpm --filter web lint
+     3. pnpm --filter web build

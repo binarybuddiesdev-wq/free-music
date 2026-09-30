@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/stores/settings.store'
 import { SongCard } from '@/components/home/SongCard'
+import { CarouselRow } from '@/components/home/CarouselRow'
 import { SkeletonCard } from '@/components/home/SkeletonCard'
 import type { Song } from '@/types/music'
 
@@ -31,13 +32,13 @@ function MoodSection({ mood, language }: { mood: typeof MOODS[0]; language: stri
       <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
         {mood.emoji} {mood.label}
       </h2>
-      <div className="no-scrollbar" style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
+      <CarouselRow style={{ gap: 16, margin: 0, paddingLeft: 0, paddingRight: 0 }}>
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
           : songs.slice(0, 10).map((song, i) => (
               <SongCard key={song.id} song={song} queue={songs} index={i} />
             ))}
-      </div>
+      </CarouselRow>
     </section>
   )
 }

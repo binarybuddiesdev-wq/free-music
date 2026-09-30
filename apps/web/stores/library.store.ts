@@ -14,6 +14,8 @@ interface LibraryState {
   addToPlaylist: (playlistId: string, song: Song) => void
   removeFromPlaylist: (playlistId: string, songId: string) => void
   deletePlaylist: (playlistId: string) => void
+  updatePlaylistName: (playlistId: string, name: string) => void
+  updatePlaylistSongs: (playlistId: string, songs: Song[]) => void
 }
 
 export const useLibraryStore = create<LibraryState>()(
@@ -35,6 +37,7 @@ export const useLibraryStore = create<LibraryState>()(
 
       addToHistory: (song) =>
         set((s) => {
+          if (s.history[0]?.id === song.id) return s
           const filtered = s.history.filter((h) => h.id !== song.id)
           return { history: [song, ...filtered].slice(0, 200) }
         }),
@@ -82,7 +85,31 @@ export const useLibraryStore = create<LibraryState>()(
           delete pls[playlistId]
           return { playlists: pls }
         }),
+
+      updatePlaylistName: (playlistId, name) =>
+        set((s) => {
+          const pl = s.playlists[playlistId]
+          if (!pl) return s
+          return {
+            playlists: {
+              ...s.playlists,
+              [playlistId]: { ...pl, name },
+            },
+          }
+        }),
+
+      updatePlaylistSongs: (playlistId, songs) =>
+        set((s) => {
+          const pl = s.playlists[playlistId]
+          if (!pl) return s
+          return {
+            playlists: {
+              ...s.playlists,
+              [playlistId]: { ...pl, songs },
+            },
+          }
+        }),
     }),
-    { name: 'ytm-library' }
+    { name: 'ytm-library', skipHydration: true }
   )
 )

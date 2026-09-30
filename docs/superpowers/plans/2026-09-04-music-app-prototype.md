@@ -8,7 +8,7 @@
 
 **Tech Stack:** Vanilla HTML/CSS/JS (ES2020+), JioSaavn API, LRCLIB API, YouTube IFrame API, Noto Sans Telugu via Google Fonts.
 
-**Spec:** `MUSIC_APP_RESEARCH.md` (project root — all API behaviors, CORS findings, and quality rules verified 2026-09-04)
+**Spec:** [`docs/research/music-app-research.md`](file:///C:/teja/coding/free-music/docs/research/music-app-research.md) (initial API behaviors, CORS findings, and quality rules verified 2026-09-04)
 
 ## Global Constraints
 

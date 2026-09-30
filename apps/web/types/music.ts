@@ -17,14 +17,37 @@ export interface Playlist {
   createdAt: number
 }
 
+export interface Album {
+  id: string
+  title: string
+  artist: string
+  year?: string
+  image: string
+  songCount: number
+  language?: string
+}
+
+export interface Artist {
+  id: string
+  name: string
+  image: string
+  role?: string
+  subscriberCount?: number
+  genres?: string[]
+}
+
+export interface SearchPlaylist {
+  id: string
+  title: string
+  owner: string
+  image: string
+  songCount: number
+  language?: string
+}
+
 export interface LyricLine {
   time: number
   text: string
-}
-
-export interface SearchResult {
-  songs: Song[]
-  total: number
 }
 
 export interface Language {

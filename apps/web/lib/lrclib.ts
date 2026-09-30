@@ -10,7 +10,10 @@ interface LrcLibResponse {
 
 async function fetchLyrics(params: URLSearchParams): Promise<LrcLibResponse | null> {
   try {
-    const res = await fetch(`${BASE}/get?${params}`, { next: { revalidate: 86400 } })
+    const res = await fetch(`${BASE}/get?${params}`, {
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(6000),
+    })
     if (!res.ok) return null
     return res.json()
   } catch {

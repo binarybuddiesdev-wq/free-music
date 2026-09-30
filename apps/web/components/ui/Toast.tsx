@@ -12,12 +12,14 @@ export function showToast(message: string) {
   showToastFn?.(message)
 }
 
+let toastSeq = 0
+
 export function ToastContainer() {
   const [toasts, setToasts] = useState<ToastState[]>([])
 
   useEffect(() => {
     showToastFn = (message) => {
-      const id = Date.now()
+      const id = ++toastSeq
       setToasts((t) => [...t, { message, id }])
       setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3000)
     }

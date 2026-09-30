@@ -1,6 +1,10 @@
 'use client'
+import { useRef, useState, useEffect, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/stores/settings.store'
+import { randomPage } from '@/lib/session'
+import { SeenSongsContext } from './SeenSongsContext'
+import { CarouselRow } from './CarouselRow'
 import { SongCard } from './SongCard'
 import { SkeletonCard } from './SkeletonCard'
 import type { Song } from '@/types/music'
@@ -12,53 +16,47 @@ interface SectionRowProps {
 
 export function SectionRow({ id, title }: SectionRowProps) {
   const language = useSettingsStore((s) => s.language)
+  const page = useRef(randomPage()).current
+  const seenIds = useContext(SeenSongsContext)
+  const [filteredSongs, setFilteredSongs] = useState<Song[]>([])
 
   const { data, isLoading } = useQuery<{ songs: Song[] }>({
-    queryKey: ['section', id, language],
+    queryKey: ['section', id, language, page],
     queryFn: () =>
-      fetch(`/api/search?section=${id}&lang=${language}`).then((r) => r.json()),
-    staleTime: 5 * 60 * 1000,
+      fetch(`/api/search?section=${id}&lang=${language}&page=${page}`).then((r) => r.json()),
+    staleTime: 0,
+    gcTime: 2 * 60 * 1000,
   })
 
-  const songs = data?.songs ?? []
+  useEffect(() => {
+    if (!data?.songs) return
+    const seen = seenIds?.current ?? new Set<string>()
+    const fresh = data.songs.filter((s) => !seen.has(s.id))
+    fresh.forEach((s) => seen.add(s.id))
+    setFilteredSongs(fresh)
+    return () => {
+      // Clean up on unmount so Strict Mode double-invoke stays correct
+      fresh.forEach((s) => seen.delete(s.id))
+    }
+  }, [data, seenIds])
+
+  const songs = filteredSongs
+
+  if (!isLoading && songs.length === 0) return null
 
   return (
     <section style={{ marginBottom: 32 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-.2px' }}>{title}</h2>
-        {songs.length > 0 && (
-          <button
-            style={{
-              padding: '6px 16px', borderRadius: 20,
-              background: 'rgba(255,255,255,.1)', color: '#fff',
-              fontSize: 12, fontWeight: 500, cursor: 'pointer', border: 0,
-              transition: 'background .15s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.2)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,.1)')}
-          >
-            See all
-          </button>
-        )}
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-.2px' }}>{title}</h2>
       </div>
 
-      <div
-        className="no-scrollbar"
-        style={{
-          display: 'flex', gap: 12, overflowX: 'auto',
-          scrollBehavior: 'smooth', scrollSnapType: 'x mandatory',
-          paddingBottom: 8, margin: '0 -24px',
-          paddingLeft: 24, paddingRight: 24,
-        }}
-      >
+      <CarouselRow>
         {isLoading
           ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-          : songs.length === 0
-            ? <p style={{ color: '#aaa', fontSize: 13, padding: '8px 0' }}>No songs found</p>
-            : songs.map((song, i) => (
-                <SongCard key={song.id} song={song} queue={songs} index={i} />
-              ))}
-      </div>
+          : songs.map((song, i) => (
+              <SongCard key={song.id} song={song} queue={songs} index={i} />
+            ))}
+      </CarouselRow>
     </section>
   )
 }
