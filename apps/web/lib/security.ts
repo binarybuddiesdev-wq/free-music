@@ -11,11 +11,14 @@ export const ALLOWED_LANGUAGES = [
   'kannada',
   'malayalam',
   'punjabi',
-  'english',
   'marathi',
   'bengali',
   'gujarati',
+  'odia',
+  'assamese',
+  'urdu',
   'bhojpuri',
+  'english',
 ] as const
 
 export type AllowedLanguage = (typeof ALLOWED_LANGUAGES)[number]

@@ -9,7 +9,7 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 |---|---|---|---|
 | 0 | Branch and baseline | Done | User committed baseline; work stays on `main` |
 | 1 | Skip redundant localStorage writes (#2) | Done | 79 tests pass, lint clean, tsc 0 |
-| 2 | Accept every selectable language (#3) | Pending | |
+| 2 | Accept every selectable language (#3) | Done | 82 tests pass, lint clean, tsc 0 |
 | 3 | Pure queue logic module (#5, #6, #15) | Pending | |
 | 4 | Wire queue UIs (#5, #6) | Pending | |
 | 5 | Player store: mute, pause, video mode (#9, #10) | Pending | |
@@ -27,6 +27,11 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 - All five persisted stores (`player`, `queue`, `library`, `settings`, `ui`) now use `createJSONStorage(() => dedupLocalStorage)`.
 - Deviation: the test file and implementation were written together, so the RED run was not watched separately.
 - Not done: the optional manual DevTools localStorage check.
+
+### Task 2 — done
+- Added `lib/languages.test.mjs` (3 tests), registered in the `test` script.
+- Watched RED first: `odia must not fall back to telugu`.
+- `ALLOWED_LANGUAGES` in `lib/security.ts` now matches `lib/languages.ts` (added `odia`, `assamese`, `urdu`).
 
 ## Rulings
 - Working directly on `main` rather than `fix/codebase-review`, per user instruction.
