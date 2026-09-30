@@ -37,25 +37,32 @@ function StoreHydrator() {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // 2. Service Worker registration with update prompt
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then((reg) => {
-            reg.addEventListener('updatefound', () => {
-              const newWorker = reg.installing
-              if (newWorker) {
+    // 2. Service Worker registration with update prompt (production only)
+    if ('serviceWorker' in navigator) {
+      if (process.env.NODE_ENV === 'production') {
+        const register = () => {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then((reg) => {
+              reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing
+                if (!newWorker) return
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                     showToast('New version available — reload to update')
                   }
                 })
-              }
+              })
             })
-          })
-          .catch(() => {})
-      })
+            .catch(() => {})
+        }
+        // The effect usually runs after 'load' already fired — the old code never registered then
+        if (document.readyState === 'complete') register()
+        else window.addEventListener('load', register, { once: true })
+      } else {
+        // Dev: remove any worker left from a production build so it can't serve stale chunks
+        navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister())).catch(() => {})
+      }
     }
 
     return () => {

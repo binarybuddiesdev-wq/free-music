@@ -1,1 +1,107 @@
-if(!self.define){let e,s={};const n=(n,a)=>(n=new URL(n+".js",a).href,s[n]||new Promise(s=>{if("document"in self){const e=document.createElement("script");e.src=n,e.onload=s,document.head.appendChild(e)}else e=n,importScripts(n),s()}).then(()=>{let e=s[n];if(!e)throw new Error(`Module ${n} didn’t register its module`);return e}));self.define=(a,i)=>{const t=e||("document"in self?document.currentScript.src:"")||location.href;if(s[t])return;let c={};const b=e=>n(e,t),r={module:{uri:t},exports:c,require:b};s[t]=Promise.all(a.map(e=>r[e]||b(e))).then(e=>(i(...e),c))}}define(["./workbox-1d075dc5"],function(e){"use strict";importScripts(),self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"/_next/app-build-manifest.json",revision:"b046209d260602b01e83bf2ddfa14784"},{url:"/_next/static/FfJb1zZAfVvHbpzzb6nPF/_buildManifest.js",revision:"e009ae122527d1b49f6ce99a33042a01"},{url:"/_next/static/FfJb1zZAfVvHbpzzb6nPF/_ssgManifest.js",revision:"b6652df95db52feb4daf4eca35380933"},{url:"/_next/static/chunks/296-05a557569b0b6722.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/333.4e3a879e855c13e0.js",revision:"4e3a879e855c13e0"},{url:"/_next/static/chunks/339-fbf9a8a4ac8e9a77.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/372-06c04ddfd167f612.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/397-fa47bd70852678f5.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/496.36482824ab854d3a.js",revision:"36482824ab854d3a"},{url:"/_next/static/chunks/546-1ff3b02a1f6628a0.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/565-e23a148f43c16008.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/788-4dd03847eb2026d2.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/841993f6-e8aeb98175de8464.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/_not-found/page-a2385c3acd40d374.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/album/%5Bid%5D/page-08795ccf9c5feb1b.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/api/lyrics/route-5e811ca35878bd51.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/api/search/route-7e526b262552a1da.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/api/video-id/route-d987bcfab104f81c.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/artist/%5Bid%5D/page-6c6d4fdd431e0375.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/explore/page-fb0372109bd8e7a1.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/layout-bce7f8b6ebd8b4ce.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/library/page-cb2781ea0fac6450.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/page-a0fb77e2d60e5d6c.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/playlist/%5Bid%5D/page-4c6b232ad3f86aee.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/search/page-08b72cc8982a4925.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/settings/page-76ba2f454f6f20dc.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/app/watch/page-7ca95fa5bca8dddd.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/framework-15c7ffee7fe7eab0.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/main-7e4d91176f75cf4d.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/main-app-9d1797b8d047464d.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/pages/_app-3c6b17b82314e083.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/pages/_error-16aa2ee87ff71d8e.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/chunks/polyfills-42372ed130431b0a.js",revision:"846118c33b2c0e922d7b3a7676f81f6f"},{url:"/_next/static/chunks/webpack-45b3cd3a5720559a.js",revision:"FfJb1zZAfVvHbpzzb6nPF"},{url:"/_next/static/css/06e8150aa865a6eb.css",revision:"06e8150aa865a6eb"},{url:"/icons/icon-192.png",revision:"e8d0e7e4b344d0aca9b9e03380b8985e"},{url:"/icons/icon-512.png",revision:"ae3dfddd6c70bfed917d7bb112dc5ea3"},{url:"/icons/maskable-512.png",revision:"eb28ad103329f7e854134992731bce3d"},{url:"/manifest.json",revision:"d8ae36ef8a75c7e736ba0898295e44f4"},{url:"/offline.html",revision:"fd640eb2f44cf98304c48a4f082e7ec8"}],{ignoreURLParametersMatching:[]}),e.cleanupOutdatedCaches(),e.registerRoute("/",new e.NetworkFirst({cacheName:"start-url",plugins:[{cacheWillUpdate:async({request:e,response:s,event:n,state:a})=>s&&"opaqueredirect"===s.type?new Response(s.body,{status:200,statusText:"OK",headers:s.headers}):s}]}),"GET"),e.registerRoute(/\.(?:mp3|m4a|mp4|aac|ogg|webm)$/i,new e.CacheFirst({cacheName:"audio-cache",plugins:[{cachedResponseWillBeUsed:async({request:e,cachedResponse:s})=>s&&e.headers.has("range")?await createPartialResponse(e,s):s},{cacheWillUpdate:function(e){return _ref.apply(this,arguments)}},new e.ExpirationPlugin({maxEntries:200,maxAgeSeconds:2592e3})]}),"GET"),e.registerRoute(/\/api\/(?:search|video-id|lyrics)/,new e.NetworkFirst({cacheName:"api-cache",networkTimeoutSeconds:5,plugins:[new e.ExpirationPlugin({maxEntries:100,maxAgeSeconds:300})]}),"GET"),e.registerRoute(/\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/i,new e.CacheFirst({cacheName:"image-cache",plugins:[new e.ExpirationPlugin({maxEntries:200,maxAgeSeconds:2592e3})]}),"GET"),e.registerRoute(/^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,new e.StaleWhileRevalidate({cacheName:"font-cache",plugins:[]}),"GET")});
+/* Free Music service worker — hand-written, no build step.
+ * Bump CACHE_VERSION whenever the caching rules or SHELL_URLS change.
+ * Audio is intentionally NOT cached here: offline songs live in IndexedDB (lib/offline-storage.ts). */
+const CACHE_VERSION = 'v1'
+const SHELL_CACHE = `fm-shell-${CACHE_VERSION}`
+const STATIC_CACHE = `fm-static-${CACHE_VERSION}`
+const IMAGE_CACHE = `fm-images-${CACHE_VERSION}`
+const CURRENT_CACHES = [SHELL_CACHE, STATIC_CACHE, IMAGE_CACHE]
+
+const OFFLINE_URL = '/offline.html'
+const SHELL_URLS = ['/', OFFLINE_URL, '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png']
+const MAX_PAGE_ENTRIES = 50
+const MAX_IMAGE_ENTRIES = 200
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_URLS)).then(() => self.skipWaiting())
+  )
+})
+
+self.addEventListener('activate', (event) => {
+  // Also removes caches left by the old workbox worker (start-url, audio-cache, api-cache, …)
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => !CURRENT_CACHES.includes(k)).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  )
+})
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event
+  if (request.method !== 'GET') return
+  const url = new URL(request.url)
+
+  // Audio streams (range requests), media files and API calls always go straight to the network
+  if (request.headers.has('range')) return
+  if (url.pathname.startsWith('/api/')) return
+  if (/\.(mp4|m4a|mp3|aac|ogg|webm)$/i.test(url.pathname)) return
+
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigation(request, url))
+    return
+  }
+  if (url.origin === self.location.origin && url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(cacheFirst(request, STATIC_CACHE))
+    return
+  }
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE))
+    return
+  }
+  if (request.destination === 'image' && url.origin === self.location.origin) {
+    event.respondWith(staleWhileRevalidate(request, IMAGE_CACHE, MAX_IMAGE_ENTRIES))
+  }
+})
+
+async function handleNavigation(request, url) {
+  const cache = await caches.open(SHELL_CACHE)
+  try {
+    const response = await fetch(request)
+    if (response.ok) {
+      await cache.put(url.pathname, response.clone())
+      trimCache(SHELL_CACHE, MAX_PAGE_ENTRIES + SHELL_URLS.length)
+    }
+    return response
+  } catch {
+    return (
+      (await cache.match(url.pathname)) ||
+      (await cache.match('/')) ||
+      (await cache.match(OFFLINE_URL)) ||
+      new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } })
+    )
+  }
+}
+
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName)
+  const cached = await cache.match(request)
+  if (cached) return cached
+  const response = await fetch(request)
+  if (response.ok) cache.put(request, response.clone())
+  return response
+}
+
+async function staleWhileRevalidate(request, cacheName, maxEntries) {
+  const cache = await caches.open(cacheName)
+  const cached = await cache.match(request)
+  const network = fetch(request)
+    .then((response) => {
+      // Opaque (cross-origin no-cors) responses are not ok and are never stored
+      if (response.ok) {
+        cache.put(request, response.clone())
+        if (maxEntries) trimCache(cacheName, maxEntries)
+      }
+      return response
+    })
+    .catch(() => cached)
+  return cached || network
+}
+
+async function trimCache(cacheName, maxEntries) {
+  const cache = await caches.open(cacheName)
+  const keys = await cache.keys()
+  if (keys.length <= maxEntries) return
+  await Promise.all(keys.slice(0, keys.length - maxEntries).map((k) => cache.delete(k)))
+}

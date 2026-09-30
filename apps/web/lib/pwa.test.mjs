@@ -45,19 +45,22 @@ test('PWA icon files exist and have valid PNG signatures', () => {
   assert.deepEqual(buf512.subarray(0, 8), pngHeader, 'icon-512.png must have PNG header');
 });
 
-test('Service worker exists and implements range request audio caching', () => {
+test('Service worker is hand-written, versioned and never intercepts audio or API requests', () => {
   const swPath = path.join(PUBLIC_DIR, 'sw.js');
   assert.ok(fs.existsSync(swPath), 'sw.js must exist');
-
   const content = fs.readFileSync(swPath, 'utf8');
-  assert.ok(
-    content.includes('Range Not Satisfiable') ||
-    content.includes('handleRangeRequest') ||
-    content.includes('createPartialResponse') ||
-    content.includes('headers.has("range")'),
-    'Must handle HTTP Range requests'
-  );
+
   assert.ok(content.includes('offline.html'), 'Must reference offline.html fallback');
+  assert.match(content, /const CACHE_VERSION = '/, 'Must declare CACHE_VERSION');
+  assert.ok(!content.includes('precacheAndRoute'), 'Must not be a stale workbox build artifact');
+  assert.ok(!content.includes('createPartialResponse') && !content.includes('_ref'), 'Must not call undefined helpers');
+  assert.ok(content.includes("request.headers.has('range')"), 'Range (audio) requests must bypass the SW');
+  assert.ok(content.includes("url.pathname.startsWith('/api/')"), 'API requests must bypass the SW');
+});
+
+test('No leftover workbox runtime files in public/', () => {
+  const leftovers = fs.readdirSync(PUBLIC_DIR).filter((f) => /^workbox-.*\.js$/.test(f));
+  assert.deepEqual(leftovers, []);
 });
 
 test('offline.html fallback page exists', () => {
