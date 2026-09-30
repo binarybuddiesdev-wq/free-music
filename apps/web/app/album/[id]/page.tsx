@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { usePlayerStore } from '@/stores/player.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
 import { formatDuration, onEnterSpace, fisherYates } from '@/lib/utils'
-import type { Song } from '@/types/music'
+import type { Album, Song } from '@/types/music'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -17,7 +17,7 @@ export default function AlbumDetailPage() {
   const isPlaying = usePlayerStore((s) => s.isPlaying)
   const [ctx, setCtx] = useState<{ x: number; y: number; song: Song } | null>(null)
 
-  const { data, isLoading, isError, refetch } = useQuery<{ songs: Song[] }>({
+  const { data, isLoading, isError, refetch } = useQuery<{ album?: Album | null; songs: Song[] }>({
     queryKey: ['album', id],
     queryFn: async () => {
       if (!id) return { songs: [] }
@@ -30,10 +30,11 @@ export default function AlbumDetailPage() {
 
   const songs = data?.songs ?? []
   const firstSong = songs[0]
-  const albumTitle = firstSong?.album || 'Album'
-  const albumArtist = firstSong?.artist || 'Various Artists'
-  const albumImage = firstSong?.image || ''
-  const albumYear = firstSong?.year
+  const album = data?.album
+  const albumTitle = album?.title || firstSong?.album || 'Album'
+  const albumArtist = album?.artist || firstSong?.artist || 'Various Artists'
+  const albumImage = album?.image || firstSong?.image || ''
+  const albumYear = album?.year || firstSong?.year
 
   const handlePlayAll = (startIndex = 0) => {
     if (songs.length === 0) return

@@ -4,11 +4,12 @@ import {
   searchAlbums,
   searchArtists,
   searchPlaylists,
-  getAlbumSongs,
+  getAlbumDetails,
   getPlaylistSongs,
   getArtistDetails,
   getSectionSongs,
   getSongRecommendations,
+  suggestSongs,
 } from '@/lib/saavn'
 import {
   sanitizeString,
@@ -21,9 +22,13 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limiter'
 import { logger } from '@/lib/logger'
 
 export async function GET(req: NextRequest) {
-  // 1. Rate Limiting Protection (DoS / Bot defense: 60 req/min per IP)
+  // 1. Rate Limiting Protection (DoS / Bot defense per IP)
+  const isSuggest = req.nextUrl.searchParams.get('suggest') === '1'
+  // Typeahead gets its own, larger bucket so typing can't exhaust the page-load budget
   const clientIp = getClientIp(req)
-  const rateLimit = checkRateLimit(`search:${clientIp}`, 60, 60000)
+  const rateLimit = isSuggest
+    ? checkRateLimit(`suggest:${clientIp}`, 120, 60000)
+    : checkRateLimit(`search:${clientIp}`, 60, 60000)
 
   const rateLimitHeaders = {
     'X-RateLimit-Limit': String(rateLimit.limit),
@@ -62,6 +67,11 @@ export async function GET(req: NextRequest) {
   const recommendSongId = sanitizeSafeId(searchParams.get('recommendSongId'))
 
   try {
+    if (isSuggest) {
+      const songs = q ? await suggestSongs(q, lang) : []
+      return NextResponse.json({ type: 'suggestions', page: 1, songs, results: songs }, { headers: successHeaders })
+    }
+
     // 0. Recommendations / Radio mode lookup
     if (recommendSongId) {
       const artist = sanitizeString(searchParams.get('artist'), 100) || undefined
@@ -74,9 +84,9 @@ export async function GET(req: NextRequest) {
 
     // 1. Specific album songs lookup
     if (albumId) {
-      const songs = await getAlbumSongs(albumId)
+      const { album, songs } = await getAlbumDetails(albumId)
       return NextResponse.json(
-        { type: 'album_songs', page: 1, songs, results: songs },
+        { type: 'album_songs', page: 1, album, songs, results: songs },
         { headers: successHeaders }
       )
     }
@@ -93,6 +103,12 @@ export async function GET(req: NextRequest) {
     // 3. Specific artist details lookup
     if (artistId) {
       const data = await getArtistDetails(artistId)
+      if (!data) {
+        return NextResponse.json(
+          { type: 'artist_details', error: 'Artist not found', artist: null, songs: [], albums: [], results: [] },
+          { status: 502, headers: rateLimitHeaders }
+        )
+      }
       return NextResponse.json(
         {
           type: 'artist_details',

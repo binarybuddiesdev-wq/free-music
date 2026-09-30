@@ -7,6 +7,26 @@ import { preprocessQuery, getYouTubeSuggestion, calculateRelevance, isDiscoveryQ
 // Official JioSaavn API — no external mirror needed
 const BASE = 'https://www.jiosaavn.com/api.php'
 const DES_KEY = CryptoJS.enc.Utf8.parse('38346591')
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36'
+
+/** Single place for JioSaavn API calls (was copy-pasted 6 times). Returns null on HTTP errors. */
+async function saavnCall<T>(call: string, params: Record<string, string>, revalidate: number): Promise<T | null> {
+  const qs = new URLSearchParams({
+    __call: call,
+    _format: 'json',
+    _marker: '0',
+    api_version: '4',
+    ctx: 'web6dot0',
+    ...params,
+  })
+  const res = await fetch(`${BASE}?${qs}`, {
+    headers: { 'User-Agent': USER_AGENT },
+    next: { revalidate },
+    signal: AbortSignal.timeout(12000),
+  })
+  if (!res.ok) return null
+  return (await res.json()) as T
+}
 
 function decryptMediaUrl(encrypted: string): string {
   try {
@@ -64,25 +84,11 @@ function normalize(raw: RawSong): Song {
 }
 
 async function jiosaavnSearch(query: string, n = 40, p = 1): Promise<Song[]> {
-  const params = new URLSearchParams({
-    __call: 'search.getResults',
-    _format: 'json',
-    _marker: '0',
-    api_version: '4',
-    ctx: 'web6dot0',
-    q: query,
-    n: String(n),
-    p: String(p),
-  })
-  const res = await fetch(`${BASE}?${params}`, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36' },
-    next: { revalidate: 300 },
-    signal: AbortSignal.timeout(12000),
-  })
-  if (!res.ok) return []
-  const json = await res.json()
-  const results: unknown[] = json?.results ?? []
-  return results.filter((r: unknown) => (r as Record<string, unknown>).type === 'song').map((r) => normalize(r as RawSong))
+  const json = await saavnCall<{ results?: unknown[] }>('search.getResults', { q: query, n: String(n), p: String(p) }, 300)
+  const results = json?.results ?? []
+  return results
+    .filter((r) => (r as Record<string, unknown>).type === 'song')
+    .map((r) => normalize(r as RawSong))
 }
 
 function dedup(songs: Song[]): Song[] {
@@ -102,13 +108,15 @@ export async function searchSongs(query: string, language: string, page = 1): Pr
     return matching.length >= 10 ? matching : [...matching, ...others]
   }
 
-  // 1. Primary search with cleaned query for specific entity searches
-  let raw = await jiosaavnSearch(cleaned, 40, page)
-  let relevant = raw.filter((s) => calculateRelevance(s, coreWords) > 0)
-
-  // 2. Secondary search if primary had low relevance and entity differs
-  if (relevant.length < 2 && entity !== cleaned) {
-    const entityRaw = await jiosaavnSearch(entity, 40, page)
+  // 1+2. Primary and entity searches in parallel (was sequential: up to 24 s worst case)
+  const needsEntitySearch = entity !== cleaned
+  const [primaryRaw, entityRaw] = await Promise.all([
+    jiosaavnSearch(cleaned, 40, page),
+    needsEntitySearch ? jiosaavnSearch(entity, 40, page) : Promise.resolve([] as Song[]),
+  ])
+  let raw = primaryRaw
+  let relevant = primaryRaw.filter((s) => calculateRelevance(s, coreWords) > 0)
+  if (relevant.length < 2 && needsEntitySearch) {
     const entityRelevant = entityRaw.filter((s) => calculateRelevance(s, coreWords) > 0)
     if (entityRelevant.length > relevant.length) {
       raw = entityRaw
@@ -145,29 +153,13 @@ export async function searchSongs(query: string, language: string, page = 1): Pr
   return [...matchingLang, ...otherLang]
 }
 
-export async function getSong(id: string): Promise<Song | null> {
-  try {
-    const params = new URLSearchParams({
-      __call: 'song.getDetails',
-      _format: 'json',
-      _marker: '0',
-      api_version: '4',
-      ctx: 'web6dot0',
-      pids: id,
-    })
-    const res = await fetch(`${BASE}?${params}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(12000),
-    })
-    if (!res.ok) return null
-    const json = await res.json()
-    const data = json?.[id]
-    if (!data) return null
-    return normalize(data)
-  } catch {
-    return null
-  }
+/** Typeahead: one upstream call, no relevance fallbacks, max 5 results. */
+export async function suggestSongs(query: string, language: string): Promise<Song[]> {
+  const { cleaned } = preprocessQuery(query)
+  if (!cleaned) return []
+  const songs = dedup(await jiosaavnSearch(cleaned, 10, 1))
+  const lang = language.toLowerCase()
+  return [...songs.filter((s) => s.language === lang), ...songs.filter((s) => s.language !== lang)].slice(0, 5)
 }
 
 const SECTION_QUERIES: Record<string, Record<string, string>> = {
@@ -273,35 +265,19 @@ function normalizePlaylist(raw: RawPlaylist): SearchPlaylist {
   }
 }
 
-async function jiosaavnSearchType(call: string, query: string, n = 30, p = 1): Promise<any[]> {
-  const params = new URLSearchParams({
-    __call: call,
-    _format: 'json',
-    _marker: '0',
-    api_version: '4',
-    ctx: 'web6dot0',
-    q: query,
-    n: String(n),
-    p: String(p),
-  })
-  const res = await fetch(`${BASE}?${params}`, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36' },
-    next: { revalidate: 300 },
-    signal: AbortSignal.timeout(12000),
-  })
-  if (!res.ok) return []
-  const json = await res.json()
+async function jiosaavnSearchType<T>(call: string, query: string, n = 30, p = 1): Promise<T[]> {
+  const json = await saavnCall<{ results?: T[] }>(call, { q: query, n: String(n), p: String(p) }, 300)
   return json?.results ?? []
 }
 
 export async function searchAlbums(query: string, language?: string, page = 1): Promise<Album[]> {
   try {
     const { cleaned, entity, coreWords } = preprocessQuery(query)
-    let results = (await jiosaavnSearchType('search.getAlbumResults', cleaned, 30, page)).map(normalizeAlbum)
+    let results = (await jiosaavnSearchType<RawAlbum>('search.getAlbumResults', cleaned, 30, page)).map(normalizeAlbum)
     let relevant = results.filter((a) => calculateRelevance(a, coreWords) > 0)
 
     if (relevant.length < 2 && entity !== cleaned) {
-      const entityResults = (await jiosaavnSearchType('search.getAlbumResults', entity, 30, page)).map(normalizeAlbum)
+      const entityResults = (await jiosaavnSearchType<RawAlbum>('search.getAlbumResults', entity, 30, page)).map(normalizeAlbum)
       const entityRelevant = entityResults.filter((a) => calculateRelevance(a, coreWords) > 0)
       if (entityRelevant.length > relevant.length) {
         results = entityResults
@@ -326,11 +302,11 @@ export async function searchArtists(query: string, _language?: string, page = 1)
   try {
     const { cleaned, entity, coreWords } = preprocessQuery(query)
     const target = entity || cleaned
-    let results = (await jiosaavnSearchType('search.getArtistResults', target, 30, page)).map(normalizeArtist)
+    let results = (await jiosaavnSearchType<RawArtist>('search.getArtistResults', target, 30, page)).map(normalizeArtist)
     let relevant = results.filter((a) => calculateRelevance(a, coreWords) > 0)
 
     if (relevant.length === 0 && target !== cleaned) {
-      const cleanResults = (await jiosaavnSearchType('search.getArtistResults', cleaned, 30, page)).map(normalizeArtist)
+      const cleanResults = (await jiosaavnSearchType<RawArtist>('search.getArtistResults', cleaned, 30, page)).map(normalizeArtist)
       const cleanRelevant = cleanResults.filter((a) => calculateRelevance(a, coreWords) > 0)
       if (cleanRelevant.length > 0) {
         results = cleanResults
@@ -347,11 +323,11 @@ export async function searchArtists(query: string, _language?: string, page = 1)
 export async function searchPlaylists(query: string, language?: string, page = 1): Promise<SearchPlaylist[]> {
   try {
     const { cleaned, entity, coreWords } = preprocessQuery(query)
-    let results = (await jiosaavnSearchType('search.getPlaylistResults', cleaned, 30, page)).map(normalizePlaylist)
+    let results = (await jiosaavnSearchType<RawPlaylist>('search.getPlaylistResults', cleaned, 30, page)).map(normalizePlaylist)
     let relevant = results.filter((p) => calculateRelevance(p, coreWords) > 0)
 
     if (relevant.length < 2 && entity !== cleaned) {
-      const entityResults = (await jiosaavnSearchType('search.getPlaylistResults', entity, 30, page)).map(normalizePlaylist)
+      const entityResults = (await jiosaavnSearchType<RawPlaylist>('search.getPlaylistResults', entity, 30, page)).map(normalizePlaylist)
       const entityRelevant = entityResults.filter((p) => calculateRelevance(p, coreWords) > 0)
       if (entityRelevant.length > relevant.length) {
         results = entityResults
@@ -372,97 +348,74 @@ export async function searchPlaylists(query: string, language?: string, page = 1
   }
 }
 
-export async function getAlbumSongs(albumId: string): Promise<Song[]> {
+export async function getAlbumDetails(albumId: string): Promise<{ album: Album | null; songs: Song[] }> {
   try {
-    const params = new URLSearchParams({
-      __call: 'content.getAlbumDetails',
-      _format: 'json',
-      _marker: '0',
-      api_version: '4',
-      ctx: 'web6dot0',
-      albumid: albumId,
-    })
-    const res = await fetch(`${BASE}?${params}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(12000),
-    })
-    if (!res.ok) return []
-    const json = await res.json()
-    const songs: any[] = json?.songs ?? json?.list ?? []
-    return songs.map(normalize)
+    const json = await saavnCall<RawAlbum & { list?: RawSong[]; songs?: RawSong[] }>(
+      'content.getAlbumDetails',
+      { albumid: albumId },
+      3600
+    )
+    if (!json) return { album: null, songs: [] }
+    const songs = (json.songs ?? json.list ?? []).map(normalize)
+    const album = json.title
+      ? { ...normalizeAlbum(json), songCount: songs.length || Number(json.more_info?.song_count ?? 0) }
+      : null
+    return { album, songs }
   } catch {
-    return []
+    return { album: null, songs: [] }
   }
 }
 
 export async function getPlaylistSongs(playlistId: string): Promise<Song[]> {
   try {
-    const params = new URLSearchParams({
-      __call: 'playlist.getDetails',
-      _format: 'json',
-      _marker: '0',
-      api_version: '4',
-      ctx: 'web6dot0',
-      listid: playlistId,
-    })
-    const res = await fetch(`${BASE}?${params}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(12000),
-    })
-    if (!res.ok) return []
-    const json = await res.json()
-    const songs: any[] = json?.songs ?? json?.list ?? []
-    return songs.map(normalize)
+    const json = await saavnCall<{ list?: RawSong[]; songs?: RawSong[] }>('playlist.getDetails', { listid: playlistId }, 3600)
+    return (json?.songs ?? json?.list ?? []).map(normalize)
   } catch {
     return []
   }
 }
 
-export async function getArtistDetails(artistId: string): Promise<{ artist: Artist; songs: Song[]; albums: Album[] }> {
+interface RawArtistPage {
+  artistId?: string
+  id?: string
+  name?: string
+  title?: string
+  image?: string
+  follower_count?: string | number
+  fans?: string | number
+  role?: string
+  topSongs?: RawSong[]
+  songs?: RawSong[]
+  topAlbums?: RawAlbum[]
+  albums?: RawAlbum[]
+}
+
+export async function getArtistDetails(
+  artistId: string
+): Promise<{ artist: Artist; songs: Song[]; albums: Album[] } | null> {
   try {
-    const params = new URLSearchParams({
-      __call: 'artist.getArtistPageDetails',
-      _format: 'json',
-      _marker: '0',
-      api_version: '4',
-      ctx: 'web6dot0',
-      artistId: artistId,
-      n_song: '30',
-      n_album: '20',
-    })
-    const res = await fetch(`${BASE}?${params}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(12000),
-    })
-    if (!res.ok) throw new Error('Failed to fetch')
-    const json = await res.json()
-    const rawSongs: any[] = json?.topSongs ?? json?.songs ?? []
-    const rawAlbums: any[] = json?.topAlbums ?? json?.albums ?? []
-    const artist = normalizeArtist({
-      id: json?.artistId || json?.id || artistId,
-      name: json?.name || json?.title,
-      image: json?.image,
-      follower_count: json?.follower_count || json?.fans,
-      role: json?.role || 'Artist',
-    })
+    const json = await saavnCall<RawArtistPage>(
+      'artist.getArtistPageDetails',
+      { artistId, n_song: '30', n_album: '20' },
+      3600
+    )
+    if (!json) return null
+    const rawSongs = json.topSongs ?? json.songs ?? []
+    const name = json.name || json.title
+    if (!name && rawSongs.length === 0) return null
     return {
-      artist,
+      artist: normalizeArtist({
+        id: json.artistId || json.id || artistId,
+        name,
+        image: json.image,
+        follower_count: json.follower_count || json.fans,
+        role: json.role || 'Artist',
+      }),
       songs: rawSongs.map(normalize),
-      albums: rawAlbums.map(normalizeAlbum),
+      albums: (json.topAlbums ?? json.albums ?? []).map(normalizeAlbum),
     }
   } catch {
-    // Fallback: search songs for this artist
-    const songs = await searchSongs(artistId, 'telugu', 1)
-    const artist: Artist = {
-      id: artistId,
-      name: decodeHtml(artistId),
-      image: songs[0]?.image || '',
-      role: 'Artist',
-    }
-    return { artist, songs, albums: [] }
+    return null
   }
 }
 

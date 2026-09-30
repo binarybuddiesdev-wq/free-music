@@ -112,7 +112,7 @@ export function Header() {
     queryKey: ['search-suggestions', debouncedQuery, language],
     queryFn: async ({ signal }) => {
       if (!debouncedQuery) return { songs: [] }
-      const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&lang=${language}`, { signal })
+      const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&lang=${language}&suggest=1`, { signal })
       return res.json()
     },
     enabled: isOpen && debouncedQuery.length >= 2,

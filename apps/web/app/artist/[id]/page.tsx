@@ -27,6 +27,7 @@ export default function ArtistDetailPage() {
     queryFn: async () => {
       if (!id) return { artist: { id: '', name: '', image: '' }, songs: [], albums: [] }
       const res = await fetch(`/api/search?artistId=${id}`)
+      if (!res.ok) throw new Error(`Artist request failed: HTTP ${res.status}`)
       return res.json()
     },
     enabled: !!id,
