@@ -1,6 +1,7 @@
 'use client'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { dedupLocalStorage } from '@/lib/dedup-storage'
 import type { Song, Playlist } from '@/types/music'
 
 interface LibraryState {
@@ -110,6 +111,6 @@ export const useLibraryStore = create<LibraryState>()(
           }
         }),
     }),
-    { name: 'ytm-library', skipHydration: true }
+    { name: 'ytm-library', storage: createJSONStorage(() => dedupLocalStorage), skipHydration: true }
   )
 )

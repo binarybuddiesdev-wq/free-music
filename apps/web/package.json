@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --test lib/pwa.test.mjs lib/quality.test.mjs lib/search.test.mjs lib/offline-autoplay.test.mjs lib/security.test.mjs lib/production.test.mjs lib/stores.test.mjs lib/api-logic.test.mjs lib/saavn-parser.test.mjs lib/lrclib-parser.test.mjs lib/youtube-matcher.test.mjs lib/edge-cases.test.mjs lib/nasty-paths.test.mjs",
+    "test": "node --test lib/pwa.test.mjs lib/quality.test.mjs lib/search.test.mjs lib/offline-autoplay.test.mjs lib/security.test.mjs lib/production.test.mjs lib/stores.test.mjs lib/api-logic.test.mjs lib/saavn-parser.test.mjs lib/lrclib-parser.test.mjs lib/youtube-matcher.test.mjs lib/edge-cases.test.mjs lib/nasty-paths.test.mjs lib/dedup-storage.test.mjs",
     "test:unit": "node --test lib/*.test.mjs",
     "test:e2e": "playwright test"
   },

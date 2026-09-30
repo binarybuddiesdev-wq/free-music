@@ -1,6 +1,7 @@
 'use client'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { dedupLocalStorage } from '@/lib/dedup-storage'
 import type { Song } from '@/types/music'
 import { useQueueStore } from './queue.store'
 import { useLibraryStore } from './library.store'
@@ -134,6 +135,7 @@ export const usePlayerStore = create<PlayerState>()(
     }),
     {
       name: 'ytm-player',
+      storage: createJSONStorage(() => dedupLocalStorage),
       skipHydration: true,
       partialize: (s) => ({
         currentSong: s.currentSong,

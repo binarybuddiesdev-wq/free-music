@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { dedupLocalStorage } from '@/lib/dedup-storage'
 
 interface UIState {
   sidebarCollapsed: boolean
@@ -20,6 +21,6 @@ export const useUIStore = create<UIState>()(
       setQueueOpen: (v) => set({ queueOpen: v }),
       toggleQueue: () => set((s) => ({ queueOpen: !s.queueOpen })),
     }),
-    { name: 'ytm-ui', skipHydration: true }
+    { name: 'ytm-ui', storage: createJSONStorage(() => dedupLocalStorage), skipHydration: true }
   )
 )

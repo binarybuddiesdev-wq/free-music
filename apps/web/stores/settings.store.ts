@@ -1,6 +1,7 @@
 'use client'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { dedupLocalStorage } from '@/lib/dedup-storage'
 import { DEFAULT_LANGUAGE } from '@/lib/languages'
 
 export type Theme = 'dark' | 'light' | 'system'
@@ -140,6 +141,6 @@ export const useSettingsStore = create<SettingsState>()(
       lyricsOffset: 0,
       setLyricsOffset: (lyricsOffset) => set({ lyricsOffset }),
     }),
-    { name: 'ytm-settings', skipHydration: true }
+    { name: 'ytm-settings', storage: createJSONStorage(() => dedupLocalStorage), skipHydration: true }
   )
 )

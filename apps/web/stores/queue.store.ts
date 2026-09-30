@@ -1,6 +1,7 @@
 'use client'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { dedupLocalStorage } from '@/lib/dedup-storage'
 import type { Song } from '@/types/music'
 import { fisherYates } from '@/lib/utils'
 
@@ -119,6 +120,7 @@ export const useQueueStore = create<QueueState>()(
     }),
     {
       name: 'ytm-queue',
+      storage: createJSONStorage(() => dedupLocalStorage),
       skipHydration: true,
       partialize: (s) => ({
         queue: s.queue,
