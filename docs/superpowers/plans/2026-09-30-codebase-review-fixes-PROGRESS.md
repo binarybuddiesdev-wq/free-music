@@ -16,8 +16,15 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 | 6 | Sleep timer (#4) | Done | 106 tests pass, lint clean, tsc 0 |
 | 7 | AudioManager listeners/skip/preload (#7, #16, #21, #24) | Done | 108 tests pass, lint clean, tsc 0 |
 | — | Checkpoint 1 (full build) | Done | `pnpm --filter web build` succeeded |
-| 8–15 | Phase 2 functional bugs | Pending | |
-| — | Checkpoint 2 (full build) | Pending | |
+| 8 | Like buttons update immediately (#8) | Done | 108 tests pass, lint clean, tsc 0 |
+| 9 | Isolate progress re-renders (#16) | Done | 111 tests pass, lint clean, tsc 0 |
+| 10 | Home feed caching, no language side effect (#17, #12a) | Done | 123 tests pass (Task 10 added 7; Task 11 added 5), lint clean, tsc 0 |
+| 11 | Varied radio + side-effect-free Start radio (#12b, #14) | Done | 123 tests pass, lint clean, tsc 0 |
+| 12 | Faster lyrics lookup (#19) | Done | 127 tests pass, lint clean, tsc 0 |
+| 13 | saavn.ts helper, parallel search, album/artist (#13, #19, #28, #31) | Done | 127 tests pass, lint clean, tsc 0; curl-verified |
+| 14 | Lightweight search suggestions (#18) | Done | (same commit as 13); curl-verified |
+| 15 | Replace broken service worker (#1) | Done | 128 tests pass, lint clean, tsc 0, build OK |
+| — | Checkpoint 2 (full build) | Done | `pnpm --filter web build` succeeded |
 | 16–21 | Phase 3 performance, cleanup, final verification | Pending | |
 
 ## Log
@@ -61,6 +68,19 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 ### Checkpoint 1
 - Full `pnpm --filter web build` succeeded after Task 7.
 
+### Phase 2 — done (Tasks 8–15)
+- Task 8 `cfc00a7`: like state subscribes to `likedSongs`; `isLiked` removed from the store.
+- Task 9 `3417bd6`: `lib/lyrics-sync.ts` (`findActiveLine`, 3 tests, RED first). LyricsPanel re-renders only when the line changes; MiniPlayer progress bar and time moved into `MiniProgressBar` / `PlaybackTime`.
+- Task 10 `d3208fe`: `sessionPage` + `fetchSectionSongs` (7 tests, RED first). Sections use app-wide query cache; chips use `languageOverride`, no longer overwrite the saved language. `randomPage` removed.
+- Task 11 `9760742`: `mergeRecommendations` (5 tests, RED first); `getSongRecommendations` uses random pages and both sources in parallel; Start radio no longer changes autoplay or restarts the song.
+- Task 12 `55848e2`: `buildLyricsAttempts` / `pickLyrics` (4 tests, RED first); lrclib attempts run in parallel and JSON is awaited.
+- Tasks 13+14 `8186ecb`: `saavnCall` helper, parallel primary/entity search, `getAlbumDetails` (real album title/artist/image), `getArtistDetails` returns null -> HTTP 502 (no junk Telugu fallback), artist page shows its error state, `getSong` deleted, `suggestSongs` + `suggest=1` (own 120/min bucket) used by the header. Checked with curl against the dev server: album metadata present, fake artist -> 502, suggestions ≤ 5 in ~0.15 s, search 40 songs, radio lists differ between calls, lyrics returned.
+- Task 15: hand-written `public/sw.js` (audio/API/range requests bypass it), `workbox-*.js` and `next-pwa.d.ts` deleted, registration fixed for the already-loaded case (dev unregisters old workers), `/sw.js` served uncached. Service-worker test rewritten (RED against the old file, then GREEN). Production server check: `/sw.js` returns the no-cache headers; `offline.html`, icons and manifest return 200.
+- Checkpoint 2: full `pnpm --filter web build` succeeded.
+- NOT run: any in-browser manual check (service worker activation/offline reload, queue/like/profiler checks, network-tab request counts).
+
 ## Rulings
 - Working directly on `main` rather than `fix/codebase-review`, per user instruction.
 - Stopping after each task to update this file, per user instruction. Latest instruction: stop after each PHASE; Phase 1 (Tasks 1–7) finished in one run, stopped at Checkpoint 1.
+- Task 11: "Start radio" calls `setQueue(radioQueue, 0, true)` (plan said `false`). `false` would silently turn shuffle off; `true` keeps the user's shuffle setting with the current song first. Cost if wrong: radio starts unshuffled instead of keeping shuffle.
+- Tasks 13 and 14 are one commit because both edit `saavn.ts` and `app/api/search/route.ts`; splitting would need hunk-level staging.
