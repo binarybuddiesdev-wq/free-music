@@ -1,8 +1,9 @@
 'use client'
-import { useRef, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/stores/settings.store'
-import { randomPage } from '@/lib/session'
+import { sessionPage } from '@/lib/session'
+import { fetchSectionSongs } from '@/lib/home-feed'
 import { SeenSongsContext } from './SeenSongsContext'
 import { CarouselRow } from './CarouselRow'
 import { SongCard } from './SongCard'
@@ -12,20 +13,20 @@ import type { Song } from '@/types/music'
 interface SectionRowProps {
   id: string
   title: string
+  /** Temporary language chosen with a home chip; does not change the saved setting. */
+  languageOverride?: string
 }
 
-export function SectionRow({ id, title }: SectionRowProps) {
-  const language = useSettingsStore((s) => s.language)
-  const page = useRef(randomPage()).current
+export function SectionRow({ id, title, languageOverride }: SectionRowProps) {
+  const storeLanguage = useSettingsStore((s) => s.language)
+  const language = languageOverride ?? storeLanguage
+  const page = sessionPage(`section:${id}:${language}`)
   const seenIds = useContext(SeenSongsContext)
   const [filteredSongs, setFilteredSongs] = useState<Song[]>([])
 
   const { data, isLoading } = useQuery<{ songs: Song[] }>({
     queryKey: ['section', id, language, page],
-    queryFn: () =>
-      fetch(`/api/search?section=${id}&lang=${language}&page=${page}`).then((r) => r.json()),
-    staleTime: 0,
-    gcTime: 2 * 60 * 1000,
+    queryFn: () => fetchSectionSongs(id, language, page),
   })
 
   useEffect(() => {

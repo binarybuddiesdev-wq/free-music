@@ -9,7 +9,6 @@ import { ForYouSection } from '@/components/home/ForYouSection'
 import { SongCard } from '@/components/home/SongCard'
 import { useLibraryStore } from '@/stores/library.store'
 import { MoodChips } from '@/components/home/MoodChips'
-import { useSettingsStore } from '@/stores/settings.store'
 import type { Song } from '@/types/music'
 
 interface SectionConfig {
@@ -69,13 +68,12 @@ function ListenAgainSection() {
 export default function HomePage() {
   const seenIds = useRef(new Set<string>())
   const [activeMood, setActiveMood] = useState('All')
-  const setLanguage = useSettingsStore((s) => s.setLanguage)
+  // "Telugu"/"Hindi" chips filter this page only — they no longer overwrite the saved language
+  const [chipLanguage, setChipLanguage] = useState<string | undefined>(undefined)
 
   const handleSelectChip = (chip: string) => {
     setActiveMood(chip)
-    if (chip === 'Telugu' || chip === 'Hindi') {
-      setLanguage(chip.toLowerCase())
-    }
+    setChipLanguage(chip === 'Telugu' || chip === 'Hindi' ? chip.toLowerCase() : undefined)
   }
 
   const isAllOrGeneral = activeMood === 'All' || activeMood === 'Music' || activeMood === 'Telugu' || activeMood === 'Hindi'
@@ -90,13 +88,13 @@ export default function HomePage() {
         <MoodChips active={activeMood} onSelect={handleSelectChip} />
         {isAllOrGeneral && (
           <>
-            <ForYouSection />
+            <ForYouSection languageOverride={chipLanguage} />
             <ListenAgainSection />
-            <QuickPicksSection />
+            <QuickPicksSection languageOverride={chipLanguage} />
           </>
         )}
         {visibleSections.map((s) => (
-          <SectionRow key={`${s.id}-${activeMood}`} id={s.id} title={s.title} />
+          <SectionRow key={s.id} id={s.id} title={s.title} languageOverride={chipLanguage} />
         ))}
       </div>
     </SeenSongsContext.Provider>

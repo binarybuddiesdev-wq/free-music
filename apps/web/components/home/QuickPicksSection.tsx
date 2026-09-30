@@ -1,18 +1,20 @@
 'use client'
 import Image from 'next/image'
-import { useState, useRef, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/stores/settings.store'
 import { usePlayerStore } from '@/stores/player.store'
 import { useLibraryStore } from '@/stores/library.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
-import { randomPage } from '@/lib/session'
+import { sessionPage } from '@/lib/session'
+import { fetchSectionSongs } from '@/lib/home-feed'
 import { SeenSongsContext } from './SeenSongsContext'
 import type { Song } from '@/types/music'
 import { formatDuration, onEnterSpace } from '@/lib/utils'
 
-export function QuickPicksSection() {
-  const language = useSettingsStore((s) => s.language)
+export function QuickPicksSection({ languageOverride }: { languageOverride?: string }) {
+  const storeLanguage = useSettingsStore((s) => s.language)
+  const language = languageOverride ?? storeLanguage
   const playSong = usePlayerStore((s) => s.playSong)
   const currentSong = usePlayerStore((s) => s.currentSong)
   const isPlaying = usePlayerStore((s) => s.isPlaying)
@@ -21,13 +23,11 @@ export function QuickPicksSection() {
   const seenIds = useContext(SeenSongsContext)
   const [filteredSongs, setFilteredSongs] = useState<Song[]>([])
 
-  const page = useRef(randomPage()).current
+  const page = sessionPage(`section:quick-picks:${language}`)
 
   const { data, isLoading } = useQuery<{ songs: Song[] }>({
     queryKey: ['section', 'quick-picks', language, page],
-    queryFn: () => fetch(`/api/search?section=quick-picks&lang=${language}&page=${page}`).then(r => r.json()),
-    staleTime: 0,
-    gcTime: 2 * 60 * 1000,
+    queryFn: () => fetchSectionSongs('quick-picks', language, page),
   })
 
   useEffect(() => {

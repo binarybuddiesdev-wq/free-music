@@ -3,7 +3,7 @@ import { useRef, useMemo, useState, useEffect, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useLibraryStore } from '@/stores/library.store'
 import { useSettingsStore } from '@/stores/settings.store'
-import { randomPage } from '@/lib/session'
+import { sessionPage } from '@/lib/session'
 import { SeenSongsContext } from './SeenSongsContext'
 import { CarouselRow } from './CarouselRow'
 import { SongCard } from './SongCard'
@@ -22,11 +22,13 @@ function getTopArtist(history: Song[]): string | null {
   return sorted[0]?.[0] ?? null
 }
 
-export function ForYouSection() {
+export function ForYouSection({ languageOverride }: { languageOverride?: string }) {
   const history = useLibraryStore((s) => s.history)
-  const language = useSettingsStore((s) => s.language)
-  const page = useRef(randomPage()).current
+  const storeLanguage = useSettingsStore((s) => s.language)
+  const language = languageOverride ?? storeLanguage
   const [topArtist, setTopArtist] = useState<string | null>(null)
+  // Page range 1–3: deep pages of an artist search are mostly irrelevant
+  const page = sessionPage(`for-you:${topArtist ?? ''}:${language}`, 3)
   const initializedRef = useRef(false)
 
   // Keep topArtist stable during the session
@@ -47,12 +49,12 @@ export function ForYouSection() {
 
   const { data, isLoading } = useQuery<{ songs: Song[] }>({
     queryKey: ['for-you', topArtist, language, page],
-    queryFn: () =>
-      fetch(`/api/search?q=${encodeURIComponent(topArtist + ' ' + language)}&lang=${language}&page=${page}`)
-        .then((r) => r.json()),
+    queryFn: async () => {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(`${topArtist} ${language}`)}&lang=${language}&page=${page}`)
+      if (!res.ok) throw new Error(`For you failed: HTTP ${res.status}`)
+      return res.json()
+    },
     enabled: !!topArtist,
-    staleTime: 0,
-    gcTime: 2 * 60 * 1000,
   })
 
   if (!topArtist) return null
