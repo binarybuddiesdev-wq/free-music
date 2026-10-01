@@ -1,4 +1,5 @@
 'use client'
+import { dedupSongs } from '@/lib/song-dedup'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect, Suspense } from 'react'
@@ -112,8 +113,10 @@ function SearchResults() {
           : json.playlists || (json.results as SearchPlaylist[] | undefined) || []
 
       if (newItems.length > 0) {
-        const existingIds = new Set(items.map((x) => x.id))
-        const deduplicated = newItems.filter((x: any) => !existingIds.has(x.id))
+        const deduplicated =
+          activeTab === 'Songs'
+            ? dedupSongs([...(items as Song[]), ...(newItems as Song[])]).slice(items.length)
+            : newItems.filter((x: any) => !new Set(items.map((i) => i.id)).has(x.id))
         if (deduplicated.length > 0) {
           setItems((prev) => [...prev, ...deduplicated])
           setPage(nextPage)

@@ -2,6 +2,7 @@ import CryptoJS from 'crypto-js'
 import type { Song, Album, Artist, SearchPlaylist } from '@/types/music'
 import { mergeRecommendations } from './recommendations'
 import { fisherYates } from './utils'
+import { dedupSongs } from './song-dedup'
 import { preprocessQuery, getYouTubeSuggestion, calculateRelevance, isDiscoveryQuery } from './search-engine'
 
 // Official JioSaavn API — no external mirror needed
@@ -91,17 +92,12 @@ async function jiosaavnSearch(query: string, n = 40, p = 1): Promise<Song[]> {
     .map((r) => normalize(r as RawSong))
 }
 
-function dedup(songs: Song[]): Song[] {
-  const seen = new Set<string>()
-  return songs.filter((s) => { if (seen.has(s.id)) return false; seen.add(s.id); return true })
-}
-
 export async function searchSongs(query: string, language: string, page = 1): Promise<Song[]> {
   const { cleaned, entity, coreWords } = preprocessQuery(query)
 
   // If this is a generic discovery/mood query (e.g. "telugu hits", "happy songs", "party songs")
   if (isDiscoveryQuery(coreWords)) {
-    const all = dedup(await jiosaavnSearch(cleaned, 40, page))
+    const all = dedupSongs(await jiosaavnSearch(cleaned, 40, page))
     const userLang = language.toLowerCase()
     const matching = all.filter((s) => s.language === userLang)
     const others = all.filter((s) => s.language !== userLang)
@@ -143,7 +139,7 @@ export async function searchSongs(query: string, language: string, page = 1): Pr
   }
 
   const pool = relevant.length > 0 ? relevant : raw
-  const all = dedup(pool)
+  const all = dedupSongs(pool)
 
   // Language prioritization: requested language first, then other languages
   const userLang = language.toLowerCase()
@@ -157,7 +153,7 @@ export async function searchSongs(query: string, language: string, page = 1): Pr
 export async function suggestSongs(query: string, language: string): Promise<Song[]> {
   const { cleaned } = preprocessQuery(query)
   if (!cleaned) return []
-  const songs = dedup(await jiosaavnSearch(cleaned, 10, 1))
+  const songs = dedupSongs(await jiosaavnSearch(cleaned, 10, 1))
   const lang = language.toLowerCase()
   return [...songs.filter((s) => s.language === lang), ...songs.filter((s) => s.language !== lang)].slice(0, 5)
 }
@@ -188,7 +184,7 @@ function getQuery(sectionId: string, language: string): string {
 
 export async function getSectionSongs(sectionId: string, language: string, page = 1): Promise<Song[]> {
   const query = getQuery(sectionId, language)
-  const all = dedup(await jiosaavnSearch(query, 40, page))
+  const all = dedupSongs(await jiosaavnSearch(query, 40, page))
   const userLang = language.toLowerCase()
   const matching = all.filter((s) => s.language === userLang)
   const others = all.filter((s) => s.language !== userLang)
