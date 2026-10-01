@@ -130,3 +130,10 @@ test('production HTTP security headers and CSP are configured in next.config.ts'
   assert.ok(headerMap.get('Permissions-Policy')?.includes('camera=()'))
   assert.ok(headerMap.get('Permissions-Policy')?.includes('microphone=()'))
 })
+
+test('sanitizeString keeps a stray "<" that is not an HTML tag', () => {
+  assert.equal(sanitizeString('I <3 You'), 'I <3 You')
+  assert.equal(sanitizeString('a < b'), 'a < b')
+  assert.equal(sanitizeString('Song <Remix>'), 'Song')
+  assert.equal(sanitizeString('hi <script'), 'hi')
+})

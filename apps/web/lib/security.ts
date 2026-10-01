@@ -40,7 +40,8 @@ export function sanitizeString(val: unknown, maxLength = 200): string {
   let clean = val.replace(/\0/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
 
   // 2. Strip potential HTML injection tags & script markers
-  clean = clean.replace(/<[^>]*>?/gm, '')
+  // Only real tags (`<b>`, `</p>`, `<!--`, unterminated `<script`), so "I <3 You" and "a < b" survive
+  clean = clean.replace(/<\/?[a-zA-Z!][^>]*(?:>|$)/gm, '')
   clean = clean.replace(/javascript\s*:/gi, '')
   clean = clean.replace(/data\s*:[^;]+;base64,[a-zA-Z0-9+/=]+/gi, '')
   clean = clean.replace(/data\s*:\s*text\/[a-z]+/gi, '')
