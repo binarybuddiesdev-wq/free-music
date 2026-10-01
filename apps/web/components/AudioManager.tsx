@@ -452,6 +452,13 @@ export function AudioManager() {
 
     const onPause = () => usePlayerStore.getState().setIsPlaying(false)
 
+    // Playback started without a click (hardware media key, restored session): the Web Audio
+    // graph would stay suspended and the track would play silently
+    const onPlay = () => {
+      const ctx = audioContextRef.current
+      if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {})
+    }
+
     const onCanPlay = () => {
       clearBufferingTimer()
       usePlayerStore.getState().setIsLoading(false)
@@ -498,6 +505,7 @@ export function AudioManager() {
     el.addEventListener('waiting', onWaiting)
     el.addEventListener('playing', onPlaying)
     el.addEventListener('pause', onPause)
+    el.addEventListener('play', onPlay)
     el.addEventListener('canplay', onCanPlay)
     el.addEventListener('error', onError)
     el.addEventListener('ended', onEnded)
@@ -513,6 +521,7 @@ export function AudioManager() {
       el.removeEventListener('waiting', onWaiting)
       el.removeEventListener('playing', onPlaying)
       el.removeEventListener('pause', onPause)
+      el.removeEventListener('play', onPlay)
       el.removeEventListener('canplay', onCanPlay)
       el.removeEventListener('error', onError)
       el.removeEventListener('ended', onEnded)
