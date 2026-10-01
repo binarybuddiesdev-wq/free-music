@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useLibraryStore } from '@/stores/library.store'
 import { useSettingsStore } from '@/stores/settings.store'
 import { sessionPage } from '@/lib/session'
+import { createSongSet, takeFresh } from '@/lib/song-dedup'
 import { SeenSongsContext } from './SeenSongsContext'
 import { CarouselRow } from './CarouselRow'
 import { SongCard } from './SongCard'
@@ -57,9 +58,18 @@ export function ForYouSection({ languageOverride }: { languageOverride?: string 
     enabled: !!topArtist,
   })
 
-  if (!topArtist) return null
+  const seenIds = useContext(SeenSongsContext)
+  const [songs, setSongs] = useState<Song[]>([])
 
-  const songs = data?.songs ?? []
+  useEffect(() => {
+    if (!data?.songs) return
+    const seen = seenIds?.current ?? createSongSet()
+    const fresh = takeFresh(data.songs, seen)
+    setSongs(fresh)
+    return () => fresh.forEach((s) => seen.delete(s))
+  }, [data, seenIds])
+
+  if (!topArtist) return null
 
   if (!isLoading && songs.length === 0) return null
 

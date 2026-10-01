@@ -1,6 +1,7 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import { SeenSongsContext } from '@/components/home/SeenSongsContext'
+import { createSongSet, dedupSongs } from '@/lib/song-dedup'
 import { CarouselRow } from '@/components/home/CarouselRow'
 import { SectionRow } from '@/components/home/SectionRow'
 import { QuickPicksSection } from '@/components/home/QuickPicksSection'
@@ -35,6 +36,7 @@ const ALL_SECTIONS: SectionConfig[] = [
 
 function ListenAgainSection() {
   const history = useLibraryStore((s) => s.history)
+  const seenIds = useContext(SeenSongsContext)
   const [songs, setSongs] = useState<Song[]>([])
   const initializedRef = useRef(false)
 
@@ -46,10 +48,18 @@ function ListenAgainSection() {
       return
     }
     if (!initializedRef.current && history.length > 0) {
-      setSongs(history.slice(0, 20))
+      setSongs(dedupSongs(history).slice(0, 20))
       initializedRef.current = true
     }
   }, [history])
+
+  // Reserve these songs so the sections below don't repeat them
+  useEffect(() => {
+    const seen = seenIds?.current
+    if (!seen) return
+    songs.forEach((s) => seen.add(s))
+    return () => songs.forEach((s) => seen.delete(s))
+  }, [songs, seenIds])
 
   if (songs.length === 0) return null
 
@@ -66,7 +76,8 @@ function ListenAgainSection() {
 }
 
 export default function HomePage() {
-  const seenIds = useRef(new Set<string>())
+  // Songs already shown on this page; every section filters against it so a song appears once
+  const [seenIds] = useState(() => ({ current: createSongSet() }))
   const [activeMood, setActiveMood] = useState('All')
   // "Telugu"/"Hindi" chips filter this page only — they no longer overwrite the saved language
   const [chipLanguage, setChipLanguage] = useState<string | undefined>(undefined)

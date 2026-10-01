@@ -8,6 +8,7 @@ import { useLibraryStore } from '@/stores/library.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
 import { sessionPage } from '@/lib/session'
 import { fetchSectionSongs } from '@/lib/home-feed'
+import { createSongSet, takeFresh } from '@/lib/song-dedup'
 import { SeenSongsContext } from './SeenSongsContext'
 import type { Song } from '@/types/music'
 import { formatDuration, onEnterSpace, sizedImage } from '@/lib/utils'
@@ -32,12 +33,11 @@ export function QuickPicksSection({ languageOverride }: { languageOverride?: str
 
   useEffect(() => {
     if (!data?.songs) return
-    const seen = seenIds?.current ?? new Set<string>()
-    const fresh = data.songs.filter((s) => !seen.has(s.id)).slice(0, 20)
-    fresh.forEach((s) => seen.add(s.id))
+    const seen = seenIds?.current ?? createSongSet()
+    const fresh = takeFresh(data.songs, seen, 20)
     setFilteredSongs(fresh)
     return () => {
-      fresh.forEach((s) => seen.delete(s.id))
+      fresh.forEach((s) => seen.delete(s))
     }
   }, [data, seenIds])
 

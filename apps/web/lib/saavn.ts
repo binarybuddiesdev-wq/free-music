@@ -428,11 +428,12 @@ export async function getSongRecommendations(
     primaryArtist ? jiosaavnSearch(primaryArtist, 40, randomPageUpTo(2)) : Promise.resolve([] as Song[]),
     getSectionSongs(Math.random() < 0.5 ? 'trending' : 'quick-picks', language, randomPageUpTo(3)),
   ])
-  return mergeRecommendations({
+  // The same recording is listed under several ids, so collapse repeats after merging
+  return dedupSongs(mergeRecommendations({
     seedId: songId,
     primaryArtist,
     artistSongs: artistResult.status === 'fulfilled' ? artistResult.value : [],
     discoverySongs: discoveryResult.status === 'fulfilled' ? discoveryResult.value : [],
     shuffle: fisherYates,
-  })
+  }))
 }

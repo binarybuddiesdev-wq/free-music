@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/stores/settings.store'
 import { sessionPage } from '@/lib/session'
 import { fetchSectionSongs } from '@/lib/home-feed'
+import { createSongSet, takeFresh } from '@/lib/song-dedup'
 import { SeenSongsContext } from './SeenSongsContext'
 import { CarouselRow } from './CarouselRow'
 import { SongCard } from './SongCard'
@@ -31,13 +32,13 @@ export function SectionRow({ id, title, languageOverride }: SectionRowProps) {
 
   useEffect(() => {
     if (!data?.songs) return
-    const seen = seenIds?.current ?? new Set<string>()
-    const fresh = data.songs.filter((s) => !seen.has(s.id))
-    fresh.forEach((s) => seen.add(s.id))
+    // One song shows once per page, even when it is listed under different ids
+    const seen = seenIds?.current ?? createSongSet()
+    const fresh = takeFresh(data.songs, seen)
     setFilteredSongs(fresh)
     return () => {
       // Clean up on unmount so Strict Mode double-invoke stays correct
-      fresh.forEach((s) => seen.delete(s.id))
+      fresh.forEach((s) => seen.delete(s))
     }
   }, [data, seenIds])
 
