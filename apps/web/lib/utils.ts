@@ -70,3 +70,11 @@ export function formatBytes(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
+
+export type ArtworkSize = 50 | 150 | 500
+
+/** JioSaavn artwork URLs end in -50x50/-150x150/-500x500; other hosts are returned unchanged. */
+export function sizedImage(url: string, size: ArtworkSize): string {
+  if (!url) return ''
+  return url.replace(/-(50x50|150x150|500x500)(\.\w+)$/, `-${size}x${size}$2`)
+}

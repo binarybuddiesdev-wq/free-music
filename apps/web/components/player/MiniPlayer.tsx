@@ -6,7 +6,7 @@ import { useQueueStore } from '@/stores/queue.store'
 import { useLibraryStore } from '@/stores/library.store'
 import { useUIStore } from '@/stores/ui.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
-import { formatDuration } from '@/lib/utils'
+import { formatDuration, sizedImage } from '@/lib/utils'
 
 export function MiniPlayer() {
   const currentSong = usePlayerStore((s) => s.currentSong)
@@ -81,7 +81,7 @@ export function MiniPlayer() {
           onClick={() => setExpanded(true)}
         >
           <div style={{ width: 40, height: 40, borderRadius: 3, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--panel-bg)' }}>
-            {currentSong.image && <Image src={currentSong.image} alt={currentSong.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
+            {currentSong.image && <Image src={sizedImage(currentSong.image, 150)} alt={currentSong.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
           </div>
           <div style={{ minWidth: 0, textAlign: 'center' }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

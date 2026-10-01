@@ -8,7 +8,7 @@ import { useUIStore } from '@/stores/ui.store'
 import { usePlayerStore } from '@/stores/player.store'
 import { useSettingsStore } from '@/stores/settings.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
-import { formatDuration } from '@/lib/utils'
+import { formatDuration, sizedImage } from '@/lib/utils'
 import type { Song } from '@/types/music'
 import Image from 'next/image'
 
@@ -81,7 +81,7 @@ function SortableQueueItem({
         </div>
 
         <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 3, overflow: 'hidden', background: 'var(--panel-bg)', flexShrink: 0 }}>
-          {song.image && <Image src={song.image} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
+          {song.image && <Image src={sizedImage(song.image, 150)} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>

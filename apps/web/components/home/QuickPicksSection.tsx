@@ -10,7 +10,7 @@ import { sessionPage } from '@/lib/session'
 import { fetchSectionSongs } from '@/lib/home-feed'
 import { SeenSongsContext } from './SeenSongsContext'
 import type { Song } from '@/types/music'
-import { formatDuration, onEnterSpace } from '@/lib/utils'
+import { formatDuration, onEnterSpace, sizedImage } from '@/lib/utils'
 
 export function QuickPicksSection({ languageOverride }: { languageOverride?: string }) {
   const storeLanguage = useSettingsStore((s) => s.language)
@@ -92,7 +92,7 @@ function QuickPickRow({ song, isCurrent, isPlaying, liked, onPlay, onLike }: {
         {/* Thumbnail */}
         <div style={{ position: 'relative', width: 46, height: 46, borderRadius: 4, overflow: 'hidden', flexShrink: 0, background: 'var(--panel-bg)' }}>
           {song.image && (
-            <Image src={song.image} alt={song.title} fill sizes="46px" style={{ objectFit: 'cover' }} unoptimized />
+            <Image src={sizedImage(song.image, 150)} alt={song.title} fill sizes="46px" style={{ objectFit: 'cover' }} unoptimized />
           )}
           {isCurrent && (
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

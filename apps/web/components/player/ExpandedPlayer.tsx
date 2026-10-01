@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { usePlayerStore } from '@/stores/player.store'
 import { useQueueStore } from '@/stores/queue.store'
 import { useSettingsStore } from '@/stores/settings.store'
-import { formatDuration, onEnterSpace } from '@/lib/utils'
+import { formatDuration, onEnterSpace, sizedImage } from '@/lib/utils'
 import { LyricsPanel } from '@/components/player/LyricsPanel'
 import { VisualizerCanvas } from '@/components/player/VisualizerCanvas'
 import { ContextMenu } from '@/components/ui/ContextMenu'
@@ -413,7 +413,7 @@ function UpNextPanel() {
                   {isCurrent ? (
                     <svg viewBox="0 0 24 24" fill="var(--text-primary)" width="20" height="20"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                   ) : (
-                    song.image && <Image src={song.image} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />
+                    song.image && <Image src={sizedImage(song.image, 150)} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />
                   )}
                 </div>
                 {/* Title + artist */}
@@ -529,7 +529,7 @@ function RelatedPanel() {
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <div style={{ width: 40, height: 40, borderRadius: 3, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--panel-bg)' }}>
-                {song.image && <Image src={song.image} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
+                {song.image && <Image src={sizedImage(song.image, 150)} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

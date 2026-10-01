@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useLibraryStore } from '@/stores/library.store'
 import { usePlayerStore } from '@/stores/player.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
-import { formatDuration, truncate, onEnterSpace, fisherYates } from '@/lib/utils'
+import { formatDuration, truncate, onEnterSpace, fisherYates, sizedImage } from '@/lib/utils'
 import {
   getAllOfflineSongs,
   removeOfflineSong,
@@ -53,7 +53,7 @@ function SongRow({ song, queue, index, onContextMenu }: { song: Song; queue: Son
         ) : index + 1}
       </div>
       <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 3, overflow: 'hidden', background: 'var(--panel-bg)', flexShrink: 0 }}>
-        {song.image && <Image src={song.image} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
+        {song.image && <Image src={sizedImage(song.image, 150)} alt={song.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, color: isCurrent ? '#ff0000' : 'var(--text-primary)', fontWeight: isCurrent ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
