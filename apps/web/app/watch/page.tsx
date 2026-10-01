@@ -43,6 +43,9 @@ function WatchContent() {
   const audioRef = usePlayerStore((s) => s.audioRef)
   const setMode = usePlayerStore((s) => s.setMode)
   const setSavedTimeForVideo = usePlayerStore((s) => s.setSavedTimeForVideo)
+  // Read inside the player effect without being a dependency: changing it must not rebuild the player
+  const savedTimeRef = useRef(savedTime)
+  savedTimeRef.current = savedTime
 
   // Fetch video ID if not in URL
   const { data: resolvedId, isLoading: isResolvingVideo } = useQuery<{ videoId: string | null }>({
@@ -86,7 +89,7 @@ function WatchContent() {
       playerVars: { autoplay: 1, rel: 0, modestbranding: 1, fs: 1 },
       events: {
         onReady: (e) => {
-          if (savedTime > 0) e.target.seekTo(savedTime, true)
+          if (savedTimeRef.current > 0) e.target.seekTo(savedTimeRef.current, true)
           e.target.playVideo()
         },
       },
@@ -96,7 +99,7 @@ function WatchContent() {
       playerRef.current?.destroy()
       playerRef.current = null
     }
-  }, [ytReady, videoId, savedTime, audioRef, setMode])
+  }, [ytReady, videoId, audioRef, setMode])
 
   const handleSwitchToAudio = () => {
     if (playerRef.current?.getCurrentTime) {
@@ -107,6 +110,8 @@ function WatchContent() {
         // Ignored
       }
     }
+    // Stop the video before audio resumes, otherwise both play at once on this page
+    try { playerRef.current?.pauseVideo() } catch { /* player not ready */ }
     switchToAudio()
   }
 
