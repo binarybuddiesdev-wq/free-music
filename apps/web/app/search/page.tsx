@@ -2,7 +2,7 @@
 import { dedupSongs } from '@/lib/song-dedup'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSettingsStore } from '@/stores/settings.store'
 import { SongCard } from '@/components/home/SongCard'
 import { AlbumCard } from '@/components/search/AlbumCard'
@@ -40,6 +40,10 @@ function SearchResults() {
   const [items, setItems] = useState<any[]>([])
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  // Identifies the query/language/tab the list belongs to, so a slow "load more" for an old one is dropped
+  const listKey = `${q}|${language}|${activeTab}`
+  const listKeyRef = useRef(listKey)
+  listKeyRef.current = listKey
 
   // Sync state if URL type changes
   useEffect(() => {
@@ -91,7 +95,10 @@ function SearchResults() {
           : data.playlists || (data.results as SearchPlaylist[] | undefined) || []
 
       setItems(initialItems)
-      setHasMore(initialItems.length >= 10)
+      // A refetch replaces the list with page 1 again, so paging must restart too
+      setPage(1)
+      // The API returns deduplicated/filtered lists, so a short first page does not mean the end
+      setHasMore(initialItems.length > 0)
     }
   }, [data, activeTab])
 
@@ -99,11 +106,13 @@ function SearchResults() {
     if (loadingMore || !hasMore) return
     setLoadingMore(true)
     const nextPage = page + 1
+    const requestKey = listKey
     try {
       const res = await fetch(
         `/api/search?q=${encodeURIComponent(q)}&lang=${language}&type=${activeTab.toLowerCase()}&page=${nextPage}`
       )
       const json: SearchResponse = await res.json()
+      if (listKeyRef.current !== requestKey) return
       const newItems =
         activeTab === 'Songs'
           ? json.songs || (json.results as Song[] | undefined) || []
@@ -121,7 +130,6 @@ function SearchResults() {
         if (deduplicated.length > 0) {
           setItems((prev) => [...prev, ...deduplicated])
           setPage(nextPage)
-          setHasMore(newItems.length >= 10)
         } else {
           setHasMore(false)
         }
