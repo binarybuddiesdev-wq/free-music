@@ -60,6 +60,10 @@ interface SettingsState {
   eqCustom: number[]
   setEqCustom: (bands: number[]) => void
 
+  // Player
+  showVisualizer: boolean
+  setShowVisualizer: (v: boolean) => void
+
   // Lyrics
   lyricsFontSize: number
   setLyricsFontSize: (v: number) => void
@@ -112,6 +116,9 @@ export const useSettingsStore = create<SettingsState>()(
         const sleepTimerEnd = sleepTimer > 0 ? Date.now() + sleepTimer * 60 * 1000 : null
         set({ sleepTimer, sleepTimerEnd })
       },
+
+      showVisualizer: false,
+      setShowVisualizer: (showVisualizer) => set({ showVisualizer }),
 
       eqEnabled: false,
       setEqEnabled: (eqEnabled) => {

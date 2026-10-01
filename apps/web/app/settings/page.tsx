@@ -432,6 +432,8 @@ function AboutSection() {
 }
 
 function SettingsContent() {
+  const showVisualizer = useSettingsStore((s) => s.showVisualizer)
+  const setShowVisualizer = useSettingsStore((s) => s.setShowVisualizer)
   const eqEnabled = useSettingsStore((s) => s.eqEnabled)
   const setEqEnabled = useSettingsStore((s) => s.setEqEnabled)
   const autoplay = useSettingsStore((s) => s.autoplay)
@@ -451,6 +453,9 @@ function SettingsContent() {
         </SettingRow>
         <SettingRow label="Font size" description="Adjust UI text scale">
           <FontSizeSelector />
+        </SettingRow>
+        <SettingRow label="Audio wave" description="Show the live wave bars under the song info in the expanded player">
+          <Toggle checked={showVisualizer} onChange={setShowVisualizer} />
         </SettingRow>
       </Section>
 

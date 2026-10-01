@@ -20,6 +20,7 @@ const TABS: Tab[] = ['UP NEXT', 'LYRICS', 'RELATED']
 export function ExpandedPlayer() {
   const currentSong = usePlayerStore((s) => s.currentSong)
   const isExpanded = usePlayerStore((s) => s.isExpanded)
+  const showVisualizer = useSettingsStore((s) => s.showVisualizer)
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed)
   const toggleQueue = useUIStore((s) => s.toggleQueue)
   const mode = usePlayerStore((s) => s.mode)
@@ -242,9 +243,11 @@ export function ExpandedPlayer() {
             </div>
 
             {/* Audio Waveform Visualizer */}
-            <div style={{ marginTop: 12, width: '100%' }}>
-              <VisualizerCanvas isPlaying={isPlaying && mode === 'audio'} height={28} />
-            </div>
+            {showVisualizer && (
+              <div style={{ marginTop: 12, width: '100%' }}>
+                <VisualizerCanvas isPlaying={isPlaying && mode === 'audio'} height={28} />
+              </div>
+            )}
           </div>
         </div>
       </div>
