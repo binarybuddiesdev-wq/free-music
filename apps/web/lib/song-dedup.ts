@@ -59,7 +59,12 @@ export function isSameSong(a: Identity, b: Identity): boolean {
   if (baseTitle(a.title) !== baseTitle(b.title)) return false
   const da = a.duration ?? 0
   const db = b.duration ?? 0
-  if (da > 0 && db > 0 && Math.abs(da - db) > DURATION_TOLERANCE_SECONDS) return false
+  if (da > 0 && db > 0) {
+    if (Math.abs(da - db) > DURATION_TOLERANCE_SECONDS) return false
+  } else if (norm(a.title) !== norm(b.title)) {
+    // Without both durations we cannot tell versions apart, so only exact titles count as copies
+    return false
+  }
   const artistsB = new Set(artistSet(b.artist))
   const artistsA = artistSet(a.artist)
   // No artist info on either side: the title and duration are all we have

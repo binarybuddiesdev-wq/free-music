@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { dedupSongs, songKey } from './song-dedup.ts'
+import { dedupSongs, songKey, isSameSong } from './song-dedup.ts'
 
 const s = (id, title, artist, duration = 200) => ({ id, title, artist, album: '', duration, image: '', downloadUrl: '', language: 'hindi' })
 
@@ -82,4 +82,12 @@ test('spreadByAlbum treats songs without an album as separate', async () => {
   const { spreadByAlbum } = await import('./song-dedup.ts')
   const list = [1, 2, 3].map((n) => ({ ...s(String(n), 'T' + n, 'A'), album: '' }))
   assert.deepEqual(spreadByAlbum(list, 1).map((x) => x.id), ['1', '2', '3'])
+})
+
+test('songs with an unknown duration only merge when the full titles match', () => {
+  const a = { id: '1', title: 'Naatu Naatu (From "RRR")', artist: 'Rahul Sipligunj', duration: 0 }
+  const b = { id: '2', title: 'Naatu Naatu', artist: 'Rahul Sipligunj', duration: 215 }
+  const c = { id: '3', title: 'Naatu Naatu (From "RRR")', artist: 'Rahul Sipligunj', duration: 0 }
+  assert.equal(isSameSong(a, b), false)
+  assert.equal(isSameSong(a, c), true)
 })
