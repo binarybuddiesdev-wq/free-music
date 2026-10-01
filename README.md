@@ -24,7 +24,41 @@ A high-performance, ad-free music streaming Progressive Web Application (PWA) bu
 - **Dynamic Mood Filters**: Explore songs categorized by vibe (*Energize, Relax, Focus, Party, Romance, Workout*).
 - **Responsive Theming**: Authentic dark/light system theming implemented with semantic CSS variables.
 
-For an exhaustive feature breakdown, visit [`features.md`](file:///C:/teja/coding/free-music/features.md).
+For an exhaustive feature breakdown, visit [`docs/features/features.md`](docs/features/features.md).
+
+---
+
+## Architecture at a Glance
+
+```mermaid
+graph TD
+    Client["Browser / PWA<br/>React 19 + Zustand + React Query"]
+    SW["Service Worker (sw.js)<br/>app shell, static, images"]
+    IDB[("IndexedDB<br/>offline audio")]
+    API["Next.js Route Handlers<br/>/api/search, /lyrics, /video-id, /health"]
+    Saavn["JioSaavn API + CDN"]
+    LRC["LRCLIB (lyrics)"]
+    YT["YouTube Suggest / Data API"]
+
+    Client --> SW
+    Client --> IDB
+    Client -->|JSON| API
+    Client -->|audio stream| Saavn
+    API --> Saavn
+    API --> LRC
+    API --> YT
+```
+
+Audio is played only by the global `AudioManager`; UI components drive it through the Zustand `player` and `queue` stores. See [`docs/architecture/architecture.md`](docs/architecture/architecture.md) for the full design, data flows and caching layers.
+
+### Repository Layout
+
+```
+apps/web/        Next.js app (app/ routes + API, components/, lib/ logic, stores/, e2e/, public/)
+docs/            Architecture, features, research, specs and plans
+.github/         CI workflow, issue and PR templates
+vercel.json      Vercel deployment config
+```
 
 ---
 
@@ -34,17 +68,17 @@ This repository is built and maintained with AI agent workflows. We provide comp
 
 | Document | Description |
 |---|---|
-| **[`features.md`](file:///C:/teja/coding/free-music/features.md)** | Exhaustive breakdown of all app features, keyboard shortcuts, and UI interactions. |
-| **[`ARCHITECTURE.md`](file:///C:/teja/coding/free-music/ARCHITECTURE.md)** | System architecture, Web Audio pipeline, data flow diagrams, and Zustand state models. |
-| **[`GEMINI.md`](file:///C:/teja/coding/free-music/GEMINI.md)** | Architectural invariants and verification commands for Gemini / Antigravity agents. |
-| **[`AGENTS.md`](file:///C:/teja/coding/free-music/AGENTS.md)** | Universal developer and AI agent guide detailing codebase conventions and pitfalls. |
-| **[`CLAUDE.md`](file:///C:/teja/coding/free-music/CLAUDE.md)** | Execution instructions and constraints for Claude Code assistants. |
-| **[`.cursorrules`](file:///C:/teja/coding/free-music/.cursorrules)** | Rule configuration for Cursor and Windsurf AI editors. |
-| **[`.github/copilot-instructions.md`](file:///C:/teja/coding/free-music/.github/copilot-instructions.md)** | Dedicated context and invariant instructions for GitHub Copilot. |
-| **[`docs/`](file:///C:/teja/coding/free-music/docs/README.md)** | Technical design specifications (`specs/`) and implementation plans (`plans/`). |
-| **[`CONTRIBUTING.md`](file:///C:/teja/coding/free-music/CONTRIBUTING.md)** | Contribution standards, development setup, and pull request checklist. |
-| **[`SECURITY.md`](file:///C:/teja/coding/free-music/SECURITY.md)** | Security reporting policy and vulnerability disclosure procedures. |
-| **[`LICENSE`](file:///C:/teja/coding/free-music/LICENSE)** | Open-source MIT License. |
+| **[`docs/features/features.md`](docs/features/features.md)** | Exhaustive breakdown of all app features, keyboard shortcuts, and UI interactions. |
+| **[`docs/architecture/architecture.md`](docs/architecture/architecture.md)** | System architecture, Web Audio pipeline, data flow diagrams, and Zustand state models. |
+| **[`GEMINI.md`](GEMINI.md)** | Architectural invariants and verification commands for Gemini / Antigravity agents. |
+| **[`AGENTS.md`](AGENTS.md)** | Universal developer and AI agent guide detailing codebase conventions and pitfalls. |
+| **[`CLAUDE.md`](CLAUDE.md)** | Execution instructions and constraints for Claude Code assistants. |
+| **[`.cursorrules`](.cursorrules)** | Rule configuration for Cursor and Windsurf AI editors. |
+| **[`.github/copilot-instructions.md`](.github/copilot-instructions.md)** | Dedicated context and invariant instructions for GitHub Copilot. |
+| **[`docs/`](docs/README.md)** | Technical design specifications (`specs/`) and implementation plans (`plans/`). |
+| **[`CONTRIBUTING.md`](CONTRIBUTING.md)** | Contribution standards, development setup, and pull request checklist. |
+| **[`SECURITY.md`](SECURITY.md)** | Security reporting policy and vulnerability disclosure procedures. |
+| **[`LICENSE`](LICENSE)** | Open-source MIT License. |
 
 ---
 
@@ -64,6 +98,9 @@ pnpm dev
 ```
 Open [http://localhost:3000](http://localhost:3000) to start listening.
 
+### Environment Variables
+Copy `apps/web/.env.example` to `apps/web/.env.local` if you want to set the optional `YOUTUBE_API_KEY`. Without it, video resolution falls back to a zero-config mode, so the app runs with no configuration.
+
 ---
 
 ## Verification & Quality Assurance
@@ -79,7 +116,13 @@ pnpm --filter web lint
 
 # Build production bundle (Next.js App Router + PWA Service Worker)
 pnpm --filter web build
+
+# Browser end-to-end tests (Playwright; starts its own dev server on :3005)
+pnpm --filter web exec playwright install chromium   # first run only
+pnpm test:e2e
 ```
+
+CI (`.github/workflows/ci.yml`) runs unit tests, lint and the production build on every push and pull request to `main`, and runs the Playwright suite in a separate job.
 
 ---
 

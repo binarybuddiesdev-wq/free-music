@@ -6,7 +6,7 @@ This guide provides a comprehensive technical overview of the system architectur
 
 ## 1. System Overview & Technology Stack
 
-The project is structured as a **Turborepo monorepo** with a Next.js App Router frontend application (`apps/web`).
+The project is a **pnpm workspace monorepo** (`pnpm-workspace.yaml` -> `apps/*`) with a single Next.js App Router application, `apps/web`. Root scripts (`pnpm dev`, `pnpm test`, `pnpm build`) delegate to it.
 
 ```mermaid
 graph TD
@@ -15,9 +15,10 @@ graph TD
     JioSaavn["JioSaavn API (Direct CDN)"]
     LRCLIB["LRCLIB API (Lyrics)"]
     YouTube["YouTube Suggest & Data API"]
-    Cache["Service Worker Cache (Workbox)"]
+    Cache["Service Worker (hand-written sw.js)"]
 
-    Client -->|Audio / Static requests| Cache
+    Client -->|App shell, static assets, images| Cache
+    Client -->|Audio streams| JioSaavn
     Client -->|API queries| NextServer
     NextServer -->|Catalog & Decryption| JioSaavn
     NextServer -->|Time-synced lyrics| LRCLIB
@@ -31,7 +32,7 @@ graph TD
 - **Data Fetching & Cache**: [TanStack React Query v5](https://tanstack.com/query/latest) with request deduplication and abort signals.
 - **Drag and Drop**: [@dnd-kit/core](https://dndkit.com/) and `@dnd-kit/sortable` for queue reordering.
 - **Cryptography**: [CryptoJS](https://cryptojs.gitbook.io/) for DES decryption of JioSaavn media URLs.
-- **PWA & Offline**: `next-pwa` + `workbox-range-requests` with custom service worker caching and IndexedDB offline downloads.
+- **PWA & Offline**: a hand-written service worker (`public/sw.js`, no build step) for the app shell and static assets, plus IndexedDB for offline audio downloads.
 - **Audio Processing**: HTML5 Audio + Web Audio API (`AudioContext`, `AnalyserNode`) for 64-band real-time visualizer canvas rendering.
 
 ---
@@ -55,9 +56,10 @@ free-music/
 │       │   ├── settings/page.tsx        # Quality, language, theme controls
 │       │   ├── watch/page.tsx           # Full-screen watch view
 │       │   └── api/                     # Server Route Handlers
-│       │       ├── search/route.ts      # Unified search endpoint
+│       │       ├── search/route.ts      # Unified search, sections, details, recommendations, typeahead (?suggest=1)
 │       │       ├── lyrics/route.ts      # Time-synced lyrics endpoint
-│       │       └── video-id/route.ts    # YouTube music video ID resolver
+│       │       ├── video-id/route.ts    # YouTube music video ID resolver
+│       │       └── health/route.ts      # Uptime probe (no-store)
 │       ├── components/                  # React UI Components
 │       │   ├── AudioManager.tsx         # Global HTML5 audio & Web Audio controller
 │       │   ├── layout/                  # Header, Sidebar, MainShell
@@ -66,13 +68,18 @@ free-music/
 │       │   ├── search/                  # AlbumCard, ArtistCard, PlaylistCard
 │       │   └── ui/                      # ContextMenu, Toast notifications
 │       ├── lib/                         # Core Utilities & Backend Logic
-│       │   ├── saavn.ts                 # JioSaavn API client & DES decryptor
-│       │   ├── search-engine.ts         # Query preprocessing & typo engine
-│       │   ├── offline-storage.ts       # IndexedDB audio blob storage & byte stats
-│       │   ├── recent-searches.ts       # Search history manager in localStorage
-│       │   ├── lrclib.ts                # LRCLIB API client
+│       │   ├── saavn.ts                 # JioSaavn API client, DES decryptor, search/section/detail fetchers
+│       │   ├── search-engine.ts         # Query preprocessing, typo engine, relevance scoring
+│       │   ├── song-dedup.ts            # Dedupes songs by title + artists (JioSaavn reuses one song under many ids)
+│       │   ├── recommendations.ts       # Radio / autoplay recommendation merging
+│       │   ├── lrclib.ts, lyrics-sync.ts # LRCLIB client and synced-lyrics line logic
 │       │   ├── youtube.ts               # YouTube video matcher & suggest client
-│       │   ├── utils.ts                 # Time formatters & quality transform
+│       │   ├── offline-storage.ts       # IndexedDB audio blob storage & byte stats
+│       │   ├── queue-logic.ts, player-logic.ts, session.ts # Pure playback/queue/session logic behind the stores
+│       │   ├── home-feed.ts, detail-queries.ts, api-urls.ts # Home feed assembly and shared query/URL builders
+│       │   ├── settings-persist.ts, dedup-storage.ts, languages.ts, recent-searches.ts # Persistence and settings helpers
+│       │   ├── security.ts, rate-limiter.ts, logger.ts # Input sanitizers, per-IP limiter, logging
+│       │   ├── utils.ts                 # Time formatters, quality URL transform, image sizing
 │       │   └── *.test.mjs               # Node test runner unit tests
 │       ├── stores/                      # Zustand Global Stores
 │       │   ├── player.store.ts          # Playback state, track, volume, loop
@@ -80,21 +87,25 @@ free-music/
 │       │   ├── library.store.ts         # Liked songs, custom user playlists
 │       │   ├── settings.store.ts        # Language, audio quality, autoplay, theme, lyricsOffset
 │       │   └── ui.store.ts              # Sidebar & modal open states
-│       ├── public/                      # PWA assets, icons, manifest, sw.js
-│       ├── next.config.ts               # Next.js & next-pwa Workbox config
-│       └── package.json                 # Web workspace dependencies
-├── docs/                                # Project plans, architectural specifications
-│   ├── superpowers/plans/               # Structured implementation plans
-│   └── superpowers/specs/               # Product feature specifications
-├── features.md                          # Comprehensive feature catalog
-├── ARCHITECTURE.md                      # System architecture (this document)
+│       ├── e2e/                         # Playwright end-to-end specs
+│       ├── public/                      # PWA assets: icons, manifest.json, offline.html, sw.js
+│       ├── next.config.ts               # Security headers / CSP, sw.js cache headers, self polyfill
+│       ├── .env.example                 # Optional YOUTUBE_API_KEY
+│       └── package.json                 # Web workspace dependencies and test script
+├── docs/                                # Architecture, features, research, plans and specs
+│   ├── architecture/architecture.md     # System architecture (this document)
+│   ├── features/features.md             # Comprehensive feature catalog
+│   └── superpowers/{plans,specs}/       # Implementation plans and feature specs
+├── .github/                             # CI workflow, issue and PR templates
+├── vercel.json                          # Vercel deployment config
 ├── AGENTS.md                            # Universal AI developer onboarding guide
 ├── GEMINI.md                            # Gemini / Antigravity AI guide
 ├── CLAUDE.md                            # Claude Code AI guide
 ├── CONTRIBUTING.md                      # Human & AI contributor guidelines
 ├── SECURITY.md                          # Security reporting policy
 ├── LICENSE                              # MIT License
-└── package.json                         # Root monorepo configuration
+├── pnpm-workspace.yaml                  # Workspace definition (apps/*)
+└── package.json                         # Root scripts (dev, build, test, lint, test:e2e)
 ```
 
 ---
@@ -152,8 +163,17 @@ sequenceDiagram
 
 The application uses **Zustand** stores scoped to specific functional domains:
 
-| Store | File | Responsibilities | Persistence |
+| Store | File | Key state | Persistence |
 |---|---|---|---|
+| `player.store` | `stores/player.store.ts` | `currentSong`, `isPlaying`, `isLoading`, `progress`, `duration`, `volume`, `muted`, `mode` (audio/video), `isExpanded` | `localStorage`: `currentSong`, `volume`, `muted`, `mode` |
+| `queue.store` | `stores/queue.store.ts` | `queue`, `shuffledQueue`, `qIndex`, `shuffleOn`, `repeatMode`; actions `jumpTo`, `moveItem`, `removeAt`, `appendSongs` | `localStorage` |
+| `library.store` | `stores/library.store.ts` | `likedSongs`, `history`, `playlists` and their actions | `localStorage` |
+| `settings.store` | `stores/settings.store.ts` | `language`, `theme`, `fontSize`, `audioQuality` (low/normal/high), `autoplay`, `crossfade`, `gapless`, sleep timer, EQ, lyrics size/offset | `localStorage` (via `settings-persist.ts`) |
+| `ui.store` | `stores/ui.store.ts` | `sidebarCollapsed`, `queueOpen` | `localStorage` |
+
+All persisted stores write through a de-duplicating storage wrapper (`lib/dedup-storage.ts`) that skips redundant writes. Queue invariants (`qIndex` always indexes the active list) live in the pure `lib/queue-logic.ts`.
+
+---|---|---|---|
 | `player.store` | `stores/player.store.ts` | `currentSong`, `isPlaying`, `currentTime`, `duration`, `volume`, `isMuted`, `isExpanded`, `loopMode` | Memory (session) |
 | `queue.store` | `stores/queue.store.ts` | `queue`, `currentIndex`, `history`, `isShuffled`, `originalQueue`, reorder actions, `appendSongs` | `localStorage` |
 | `library.store` | `stores/library.store.ts` | `favorites`, `playlists`, `addSongToPlaylist`, `removePlaylist`, `toggleFavorite` | `localStorage` |
@@ -164,30 +184,26 @@ The application uses **Zustand** stores scoped to specific functional domains:
 
 ## 5. PWA & Offline Caching Architecture
 
-Configured via `next-pwa` in [`next.config.ts`](file:///C:/teja/coding/free-music/apps/web/next.config.ts):
+The service worker is a hand-written file, [`public/sw.js`](../../apps/web/public/sw.js), registered from `components/providers.tsx`. It has no build step; `next.config.ts` serves it with `Cache-Control: no-cache` so updates ship immediately. Bump `CACHE_VERSION` in `sw.js` whenever the caching rules or `SHELL_URLS` change; old caches are deleted on `activate`.
 
-1. **Audio Caching (`audio-cache`)**:
-   - Matches: `/\.(?:mp3|m4a|mp4|aac|ogg|webm)$/i`
-   - Strategy: `CacheFirst`
-   - Plugin: `RangeRequestsPlugin` (handles HTTP 206 partial responses for scrubbed audio)
-   - Expiration: 200 items, 30 days retention.
-2. **API Caching (`api-cache`)**:
-   - Matches: `/\/api\/(?:search|video-id|lyrics)/`
-   - Strategy: `NetworkFirst` with 5-second network timeout.
-   - Expiration: 100 entries, 5 minutes max-age.
-3. **Image Caching (`image-cache`)**:
-   - Matches: `/\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/i`
-   - Strategy: `CacheFirst`.
-   - Expiration: 200 entries, 30 days retention.
-4. **Node Environment Compatibility**:
-   - Includes top-level shim `if (typeof globalThis.self === 'undefined') globalThis.self = globalThis` to prevent Node 20+/24+ `ReferenceError: self is not defined` crashes during `next dev`.
+| Request | Strategy | Cache |
+|---|---|---|
+| Navigations | Network first, falls back to the cached page, then `/offline.html` (max 50 pages) | `fm-shell-*` |
+| `/_next/static/*` | Cache first | `fm-static-*` |
+| Google Fonts | Stale-while-revalidate | `fm-static-*` |
+| Same-origin images | Stale-while-revalidate (max 200 entries) | `fm-images-*` |
+| `/api/*`, range requests, audio files | Never intercepted; always network | none |
+
+Audio is intentionally not cached by the service worker. Offline songs live in IndexedDB (section 6), which avoids range-request edge cases.
+
+`next.config.ts` also keeps the top-level shim `if (typeof globalThis.self === 'undefined') globalThis.self = globalThis` to prevent `ReferenceError: self is not defined` crashes during `next dev` on newer Node versions.
 
 ---
 
 ## 6. Client-Side Offline Storage & Auto-Play Engine
 
 ### 6.1 IndexedDB Offline Architecture
-- **Database**: `free_music_db` (version 1) managed in [`offline-storage.ts`](file:///C:/teja/coding/free-music/apps/web/lib/offline-storage.ts).
+- **Database**: `free_music_db` (version 1) managed in [`offline-storage.ts`](../../apps/web/lib/offline-storage.ts).
 - **Store**: `downloaded_songs` with `id` keyPath.
 - **Record Schema**:
   - `id`: Unique track PID string.
@@ -196,7 +212,7 @@ Configured via `next-pwa` in [`next.config.ts`](file:///C:/teja/coding/free-musi
   - `fileSize`: Exact byte length of audio stream.
   - `downloadedAt`: Timestamp for chronological sorting.
 - **Zero-Latency Offline Playback**:
-  - [`AudioManager.tsx`](file:///C:/teja/coding/free-music/apps/web/components/AudioManager.tsx) checks IndexedDB whenever track changes.
+  - [`AudioManager.tsx`](../../apps/web/components/AudioManager.tsx) checks IndexedDB whenever track changes.
   - If a song is downloaded, `URL.createObjectURL(record.blob)` creates a local blob URL for playback without internet access.
   - Preloaded next tracks also resolve offline blobs ahead of time for gapless offline listening.
 
@@ -255,7 +271,7 @@ graph LR
 - **LRCLIB Client Integration**: Queries `/api/lyrics?title=...&artist=...&duration=...` for timestamped lyrics formatted as `[mm:ss.xx] line`.
 - **Interactive Offset Sync**:
   - Stored in `settings.store.ts` (`lyricsOffset: number` in seconds).
-  - Adjusted via toolbar buttons in [`LyricsPanel.tsx`](file:///C:/teja/coding/free-music/apps/web/components/player/LyricsPanel.tsx):
+  - Adjusted via toolbar buttons in [`LyricsPanel.tsx`](../../apps/web/components/player/LyricsPanel.tsx):
     - `[-0.5s]`: Nudge lyrics forward if they lag behind the vocal track.
     - `[Reset]`: Reset offset to 0.0s.
   - Active line detection calculates `currentTime + lyricsOffset` to highlight the current line with autoscroll.
@@ -287,24 +303,24 @@ graph TD
    - `Strict-Transport-Security`: Enforces HSTS (2-year preload policy).
    - `Permissions-Policy`: Restricts device sensor and hardware access (camera, microphone, payment, geolocation).
 2. **API Abuse & DoS Protection**:
-   - In-memory sliding window rate limiter in [`apps/web/lib/rate-limiter.ts`](file:///C:/teja/coding/free-music/apps/web/lib/rate-limiter.ts) tracking client IP.
+   - In-memory sliding window rate limiter in [`apps/web/lib/rate-limiter.ts`](../../apps/web/lib/rate-limiter.ts) tracking client IP.
    - Throttles requests per IP with automatic 429 response, `Retry-After` headers, and LRU/FIFO memory capping at 50,000 entries (<5MB heap footprint under DDoS).
 3. **Input Sanitization & Injection Defense**:
-   - Implemented in [`apps/web/lib/security.ts`](file:///C:/teja/coding/free-music/apps/web/lib/security.ts).
+   - Implemented in [`apps/web/lib/security.ts`](../../apps/web/lib/security.ts).
    - Strips null bytes (`\0`), control characters, and script tags (`<script>`, `javascript:`).
    - Strict alphanumeric format and length bounds on resource IDs (`^[a-zA-Z0-9_\-\.]+$`), rejecting directory traversal (`../`) and command injections.
    - Constrains query strings to 150 characters to prevent ReDoS and memory exhaustion.
 
 ---
 
-## 11. 5-Layer Multi-Tier Caching Topology
+## 11. Multi-Tier Caching Topology
 
 ```mermaid
 flowchart TD
     subgraph Client["1. Client Device"]
         UI["React UI / State"]
         RQ["Layer 1: TanStack Query (RAM Cache)"]
-        SW["Layer 2: Service Worker (Workbox Range Cache)"]
+        SW["Layer 2: Service Worker (app shell, static, images)"]
         IDB["Layer 3: IndexedDB (Offline Audio Blobs)"]
     end
 
@@ -313,13 +329,13 @@ flowchart TD
     end
 
     subgraph Server["3. Origin & Upstream"]
-        NextServer["Layer 5: Next.js Cache (revalidate: 3600)"]
+        NextServer["Layer 5: Next.js fetch cache (revalidate: 300)"]
         Upstream["Upstream APIs (JioSaavn / LRCLIB / YouTube)"]
     end
 
     UI --> RQ
     RQ -->|Stale / Miss| SW
-    SW -->|Offline Audio Blob| IDB
+    RQ -->|Downloaded song| IDB
     SW -->|Network Request| CDN
     CDN -->|Cache Miss| NextServer
     NextServer --> Upstream
@@ -359,7 +375,7 @@ The codebase enforces a two-tier automated testing pyramid ensuring rock-solid s
 
 ```mermaid
 graph TD
-    subgraph E2E["Tier 2: Playwright End-to-End Suite (32 Tests)"]
+    subgraph E2E["Tier 2: Playwright End-to-End Suite (16 specs x Desktop and Mobile Chrome)"]
         P1["Navigation & Shell Flow (Home, Explore, Library, Settings, 404)"]
         P2["Audio Player & Controls (Shortcuts, Scrubber, Queue)"]
         P3["Search Intelligence (Debounce, Suggestions, Filters)"]
@@ -367,13 +383,14 @@ graph TD
         P5["PWA & Offline (Manifest, Service Worker, Health Probes)"]
     end
 
-    subgraph Unit["Tier 1: Native Node Test Runner (64 Tests)"]
+    subgraph Unit["Tier 1: Native Node Test Runner (pure logic and parsers)"]
         U1["Stores Logic (Player, Queue, Library, Settings)"]
         U2["API & Security (Rate Limiting, Sanitization, Memory Cap)"]
         U3["Saavn Parser (DES Decryption, Normalization, Artwork)"]
         U4["LRCLIB Parser (Timestamp Regex, Synchronization)"]
         U5["YouTube Matcher (Video ID Validator, Suggestion Scraper)"]
         U6["Edge Cases (ReDoS Strings, Zero Durations, Clamping)"]
+        U7["Queue, Player, Session and Dedup Logic"]
     end
 
     Unit --> E2E
@@ -381,16 +398,16 @@ graph TD
 
 ### Verification Commands
 ```bash
-# Run unit & logical tests (64/64 passing)
+# Run unit & logical tests
 pnpm --filter web test
 
-# Run Playwright E2E browser tests (32/32 passing)
+# Run Playwright E2E browser tests (starts its own dev server on :3005)
 pnpm --filter web test:e2e
 
-# Run ESLint validation (0 errors, 0 warnings)
+# Run ESLint validation (must be 0 errors, 0 warnings)
 pnpm --filter web lint
 
-# Build production bundle (15/15 routes compiled)
+# Build production bundle
 pnpm --filter web build
 ```
 
