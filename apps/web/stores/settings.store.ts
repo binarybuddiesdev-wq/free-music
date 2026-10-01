@@ -130,9 +130,10 @@ export const useSettingsStore = create<SettingsState>()(
 
       eqPreset: 'flat',
       setEqPreset: (eqPreset) => {
-        set({ eqPreset, eqCustom: EQ_PRESETS[eqPreset] })
+        // Picking "Custom" keeps the user's bands; every other preset becomes the new starting point
+        set(eqPreset === 'custom' ? { eqPreset } : { eqPreset, eqCustom: EQ_PRESETS[eqPreset] })
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('eq-preset-change', { detail: EQ_PRESETS[eqPreset] }))
+          window.dispatchEvent(new CustomEvent('eq-preset-change', { detail: get().eqCustom }))
         }
       },
 
