@@ -10,7 +10,7 @@
  */
 import type { Song } from '../types/music'
 
-type Identity = Pick<Song, 'id' | 'title' | 'artist'> & { duration?: number }
+type Identity = Pick<Song, 'id' | 'title' | 'artist'> & { duration?: number; album?: string }
 
 const DURATION_TOLERANCE_SECONDS = 3
 
@@ -35,6 +35,23 @@ function artistSet(artist: string): string[] {
 /** Kept for callers that want a stable string key (exact title + artist set). */
 export function songKey(song: Pick<Song, 'title' | 'artist'>): string {
   return `${norm(song.title)}|${artistSet(song.artist).sort().join(',')}`
+}
+
+/** The movie named in a `(From "X")` suffix, if any. */
+function sourceMovie(title: string): string | null {
+  const m = title.match(/[(\[]\s*from\s+["“']?([^)\]"”]+)/i) ?? title.match(/\s-\s*from\s+["“']?(.+?)["”']?$/i)
+  return m ? norm(m[1]) : null
+}
+
+/**
+ * "Song (From "Movie")" listed on some other album ("Chiru Hits", "90s Melodies") is a
+ * compilation copy: it carries the compilation's cover, not the movie's.
+ */
+function isCompilationCopy(song: Identity): boolean {
+  const movie = sourceMovie(song.title)
+  const album = norm(song.album ?? '')
+  if (!movie || !album) return false
+  return !album.includes(movie) && !movie.includes(album)
 }
 
 export function isSameSong(a: Identity, b: Identity): boolean {
@@ -89,7 +106,38 @@ export function takeFresh<T extends Identity>(songs: T[], seen: SongSet, limit =
   return fresh
 }
 
-/** Keeps the first occurrence of each song, preserving order. */
+/**
+ * One entry per song, in the order songs first appear. Among copies of the same song the
+ * original release replaces a compilation copy, so the movie's own cover is shown.
+ */
 export function dedupSongs<T extends Identity>(songs: T[]): T[] {
-  return takeFresh(songs, createSongSet())
+  const kept: T[] = []
+  for (const song of songs) {
+    const at = kept.findIndex((k) => isSameSong(k, song))
+    if (at === -1) kept.push(song)
+    else if (isCompilationCopy(kept[at]) && !isCompilationCopy(song)) kept[at] = song
+  }
+  return kept
+}
+
+/**
+ * Discovery rows are often dominated by one compilation album ("Trending Telugu Vibes"),
+ * which shows the same cover over and over. Keep at most `maxPerAlbum` songs per album in
+ * their original order, and move the overflow to the end instead of dropping it.
+ */
+export function spreadByAlbum<T extends Identity>(songs: T[], maxPerAlbum: number): T[] {
+  const counts = new Map<string, number>()
+  const first: T[] = []
+  const overflow: T[] = []
+  for (const song of songs) {
+    const album = norm(song.album ?? '')
+    if (!album) {
+      first.push(song)
+      continue
+    }
+    const n = counts.get(album) ?? 0
+    counts.set(album, n + 1)
+    ;(n < maxPerAlbum ? first : overflow).push(song)
+  }
+  return [...first, ...overflow]
 }

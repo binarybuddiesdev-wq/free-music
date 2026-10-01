@@ -2,10 +2,13 @@ import CryptoJS from 'crypto-js'
 import type { Song, Album, Artist, SearchPlaylist } from '@/types/music'
 import { mergeRecommendations } from './recommendations'
 import { fisherYates } from './utils'
-import { dedupSongs } from './song-dedup'
+import { dedupSongs, spreadByAlbum } from './song-dedup'
 import { preprocessQuery, getYouTubeSuggestion, calculateRelevance, isDiscoveryQuery } from './search-engine'
 
 // Official JioSaavn API — no external mirror needed
+// Discovery rows show at most this many songs per album before repeating an album's cover
+const MAX_PER_ALBUM_IN_ROWS = 2
+
 const BASE = 'https://www.jiosaavn.com/api.php'
 const DES_KEY = CryptoJS.enc.Utf8.parse('38346591')
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36'
@@ -97,7 +100,7 @@ export async function searchSongs(query: string, language: string, page = 1): Pr
 
   // If this is a generic discovery/mood query (e.g. "telugu hits", "happy songs", "party songs")
   if (isDiscoveryQuery(coreWords)) {
-    const all = dedupSongs(await jiosaavnSearch(cleaned, 40, page))
+    const all = spreadByAlbum(dedupSongs(await jiosaavnSearch(cleaned, 40, page)), MAX_PER_ALBUM_IN_ROWS)
     const userLang = language.toLowerCase()
     const matching = all.filter((s) => s.language === userLang)
     const others = all.filter((s) => s.language !== userLang)
@@ -184,7 +187,8 @@ function getQuery(sectionId: string, language: string): string {
 
 export async function getSectionSongs(sectionId: string, language: string, page = 1): Promise<Song[]> {
   const query = getQuery(sectionId, language)
-  const all = dedupSongs(await jiosaavnSearch(query, 40, page))
+  // Few songs per album first: one compilation would otherwise fill the row with one cover
+  const all = spreadByAlbum(dedupSongs(await jiosaavnSearch(query, 40, page)), MAX_PER_ALBUM_IN_ROWS)
   const userLang = language.toLowerCase()
   const matching = all.filter((s) => s.language === userLang)
   const others = all.filter((s) => s.language !== userLang)

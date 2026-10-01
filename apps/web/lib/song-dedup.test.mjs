@@ -52,3 +52,34 @@ test('song set remembers songs across lists and can forget them', async () => {
   first.forEach((x) => seen.delete(x))
   assert.deepEqual(takeFresh([jaamu[2]], seen).map((x) => x.id), ['NjkmHzJ1'])
 })
+
+const withAlbum = (id, title, artist, album, image) => ({ ...s(id, title, artist, 215), album, image })
+
+test('when copies collapse, the original movie release wins over the compilation copy', () => {
+  const compilation = withAlbum('sHkFzHxL', 'Ammo Naku Bhayam (From "Nyayam Kavali")', 'P. Susheela, S.P. Balasubrahmanyam', 'Ever Youth Mega Star - Chiru Hits', 'chiru-hits.jpg')
+  const original = withAlbum('eDX6QfxU', 'Ammo Naku Bhayam', 'P. Susheela, S.P. Balasubrahmanyam', 'Nyayam Kavali', 'nyayam-kavali.jpg')
+  const out = dedupSongs([s('x', 'Before', 'A'), compilation, s('y', 'After', 'A'), original])
+  assert.deepEqual(out.map((x) => x.id), ['x', 'eDX6QfxU', 'y']) // original takes the first copy's place
+  assert.equal(out[1].image, 'nyayam-kavali.jpg')
+})
+
+test('a "(From ...)" copy on its own movie album is not treated as a compilation', () => {
+  const single = withAlbum('a', 'Naatu Naatu (From "RRR")', 'Rahul', 'RRR', 'rrr.jpg')
+  const comp = withAlbum('b', 'Naatu Naatu', 'Rahul', 'Best of 2022', 'best.jpg')
+  // neither is clearly a compilation by the "From" rule alone; the first one stays
+  assert.equal(dedupSongs([single, comp])[0].id, 'a')
+})
+
+test('spreadByAlbum shows at most N songs per album first and keeps the rest at the end', async () => {
+  const { spreadByAlbum } = await import('./song-dedup.ts')
+  const song = (id, album) => ({ ...s(String(id), 'T' + id, 'A' + id), album })
+  const list = [song(1, 'Hits'), song(2, 'Hits'), song(3, 'Hits'), song(4, 'Movie'), song(5, 'Hits'), song(6, 'Other')]
+  assert.deepEqual(spreadByAlbum(list, 2).map((x) => x.id), ['1', '2', '4', '6', '3', '5'].map((x) => x))
+  assert.equal(spreadByAlbum(list, 2).length, list.length)
+})
+
+test('spreadByAlbum treats songs without an album as separate', async () => {
+  const { spreadByAlbum } = await import('./song-dedup.ts')
+  const list = [1, 2, 3].map((n) => ({ ...s(String(n), 'T' + n, 'A'), album: '' }))
+  assert.deepEqual(spreadByAlbum(list, 1).map((x) => x.id), ['1', '2', '3'])
+})
