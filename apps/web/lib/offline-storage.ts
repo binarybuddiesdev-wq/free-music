@@ -106,13 +106,16 @@ export async function saveOfflineSong(song: Song): Promise<void> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite')
     const store = tx.objectStore(STORE_NAME)
-    const req = store.put(record)
+    store.put(record)
 
-    req.onsuccess = () => {
+    // Resolve on commit, not on the request: a full disk raises QuotaExceededError at commit time,
+    // after put() has already "succeeded"
+    tx.oncomplete = () => {
       notifyUpdated()
       resolve()
     }
-    req.onerror = () => reject(req.error)
+    tx.onerror = () => reject(tx.error)
+    tx.onabort = () => reject(tx.error ?? new Error('Saving the download was aborted'))
   })
 }
 

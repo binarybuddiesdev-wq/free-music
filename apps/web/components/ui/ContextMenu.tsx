@@ -227,8 +227,12 @@ export function ContextMenu({ song, x, y, onClose }: ContextMenuProps) {
             try {
               await saveOfflineSong(song)
               showToast(`Downloaded "${song.title}" for offline playback`)
-            } catch {
-              showToast(`Failed to download "${song.title}"`)
+            } catch (err) {
+              showToast(
+                (err as { name?: string } | null)?.name === 'QuotaExceededError'
+                  ? `Not enough storage to download "${song.title}"`
+                  : `Failed to download "${song.title}"`
+              )
             }
           }
         }}
