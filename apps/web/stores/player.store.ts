@@ -94,8 +94,12 @@ export const usePlayerStore = create<PlayerState>()(
           audioRef.current.pause()
           set({ isPlaying: false })
         } else {
-          audioRef.current.play().catch(() => {})
           set({ isPlaying: true })
+          audioRef.current.play().catch((err: unknown) => {
+            // A rejected play() (autoplay policy, no source) must not leave the UI showing "playing".
+            // AbortError just means a newer load/pause interrupted it.
+            if ((err as { name?: string } | null)?.name !== 'AbortError') set({ isPlaying: false })
+          })
         }
       },
 
