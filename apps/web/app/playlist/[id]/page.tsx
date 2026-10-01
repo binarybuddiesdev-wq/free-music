@@ -10,6 +10,7 @@ import { formatDuration, truncate, onEnterSpace, fisherYates, sizedImage } from 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { publicPlaylistQuery } from '@/lib/detail-queries'
 import type { Song, Playlist } from '@/types/music'
 
 function SortablePlaylistItem({
@@ -151,14 +152,9 @@ function PlaylistContent() {
     setEditingName(false)
   }
 
-  const { data: publicData, isLoading: publicLoading } = useQuery<{ songs: Song[] }>({
-    queryKey: ['public-playlist', playlistId],
-    queryFn: async () => {
-      const res = await fetch(`/api/search?playlistId=${playlistId}`)
-      return res.json()
-    },
+  const { data: publicData, isLoading: publicLoading } = useQuery({
+    ...publicPlaylistQuery(playlistId),
     enabled: !playlist && !!playlistId,
-    staleTime: 5 * 60 * 1000,
   })
 
   if (!playlist) {

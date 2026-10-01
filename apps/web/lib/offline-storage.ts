@@ -21,12 +21,15 @@ export interface OfflineSongRecord {
   fileSize: number
 }
 
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') {
-      return reject(new Error('IndexedDB is only available in browser environments'))
-    }
+let dbPromise: Promise<IDBDatabase> | null = null
 
+function openDB(): Promise<IDBDatabase> {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('IndexedDB is only available in browser environments'))
+  }
+  if (dbPromise) return dbPromise
+
+  dbPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
     request.onupgradeneeded = (event) => {
@@ -37,9 +40,21 @@ function openDB(): Promise<IDBDatabase> {
       }
     }
 
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
+    request.onsuccess = () => {
+      const db = request.result
+      // Another tab upgraded the DB: close ours so the upgrade isn't blocked, reopen lazily
+      db.onversionchange = () => {
+        db.close()
+        dbPromise = null
+      }
+      resolve(db)
+    }
+    request.onerror = () => {
+      dbPromise = null
+      reject(request.error)
+    }
   })
+  return dbPromise
 }
 
 function notifyUpdated() {
@@ -133,8 +148,29 @@ export async function getOfflineSong(id: string): Promise<OfflineSongRecord | nu
 }
 
 export async function isSongDownloaded(id: string): Promise<boolean> {
-  const record = await getOfflineSong(id)
-  return !!record
+  try {
+    const db = await openDB()
+    return await new Promise((resolve) => {
+      const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getKey(id)
+      req.onsuccess = () => resolve(req.result !== undefined)
+      req.onerror = () => resolve(false)
+    })
+  } catch {
+    return false
+  }
+}
+
+export async function countOfflineSongs(): Promise<number> {
+  try {
+    const db = await openDB()
+    return await new Promise((resolve) => {
+      const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).count()
+      req.onsuccess = () => resolve(req.result)
+      req.onerror = () => resolve(0)
+    })
+  } catch {
+    return 0
+  }
 }
 
 export async function getAllOfflineSongs(): Promise<OfflineSongRecord[]> {
@@ -173,7 +209,10 @@ export async function clearAllOfflineSongs(): Promise<void> {
   })
 }
 
-export async function getOfflineStorageEstimate(): Promise<{ usage: number; quota: number; count: number }> {
+/** Pass the list you already loaded to avoid reading every record a second time. */
+export async function getOfflineStorageEstimate(
+  knownSongs?: OfflineSongRecord[]
+): Promise<{ usage: number; quota: number; count: number }> {
   try {
     let usage = 0
     let quota = 0
@@ -182,14 +221,11 @@ export async function getOfflineStorageEstimate(): Promise<{ usage: number; quot
       usage = est.usage || 0
       quota = est.quota || 0
     }
-    const songs = await getAllOfflineSongs()
-    const songsBytes = songs.reduce((sum, s) => sum + (s.fileSize || s.blob?.size || 0), 0)
-
-    return {
-      usage: usage > 0 ? usage : songsBytes,
-      quota,
-      count: songs.length,
-    }
+    // Only read all records when we must sum sizes ourselves
+    const songs = knownSongs ?? (usage > 0 ? null : await getAllOfflineSongs())
+    const count = songs ? songs.length : await countOfflineSongs()
+    const songsBytes = songs ? songs.reduce((sum, s) => sum + (s.fileSize || s.blob?.size || 0), 0) : 0
+    return { usage: usage > 0 ? usage : songsBytes, quota, count }
   } catch {
     return { usage: 0, quota: 0, count: 0 }
   }

@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { usePlayerStore } from '@/stores/player.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
 import { formatDuration, onEnterSpace, fisherYates } from '@/lib/utils'
+import { albumQuery } from '@/lib/detail-queries'
 import type { Album, Song } from '@/types/music'
 
 export default function AlbumDetailPage() {
@@ -17,16 +18,7 @@ export default function AlbumDetailPage() {
   const isPlaying = usePlayerStore((s) => s.isPlaying)
   const [ctx, setCtx] = useState<{ x: number; y: number; song: Song } | null>(null)
 
-  const { data, isLoading, isError, refetch } = useQuery<{ album?: Album | null; songs: Song[] }>({
-    queryKey: ['album', id],
-    queryFn: async () => {
-      if (!id) return { songs: [] }
-      const res = await fetch(`/api/search?albumId=${id}`)
-      return res.json()
-    },
-    enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data, isLoading, isError, refetch } = useQuery({ ...albumQuery(id ?? ''), enabled: !!id })
 
   const songs = data?.songs ?? []
   const firstSong = songs[0]

@@ -195,8 +195,7 @@ function LibraryContent() {
   const refreshDownloads = async () => {
     const list = await getAllOfflineSongs()
     setDownloads(list)
-    const est = await getOfflineStorageEstimate()
-    setStorageEstimate(est)
+    setStorageEstimate(await getOfflineStorageEstimate(list))
   }
 
   useEffect(() => {

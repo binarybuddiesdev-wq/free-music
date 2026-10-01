@@ -2,9 +2,11 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { usePlayerStore } from '@/stores/player.store'
 import { showToast } from '@/components/ui/Toast'
 import { onEnterSpace } from '@/lib/utils'
+import { publicPlaylistQuery } from '@/lib/detail-queries'
 import type { SearchPlaylist, Song } from '@/types/music'
 
 interface PlaylistCardProps {
@@ -13,6 +15,7 @@ interface PlaylistCardProps {
 
 export function PlaylistCard({ playlist }: PlaylistCardProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const playSong = usePlayerStore((s) => s.playSong)
   const [hovered, setHovered] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -26,9 +29,8 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
     if (loading) return
     setLoading(true)
     try {
-      const res = await fetch(`/api/search?playlistId=${playlist.id}`)
-      const data = await res.json()
-      const songs: Song[] = data.songs || data.results || []
+      const data = await queryClient.fetchQuery(publicPlaylistQuery(playlist.id))
+      const songs: Song[] = data.songs || []
       if (songs.length > 0) {
         playSong(songs[0], songs, 0)
         showToast(`Playing playlist "${playlist.title}"`)
