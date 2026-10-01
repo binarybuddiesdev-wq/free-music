@@ -54,10 +54,9 @@ Audio is played only by the global `AudioManager`; UI components drive it throug
 ### Repository Layout
 
 ```
-apps/web/        Next.js app (app/ routes + API, components/, lib/ logic, stores/, e2e/, public/)
+apps/web/        Next.js app (app/ routes + API, components/, lib/ logic, stores/, e2e/, public/, vercel.json)
 docs/            Architecture, features, research, specs and plans
 .github/         CI workflow, issue and PR templates
-vercel.json      Vercel deployment config
 ```
 
 ---
@@ -123,6 +122,15 @@ pnpm test:e2e
 ```
 
 CI (`.github/workflows/ci.yml`) runs unit tests, lint and the production build on every push and pull request to `main`, and runs the Playwright suite in a separate job.
+
+---
+
+## Deployment (Vercel)
+
+1. Import the repository in Vercel.
+2. In **Project Settings → General**, set **Root Directory** to `apps/web` (Vercel then uses `apps/web/vercel.json` and installs from the pnpm workspace root automatically).
+3. Optionally add `YOUTUBE_API_KEY` under Environment Variables.
+4. After the first deploy, check `/`, `/search?q=test` and `/api/health`.
 
 ---
 

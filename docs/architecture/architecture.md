@@ -89,6 +89,7 @@ free-music/
 │       │   └── ui.store.ts              # Sidebar & modal open states
 │       ├── e2e/                         # Playwright end-to-end specs
 │       ├── public/                      # PWA assets: icons, manifest.json, offline.html, sw.js
+│       ├── vercel.json                  # Vercel config (project Root Directory = apps/web)
 │       ├── next.config.ts               # Security headers / CSP, sw.js cache headers, self polyfill
 │       ├── .env.example                 # Optional YOUTUBE_API_KEY
 │       └── package.json                 # Web workspace dependencies and test script
@@ -97,7 +98,6 @@ free-music/
 │   ├── features/features.md             # Comprehensive feature catalog
 │   └── superpowers/{plans,specs}/       # Implementation plans and feature specs
 ├── .github/                             # CI workflow, issue and PR templates
-├── vercel.json                          # Vercel deployment config
 ├── AGENTS.md                            # Universal AI developer onboarding guide
 ├── GEMINI.md                            # Gemini / Antigravity AI guide
 ├── CLAUDE.md                            # Claude Code AI guide
