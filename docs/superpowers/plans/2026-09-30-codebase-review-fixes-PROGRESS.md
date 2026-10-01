@@ -25,7 +25,12 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 | 14 | Lightweight search suggestions (#18) | Done | (same commit as 13); curl-verified |
 | 15 | Replace broken service worker (#1) | Done | 128 tests pass, lint clean, tsc 0, build OK |
 | — | Checkpoint 2 (full build) | Done | `pnpm --filter web build` succeeded |
-| 16–21 | Phase 3 performance, cleanup, final verification | Pending | |
+| 16 | Right-sized artwork (#20) | Done | `0b65c63`; 134 tests pass, lint clean, tsc 0 |
+| 17 | Offline storage + shared detail queries (#22, #28) | Done | `d79b8d8`; 134 tests, lint, tsc 0 |
+| 18 | Visualizer efficiency (#11) | **Blocked** | overwrite of VisualizerCanvas.tsx denied by permission classifier; awaiting user |
+| 19 | Config, theme, leftovers (#23, #26, #29) | Done | `21cd046`; build OK; prod CSP has no unsafe-eval; head tags deduped |
+| 20 | vercel.json (#25) | Pending | needs owner decision |
+| 21 | Final verification | Pending | after 18 and 20 |
 
 ## Log
 
@@ -84,3 +89,5 @@ Baseline (before Task 1): 72 tests pass, lint clean, `tsc --noEmit` exit 0.
 - Stopping after each task to update this file, per user instruction. Latest instruction: stop after each PHASE; Phase 1 (Tasks 1–7) finished in one run, stopped at Checkpoint 1.
 - Task 11: "Start radio" calls `setQueue(radioQueue, 0, true)` (plan said `false`). `false` would silently turn shuffle off; `true` keeps the user's shuffle setting with the current song first. Cost if wrong: radio starts unshuffled instead of keeping shuffle.
 - Tasks 13 and 14 are one commit because both edit `saavn.ts` and `app/api/search/route.ts`; splitting would need hunk-level staging.
+- Task 17: dropped the `|| data.results` fallback in AlbumCard/PlaylistCard (not in the typed response; API returns `songs`). Cost if wrong: none for current API.
+- Task 19: only `manifest`, `mobile-web-app-capable` and `apple-mobile-web-app-status-bar-style` were duplicated; `apple-mobile-web-app-capable` was not, so it stays. Port 3000 was occupied by another process, so the check ran on port 3100.
