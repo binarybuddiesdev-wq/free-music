@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { dedupLocalStorage } from '@/lib/dedup-storage'
 import type { Song } from '@/types/music'
 import { fisherYates } from '@/lib/utils'
+import { dedupSongs, isSameSong } from '@/lib/song-dedup'
 import {
   getActiveQueue,
   jumpToIndex,
@@ -119,7 +120,12 @@ export const useQueueStore = create<QueueState>()(
 
       appendSongs: (newSongs) => {
         if (!newSongs || newSongs.length === 0) return
-        set((s) => appendUnique(s, newSongs))
+        // Autoplay/radio batches: the same recording is listed under several ids, so skip copies
+        // of songs already queued (appendUnique still guards exact ids)
+        set((s) => {
+          const fresh = dedupSongs(newSongs).filter((n) => !s.queue.some((q) => isSameSong(q, n)))
+          return appendUnique(s, fresh)
+        })
       },
     }),
     {
