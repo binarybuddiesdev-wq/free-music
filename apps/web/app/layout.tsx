@@ -11,7 +11,10 @@ import { AudioManager } from '@/components/AudioManager'
 import { ToastContainer } from '@/components/ui/Toast'
 
 export const viewport: Viewport = {
-  themeColor: '#0f0f0f',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f0f0f' },
+  ],
 }
 
 export const metadata: Metadata = {
@@ -45,10 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         {/* DNS Preconnect & Resource Hints for Ultra-Fast Audio & Asset Delivery */}
         <link rel="preconnect" href="https://aac.saavncdn.com" crossOrigin="anonymous" />
@@ -80,7 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Fonts load at runtime to avoid a build-time network dependency. */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body>
         <Providers>

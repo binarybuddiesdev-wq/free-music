@@ -195,7 +195,7 @@ export function ExpandedPlayer() {
               aspectRatio: '1',
               borderRadius: 6,
               overflow: 'hidden',
-              background: '#1a1a1a',
+              background: 'var(--panel-bg)',
               boxShadow: '0 28px 80px rgba(0,0,0,.9)',
               position: 'relative',
               flexShrink: 0,

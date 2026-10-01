@@ -4,15 +4,18 @@ if (typeof (globalThis as any).self === 'undefined') {
 
 import type { NextConfig } from 'next'
 
+// Next.js dev (React Refresh) needs eval; production does not
+const isDev = process.env.NODE_ENV !== 'production'
+
 // Production-grade Content Security Policy allowing required media, fonts, and YouTube frames
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com;
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.youtube.com https://s.ytimg.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com data:;
   img-src 'self' data: blob: https://c.saavncdn.com https://*.saavncdn.com https://i.ytimg.com https://images.unsplash.com;
   media-src 'self' data: blob: https://*.saavncdn.com https://*.googlevideo.com https://*.youtube.com;
-  connect-src 'self' https://saavn.sumit.co https://lrclib.net https://suggestqueries.google.com https://www.youtube.com https://*.saavncdn.com;
+  connect-src 'self' https://lrclib.net https://suggestqueries.google.com https://www.youtube.com https://*.saavncdn.com;
   frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com;
   frame-ancestors 'self';
   object-src 'none';
