@@ -245,10 +245,11 @@ export function AudioManager() {
     requestAnimationFrame(step)
   }, [])
 
-  // 7. Setup Equalizer (safe opt-in when eqEnabled is true)
+  // 7. Audio graph: source -> EQ filters -> analyser -> output. Always built so the visualizer
+  // follows the real audio; with EQ off every filter gain is 0, so the sound is unchanged.
   const setupEqualizer = useCallback(() => {
     const el = audioRef.current
-    if (!el || !eqEnabled || typeof window === 'undefined') return
+    if (!el || typeof window === 'undefined') return
 
     try {
       const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext
@@ -301,18 +302,11 @@ export function AudioManager() {
     } catch {
       // Browser Web Audio fallback
     }
-  }, [eqEnabled])
+  }, [])
 
   // Update EQ gains whenever EQ settings change
   useEffect(() => {
-    if (eqEnabled) {
-      setupEqualizer()
-    } else {
-      const el = audioRef.current
-      if (el && !sourceNodeRef.current) {
-        el.removeAttribute('crossorigin')
-      }
-    }
+    setupEqualizer()
     const filters = eqFiltersRef.current
     if (!filters.length) return
     const presetGains = eqPreset === 'custom' ? eqCustom : (EQ_PRESETS[eqPreset] ?? eqCustom)
