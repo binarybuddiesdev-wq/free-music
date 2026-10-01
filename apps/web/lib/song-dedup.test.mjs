@@ -91,3 +91,8 @@ test('songs with an unknown duration only merge when the full titles match', () 
   assert.equal(isSameSong(a, b), false)
   assert.equal(isSameSong(a, c), true)
 })
+
+test('a "(From ...)" suffix whose movie name has its own brackets is still stripped', () => {
+  const out = dedupSongs([s('a', 'Naatu Naatu', 'Rahul'), s('b', 'Naatu Naatu (From "RRR (2022)")', 'Rahul')])
+  assert.deepEqual(out.map((x) => x.id), ['a'])
+})

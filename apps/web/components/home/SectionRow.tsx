@@ -1,11 +1,9 @@
 'use client'
-import { useState, useEffect, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/stores/settings.store'
 import { sessionPage } from '@/lib/session'
 import { fetchSectionSongs } from '@/lib/home-feed'
-import { createSongSet, takeFresh } from '@/lib/song-dedup'
-import { SeenSongsContext } from './SeenSongsContext'
+import { useFreshSongs } from './useFreshSongs'
 import { CarouselRow } from './CarouselRow'
 import { SongCard } from './SongCard'
 import { SkeletonCard } from './SkeletonCard'
@@ -22,29 +20,16 @@ export function SectionRow({ id, title, languageOverride }: SectionRowProps) {
   const storeLanguage = useSettingsStore((s) => s.language)
   const language = languageOverride ?? storeLanguage
   const page = sessionPage(`section:${id}:${language}`)
-  const seenIds = useContext(SeenSongsContext)
-  const [filteredSongs, setFilteredSongs] = useState<Song[]>([])
-
   const { data, isLoading } = useQuery<{ songs: Song[] }>({
     queryKey: ['section', id, language, page],
     queryFn: () => fetchSectionSongs(id, language, page),
   })
 
-  useEffect(() => {
-    if (!data?.songs) return
-    // One song shows once per page, even when it is listed under different ids
-    const seen = seenIds?.current ?? createSongSet()
-    const fresh = takeFresh(data.songs, seen)
-    setFilteredSongs(fresh)
-    return () => {
-      // Clean up on unmount so Strict Mode double-invoke stays correct
-      fresh.forEach((s) => seen.delete(s))
-    }
-  }, [data, seenIds])
+  // One song shows once per page, even when it is listed under different ids
+  const { songs, pending } = useFreshSongs(data?.songs)
+  const loading = isLoading || pending
 
-  const songs = filteredSongs
-
-  if (!isLoading && songs.length === 0) return null
+  if (!loading && songs.length === 0) return null
 
   return (
     <section style={{ marginBottom: 32 }}>
@@ -53,7 +38,7 @@ export function SectionRow({ id, title, languageOverride }: SectionRowProps) {
       </div>
 
       <CarouselRow>
-        {isLoading
+        {loading
           ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
           : songs.map((song, i) => (
               <SongCard key={song.id} song={song} queue={songs} index={i} />

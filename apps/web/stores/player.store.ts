@@ -41,6 +41,16 @@ interface PlayerState {
   setSavedTimeForVideo: (t: number) => void
 }
 
+// Restarts the already-loaded source. If the element has nothing playable (restored session, failed
+// load) play() rejects: show paused instead of "playing" with no audio and no spinner.
+function restartInPlace(el: HTMLAudioElement) {
+  el.currentTime = 0
+  el.play().catch((err: unknown) => {
+    if (err instanceof DOMException && err.name === 'AbortError') return
+    usePlayerStore.setState({ isPlaying: false, isLoading: false })
+  })
+}
+
 export const usePlayerStore = create<PlayerState>()(
   persist(
     (set, get) => ({
@@ -63,8 +73,7 @@ export const usePlayerStore = create<PlayerState>()(
         useQueueStore.getState().setQueue(queue, startIndex, true)
         useLibraryStore.getState().addToHistory(song)
         if (currentSong?.id === song.id && audioRef?.current) {
-          audioRef.current.currentTime = 0
-          audioRef.current.play().catch(() => {})
+          restartInPlace(audioRef.current)
         }
         set({ currentSong: { ...song }, isPlaying: true, isLoading: true, progress: 0, mode: 'audio' })
       },
@@ -76,8 +85,7 @@ export const usePlayerStore = create<PlayerState>()(
         const isSame = currentSong?.id === song.id
         useLibraryStore.getState().addToHistory(song)
         if (isSame && audioRef?.current) {
-          audioRef.current.currentTime = 0
-          audioRef.current.play().catch(() => {})
+          restartInPlace(audioRef.current)
         }
         set({ currentSong: { ...song }, isPlaying: true, isLoading: !isSame, progress: 0, mode: 'audio' })
       },
@@ -179,8 +187,7 @@ export const usePlayerStore = create<PlayerState>()(
         const isSame = currentSong?.id === song.id
         useLibraryStore.getState().addToHistory(song)
         if (isSame && audioRef?.current) {
-          audioRef.current.currentTime = 0
-          audioRef.current.play().catch(() => {})
+          restartInPlace(audioRef.current)
         }
         set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: !isSame, mode: 'audio' })
       },

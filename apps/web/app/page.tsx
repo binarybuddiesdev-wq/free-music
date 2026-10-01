@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect, useRef, useContext } from 'react'
-import { SeenSongsContext } from '@/components/home/SeenSongsContext'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { SeenSongsContext, type SeenSongs } from '@/components/home/SeenSongsContext'
 import { createSongSet, dedupSongs } from '@/lib/song-dedup'
 import { CarouselRow } from '@/components/home/CarouselRow'
 import { SectionRow } from '@/components/home/SectionRow'
@@ -34,33 +34,28 @@ const ALL_SECTIONS: SectionConfig[] = [
   { id: 'sad-songs',     title: 'Sad & Melancholy', moods: ['All', 'Sad', 'Chill'] },
 ]
 
-function ListenAgainSection() {
+/** Snapshot of the history, kept stable during the session: clicking a card must not jump it to #1. */
+function useListenAgainSongs(): Song[] {
   const history = useLibraryStore((s) => s.history)
-  const seenIds = useContext(SeenSongsContext)
   const [songs, setSongs] = useState<Song[]>([])
   const initializedRef = useRef(false)
 
-  // Keep carousel order stable during the session — don't jump card to #1 when clicked
   useEffect(() => {
     if (history.length === 0) {
       setSongs([])
       initializedRef.current = false
       return
     }
-    if (!initializedRef.current && history.length > 0) {
+    if (!initializedRef.current) {
       setSongs(dedupSongs(history).slice(0, 20))
       initializedRef.current = true
     }
   }, [history])
 
-  // Reserve these songs so the sections below don't repeat them
-  useEffect(() => {
-    const seen = seenIds?.current
-    if (!seen) return
-    songs.forEach((s) => seen.add(s))
-    return () => songs.forEach((s) => seen.delete(s))
-  }, [songs, seenIds])
+  return songs
+}
 
+function ListenAgainSection({ songs }: { songs: Song[] }) {
   if (songs.length === 0) return null
 
   return (
@@ -77,7 +72,10 @@ function ListenAgainSection() {
 
 export default function HomePage() {
   // Songs already shown on this page; every section filters against it so a song appears once
-  const [seenIds] = useState(() => ({ current: createSongSet() }))
+  const [seen] = useState(() => ({ current: createSongSet() }))
+  // Reserved up front (not by effect order), so a section that loaded first cannot repeat these songs
+  const listenAgainSongs = useListenAgainSongs()
+  const seenSongs = useMemo<SeenSongs>(() => ({ seen, reserved: listenAgainSongs }), [seen, listenAgainSongs])
   const [activeMood, setActiveMood] = useState('All')
   // "Telugu"/"Hindi" chips filter this page only — they no longer overwrite the saved language
   const [chipLanguage, setChipLanguage] = useState<string | undefined>(undefined)
@@ -93,14 +91,14 @@ export default function HomePage() {
     : ALL_SECTIONS.filter((s) => s.moods.includes(activeMood))
 
   return (
-    <SeenSongsContext.Provider value={seenIds}>
+    <SeenSongsContext.Provider value={seenSongs}>
       <div>
         <Greeting />
         <MoodChips active={activeMood} onSelect={handleSelectChip} />
         {isAllOrGeneral && (
           <>
             <ForYouSection languageOverride={chipLanguage} />
-            <ListenAgainSection />
+            <ListenAgainSection songs={listenAgainSongs} />
             <QuickPicksSection languageOverride={chipLanguage} />
           </>
         )}

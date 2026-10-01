@@ -41,7 +41,9 @@ export function sanitizeString(val: unknown, maxLength = 200): string {
 
   // 2. Strip potential HTML injection tags & script markers
   // Only real tags (`<b>`, `</p>`, `<!--`, unterminated `<script`), so "I <3 You" and "a < b" survive
-  clean = clean.replace(/<\/?[a-zA-Z!][^>]*(?:>|$)/gm, '')
+  // A tag must be closed, except dangerous ones left open (`<script`, `<!--`), so "AC<DC" survives
+  clean = clean.replace(/<\/?[a-zA-Z!][^>]*>/g, '')
+  clean = clean.replace(/<\/?(?:script|style|iframe|object|embed|svg|img|link|meta|!--)[^>]*$/gim, '')
   clean = clean.replace(/javascript\s*:/gi, '')
   clean = clean.replace(/data\s*:[^;]+;base64,[a-zA-Z0-9+/=]+/gi, '')
   clean = clean.replace(/data\s*:\s*text\/[a-z]+/gi, '')

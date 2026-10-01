@@ -97,6 +97,15 @@ async function jiosaavnSearch(query: string, n = 40, p = 1): Promise<Song[]> {
     .map((r) => normalize(r as RawSong))
 }
 
+/** For optional secondary lookups: a failure there must not discard results the primary call returned. */
+async function jiosaavnSearchOrEmpty(query: string, n = 40, p = 1): Promise<Song[]> {
+  try {
+    return await jiosaavnSearch(query, n, p)
+  } catch {
+    return []
+  }
+}
+
 export async function searchSongs(query: string, language: string, page = 1): Promise<Song[]> {
   const { cleaned, entity, coreWords } = preprocessQuery(query)
 
@@ -113,7 +122,7 @@ export async function searchSongs(query: string, language: string, page = 1): Pr
   const needsEntitySearch = entity !== cleaned
   const [primaryRaw, entityRaw] = await Promise.all([
     jiosaavnSearch(cleaned, 40, page),
-    needsEntitySearch ? jiosaavnSearch(entity, 40, page) : Promise.resolve([] as Song[]),
+    needsEntitySearch ? jiosaavnSearchOrEmpty(entity, 40, page) : Promise.resolve([] as Song[]),
   ])
   let raw = primaryRaw
   let relevant = primaryRaw.filter((s) => calculateRelevance(s, coreWords) > 0)
@@ -134,7 +143,7 @@ export async function searchSongs(query: string, language: string, page = 1): Pr
       suggestion.toLowerCase() !== cleaned.toLowerCase()
     ) {
       const { cleaned: sugCleaned, entity: sugEntity, coreWords: sugWords } = preprocessQuery(suggestion)
-      const sugRaw = await jiosaavnSearch(sugCleaned, 40, page)
+      const sugRaw = await jiosaavnSearchOrEmpty(sugCleaned, 40, page)
       const sugRelevant = sugRaw.filter((s) => calculateRelevance(s, sugWords) > 0)
       if (sugRelevant.length > relevant.length) {
         raw = sugRaw

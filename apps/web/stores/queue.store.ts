@@ -33,7 +33,8 @@ interface QueueState {
   removeAt: (index: number) => void
   /** Append one song; returns false if it was already in the queue. */
   addToQueue: (song: Song) => boolean
-  appendSongs: (songs: Song[]) => void
+  /** `allowRecordingCopies`: when every song is a copy of a queued recording, still append them rather than stall. */
+  appendSongs: (songs: Song[], allowRecordingCopies?: boolean) => void
   currentSong: () => Song | null
 }
 
@@ -118,13 +119,15 @@ export const useQueueStore = create<QueueState>()(
         return true
       },
 
-      appendSongs: (newSongs) => {
+      appendSongs: (newSongs, allowRecordingCopies = false) => {
         if (!newSongs || newSongs.length === 0) return
         // Autoplay/radio batches: the same recording is listed under several ids, so skip copies
         // of songs already queued (appendUnique still guards exact ids)
         set((s) => {
-          const fresh = dedupSongs(newSongs).filter((n) => !s.queue.some((q) => isSameSong(q, n)))
-          return appendUnique(s, fresh)
+          const unique = dedupSongs(newSongs)
+          const fresh = unique.filter((n) => !s.queue.some((q) => isSameSong(q, n)))
+          // Never leave the end of the queue empty: a repeated recording beats silence
+          return appendUnique(s, fresh.length === 0 && allowRecordingCopies ? unique : fresh)
         })
       },
     }),

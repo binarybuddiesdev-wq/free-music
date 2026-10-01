@@ -1,11 +1,10 @@
 'use client'
-import { useRef, useMemo, useState, useEffect, useContext } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useLibraryStore } from '@/stores/library.store'
 import { useSettingsStore } from '@/stores/settings.store'
 import { sessionPage } from '@/lib/session'
-import { createSongSet, takeFresh } from '@/lib/song-dedup'
-import { SeenSongsContext } from './SeenSongsContext'
+import { useFreshSongs } from './useFreshSongs'
 import { CarouselRow } from './CarouselRow'
 import { SongCard } from './SongCard'
 import { SkeletonCard } from './SkeletonCard'
@@ -58,20 +57,12 @@ export function ForYouSection({ languageOverride }: { languageOverride?: string 
     enabled: !!topArtist,
   })
 
-  const seenIds = useContext(SeenSongsContext)
-  const [songs, setSongs] = useState<Song[]>([])
-
-  useEffect(() => {
-    if (!data?.songs) return
-    const seen = seenIds?.current ?? createSongSet()
-    const fresh = takeFresh(data.songs, seen)
-    setSongs(fresh)
-    return () => fresh.forEach((s) => seen.delete(s))
-  }, [data, seenIds])
+  const { songs, pending } = useFreshSongs(data?.songs)
+  const loading = isLoading || pending
 
   if (!topArtist) return null
 
-  if (!isLoading && songs.length === 0) return null
+  if (!loading && songs.length === 0) return null
 
   return (
     <section style={{ marginBottom: 32 }}>
@@ -85,7 +76,7 @@ export function ForYouSection({ languageOverride }: { languageOverride?: string 
       </div>
 
       <CarouselRow>
-        {isLoading
+        {loading
           ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
           : songs.map((song, i) => (
               <SongCard key={song.id} song={song} queue={songs} index={i} />

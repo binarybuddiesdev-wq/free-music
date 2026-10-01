@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import { useState, useEffect, useContext } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/stores/settings.store'
 import { usePlayerStore } from '@/stores/player.store'
@@ -8,8 +8,7 @@ import { useLibraryStore } from '@/stores/library.store'
 import { ContextMenu } from '@/components/ui/ContextMenu'
 import { sessionPage } from '@/lib/session'
 import { fetchSectionSongs } from '@/lib/home-feed'
-import { createSongSet, takeFresh } from '@/lib/song-dedup'
-import { SeenSongsContext } from './SeenSongsContext'
+import { useFreshSongs } from './useFreshSongs'
 import type { Song } from '@/types/music'
 import { formatDuration, onEnterSpace, sizedImage } from '@/lib/utils'
 
@@ -21,9 +20,6 @@ export function QuickPicksSection({ languageOverride }: { languageOverride?: str
   const isPlaying = usePlayerStore((s) => s.isPlaying)
   const likedSongs = useLibraryStore((s) => s.likedSongs)
   const toggleLike = useLibraryStore((s) => s.toggleLike)
-  const seenIds = useContext(SeenSongsContext)
-  const [filteredSongs, setFilteredSongs] = useState<Song[]>([])
-
   const page = sessionPage(`section:quick-picks:${language}`)
 
   const { data, isLoading } = useQuery<{ songs: Song[] }>({
@@ -31,23 +27,14 @@ export function QuickPicksSection({ languageOverride }: { languageOverride?: str
     queryFn: () => fetchSectionSongs('quick-picks', language, page),
   })
 
-  useEffect(() => {
-    if (!data?.songs) return
-    const seen = seenIds?.current ?? createSongSet()
-    const fresh = takeFresh(data.songs, seen, 20)
-    setFilteredSongs(fresh)
-    return () => {
-      fresh.forEach((s) => seen.delete(s))
-    }
-  }, [data, seenIds])
-
-  const songs = filteredSongs
+  const { songs, pending } = useFreshSongs(data?.songs, 20)
+  const loading = isLoading || pending
 
   return (
     <section style={{ marginBottom: 32 }}>
       <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12, letterSpacing: '-.2px' }}>Quick picks</h2>
       <div className="qp-grid">
-        {isLoading
+        {loading
           ? Array.from({ length: 20 }).map((_, i) => <QuickPickSkeleton key={i} />)
           : songs.map((song, i) => (
               <QuickPickRow

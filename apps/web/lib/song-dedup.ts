@@ -20,7 +20,8 @@ const norm = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim()
 function baseTitle(title: string): string {
   return norm(
     title
-      .replace(/\s*[(\[]\s*(?:from|original)\b[^)\]]*[)\]]/gi, '')
+      // One level of nested brackets is allowed: (From "Movie (2024)")
+      .replace(/\s*[(\[]\s*(?:from|original)\b(?:[^()\[\]]|[(\[][^()\[\]]*[)\]])*[)\]]/gi, '')
       .replace(/\s+-\s*from\b.*$/i, '')
   )
 }

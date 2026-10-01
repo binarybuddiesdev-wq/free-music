@@ -137,3 +137,9 @@ test('sanitizeString keeps a stray "<" that is not an HTML tag', () => {
   assert.equal(sanitizeString('Song <Remix>'), 'Song')
   assert.equal(sanitizeString('hi <script'), 'hi')
 })
+
+test('sanitizeString keeps text after a "<" that is not a tag', () => {
+  assert.equal(sanitizeString('AC<DC greatest hits'), 'AC<DC greatest hits')
+  assert.equal(sanitizeString('x<y songs'), 'x<y songs')
+  assert.equal(sanitizeString('<b>bold</b> AC<DC'), 'bold AC<DC')
+})

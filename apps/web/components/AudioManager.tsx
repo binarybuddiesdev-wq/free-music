@@ -405,6 +405,9 @@ export function AudioManager() {
         crossfadedSongIdRef.current = song?.id ?? null
         fadeVolume(0, crossfade, () => {
           usePlayerStore.getState().next()
+          // The same song again (single-song repeat-all) restarts at 0 synchronously, so the guard
+          // against re-triggering on the old song's end is no longer needed and would block every later loop
+          if (usePlayerStore.getState().currentSong?.id === song?.id) crossfadedSongIdRef.current = null
           if (audioRef.current) audioRef.current.volume = 0
           isFadingRef.current = false
           fadeVolume(usePlayerStore.getState().volume, Math.min(2, crossfade / 2))
@@ -493,7 +496,7 @@ export function AudioManager() {
           if (res.ok) {
             const data = await res.json()
             if (Array.isArray(data?.songs) && data.songs.length > 0) {
-              useQueueStore.getState().appendSongs(data.songs)
+              useQueueStore.getState().appendSongs(data.songs, true)
             }
           }
         } catch {

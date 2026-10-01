@@ -111,6 +111,8 @@ function SearchResults() {
       const res = await fetch(
         `/api/search?q=${encodeURIComponent(q)}&lang=${language}&type=${activeTab.toLowerCase()}&page=${nextPage}`
       )
+      // A failed page is not the end of the list: keep "Load more" so the user can retry
+      if (!res.ok) return
       const json: SearchResponse = await res.json()
       if (listKeyRef.current !== requestKey) return
       const newItems =
@@ -137,7 +139,7 @@ function SearchResults() {
         setHasMore(false)
       }
     } catch {
-      setHasMore(false)
+      // Network error: leave hasMore as is so "Load more" can be retried
     } finally {
       setLoadingMore(false)
     }
