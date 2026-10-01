@@ -167,7 +167,8 @@ export async function GET(req: NextRequest) {
     logger.error('Error handling /api/search request', err, { q, type, page, lang })
     return NextResponse.json(
       { type, page, songs: [], albums: [], artists: [], playlists: [], results: [] },
-      { status: 200, headers: successHeaders }
+      // Never cacheable: a transient upstream failure must not be served from the CDN for hours
+      { status: 502, headers: { ...rateLimitHeaders, 'Cache-Control': 'no-store' } }
     )
   }
 }

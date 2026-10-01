@@ -89,7 +89,9 @@ function normalize(raw: RawSong): Song {
 
 async function jiosaavnSearch(query: string, n = 40, p = 1): Promise<Song[]> {
   const json = await saavnCall<{ results?: unknown[] }>('search.getResults', { q: query, n: String(n), p: String(p) }, 300)
-  const results = json?.results ?? []
+  // An upstream failure must surface as an error, not as an empty (and cacheable) result list
+  if (!json) throw new Error('JioSaavn search request failed')
+  const results = json.results ?? []
   return results
     .filter((r) => (r as Record<string, unknown>).type === 'song')
     .map((r) => normalize(r as RawSong))

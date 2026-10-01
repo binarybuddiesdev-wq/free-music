@@ -71,6 +71,7 @@ function SearchResults() {
         `/api/search?q=${encodeURIComponent(q)}&lang=${language}&type=${activeTab.toLowerCase()}&page=1`,
         { signal }
       )
+      if (!res.ok) throw new Error(`Search failed: HTTP ${res.status}`)
       return res.json()
     },
     enabled: q.length > 0,
