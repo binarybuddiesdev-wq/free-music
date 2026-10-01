@@ -37,6 +37,7 @@ export function Header() {
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
   const language = useSettingsStore((s) => s.language)
   const playSong = usePlayerStore((s) => s.playSong)
+  const setExpanded = usePlayerStore((s) => s.setExpanded)
 
   useEffect(() => {
     setRecentSearches(getRecentSearches())
@@ -209,7 +210,7 @@ export function Header() {
         </button>
 
         {/* YouTube Music logo */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', flexShrink: 0 }}>
+        <Link href="/" onClick={() => setExpanded(false)} style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', flexShrink: 0 }}>
           <svg width="28" height="20" viewBox="0 0 28 20" fill="none">
             <rect width="28" height="20" rx="5" fill="#FF0000"/>
             <path d="M11 14V6l8 4-8 4z" fill="white"/>

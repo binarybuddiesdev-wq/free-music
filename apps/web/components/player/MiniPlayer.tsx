@@ -74,7 +74,7 @@ export function MiniPlayer() {
         {/* ── CENTER: thumbnail + title + artist•album•year ── */}
         <div
           style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', minWidth: 0, padding: '0 24px', cursor: 'pointer' }}
-          onClick={() => setExpanded(true)}
+          onClick={() => setExpanded(!isExpanded)}
         >
           <div style={{ width: 40, height: 40, borderRadius: 3, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--panel-bg)' }}>
             {currentSong.image && <Image src={sizedImage(currentSong.image, 150)} alt={currentSong.title} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized />}
