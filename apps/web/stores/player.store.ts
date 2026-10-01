@@ -37,6 +37,7 @@ interface PlayerState {
   setIsPlaying: (v: boolean) => void
   next: () => void
   prev: () => void
+  startTrack: (song: Song) => void
   setSavedTimeForVideo: (t: number) => void
 }
 
@@ -151,8 +152,7 @@ export const usePlayerStore = create<PlayerState>()(
       next: () => {
         const song = useQueueStore.getState().next()
         if (!song) return
-        useLibraryStore.getState().addToHistory(song)
-        set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: true, mode: 'audio' })
+        get().startTrack(song)
       },
 
       prev: () => {
@@ -164,8 +164,21 @@ export const usePlayerStore = create<PlayerState>()(
         }
         const song = useQueueStore.getState().prev()
         if (!song) return
+        get().startTrack(song)
+      },
+
+      // Shared by next/prev. When the queue lands on the song that is already loaded (first track,
+      // single-song queue) the audio source does not change, so restart it by hand and do not
+      // raise the loading flag: no canplay/playing event would ever clear it.
+      startTrack: (song) => {
+        const { audioRef, currentSong } = get()
+        const isSame = currentSong?.id === song.id
         useLibraryStore.getState().addToHistory(song)
-        set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: true, mode: 'audio' })
+        if (isSame && audioRef?.current) {
+          audioRef.current.currentTime = 0
+          audioRef.current.play().catch(() => {})
+        }
+        set({ currentSong: { ...song }, progress: 0, isPlaying: true, isLoading: !isSame, mode: 'audio' })
       },
     }),
     {

@@ -10,6 +10,7 @@ import {
   moveInQueue,
   removeFromQueue,
   appendUnique,
+  nextQueueIndex,
 } from '@/lib/queue-logic'
 
 interface QueueState {
@@ -66,15 +67,8 @@ export const useQueueStore = create<QueueState>()(
       next: () => {
         const s = get()
         const active = getActiveQueue(s)
-        if (s.repeatMode === 'one') return active[s.qIndex] ?? null
-        const next = s.qIndex + 1
-        if (next >= active.length) {
-          if (s.repeatMode === 'all') {
-            set({ qIndex: 0 })
-            return active[0] ?? null
-          }
-          return null
-        }
+        const next = nextQueueIndex(s.qIndex, active.length, s.repeatMode)
+        if (next === null) return null
         set({ qIndex: next })
         return active[next]
       },

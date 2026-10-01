@@ -7,6 +7,7 @@ import {
   removeFromQueue,
   appendUnique,
   capQueue,
+  nextQueueIndex,
   MAX_QUEUE_LENGTH,
 } from './queue-logic.ts'
 
@@ -132,4 +133,16 @@ test('appendUnique caps a long autoplay session', () => {
   assert.equal(next.queue.length, MAX_QUEUE_LENGTH)
   assert.equal(current(next), `s${MAX_QUEUE_LENGTH - 1}`)
   assert.deepEqual(ids(next.queue).slice(-2), ['new1', 'new2'])
+})
+
+test('nextQueueIndex advances on a manual skip even with repeat-one', () => {
+  assert.equal(nextQueueIndex(0, 3, 'one'), 1)
+  assert.equal(nextQueueIndex(0, 3, 'none'), 1)
+})
+
+test('nextQueueIndex wraps for repeat modes and stops at the end for none', () => {
+  assert.equal(nextQueueIndex(2, 3, 'all'), 0)
+  assert.equal(nextQueueIndex(2, 3, 'one'), 0)
+  assert.equal(nextQueueIndex(2, 3, 'none'), null)
+  assert.equal(nextQueueIndex(0, 0, 'all'), null)
 })

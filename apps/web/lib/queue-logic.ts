@@ -43,6 +43,17 @@ function removeFirstById(list: Song[], id: string): Song[] {
   return i === -1 ? list : [...list.slice(0, i), ...list.slice(i + 1)]
 }
 
+/**
+ * Index a manual "next" (or a crossfade) moves to. Repeat-one only affects what happens when a
+ * song ENDS, so skipping still advances; any repeat mode wraps around at the end of the queue.
+ */
+export function nextQueueIndex(qIndex: number, length: number, repeatMode: 'none' | 'one' | 'all'): number | null {
+  if (length <= 0) return null
+  const next = qIndex + 1
+  if (next < length) return next
+  return repeatMode === 'none' ? null : 0
+}
+
 export function jumpToIndex<T extends QueueSnapshot>(s: T, index: number): T {
   const active = getActiveQueue(s)
   if (!Number.isInteger(index) || index < 0 || index >= active.length) return s

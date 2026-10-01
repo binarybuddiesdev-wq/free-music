@@ -392,6 +392,7 @@ export function AudioManager() {
       // Crossfade near the end of the song
       if (
         crossfade > 0 &&
+        queueState.repeatMode !== 'one' &&
         el.duration > crossfade + 2 &&
         el.currentTime >= el.duration - crossfade &&
         !isFadingRef.current
