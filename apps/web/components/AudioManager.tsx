@@ -21,6 +21,9 @@ export function AudioManager() {
   const audioRef = useRef<HTMLAudioElement>(null)
   const preloadRef = useRef<HTMLAudioElement>(null)
   const isFadingRef = useRef(false)
+  // Song a crossfade already skipped away from: the old element keeps firing timeupdate near its end
+  // until the next source loads, which must not trigger a second skip
+  const crossfadedSongIdRef = useRef<string | null>(null)
   const consecutiveErrorsRef = useRef(0)
   const currentBlobUrlRef = useRef<string | null>(null)
   const isFetchingRecommendationsRef = useRef(false)
@@ -395,9 +398,11 @@ export function AudioManager() {
         queueState.repeatMode !== 'one' &&
         el.duration > crossfade + 2 &&
         el.currentTime >= el.duration - crossfade &&
-        !isFadingRef.current
+        !isFadingRef.current &&
+        song?.id !== crossfadedSongIdRef.current
       ) {
         isFadingRef.current = true
+        crossfadedSongIdRef.current = song?.id ?? null
         fadeVolume(0, crossfade, () => {
           usePlayerStore.getState().next()
           if (audioRef.current) audioRef.current.volume = 0
@@ -446,6 +451,7 @@ export function AudioManager() {
       }
       consecutiveErrorsRef.current = 0
       const player = usePlayerStore.getState()
+      if (crossfadedSongIdRef.current !== player.currentSong?.id) crossfadedSongIdRef.current = null
       player.setIsLoading(false)
       player.setIsPlaying(true)
     }
